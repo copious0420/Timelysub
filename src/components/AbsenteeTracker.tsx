@@ -41,8 +41,8 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
 
   return (
     <section className="panel overflow-hidden">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border px-5 py-4">
-        <div>
+      <header className="flex flex-col gap-4 border-b border-border px-4 py-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:px-5">
+        <div className="min-w-0">
           <h2 className="text-base font-semibold">Daily Absentee Tracker</h2>
           <p className="text-sm text-muted-foreground">
             Tick absent teachers, then choose the periods they will miss.
@@ -68,15 +68,19 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
         {teachers.map((t) => {
           const absence = get(t.id);
           return (
-            <li key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
-              <label className="flex min-w-56 items-center gap-3">
+            <li
+              key={t.id}
+              className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:px-5"
+            >
+              <label className="flex min-w-0 items-center gap-3 sm:min-w-56">
                 <Checkbox checked={!!absence} onCheckedChange={() => toggleTeacher(t)} />
-                <span>
-                  <span className="block text-sm font-medium">{t.name}</span>
-                  <span className="block text-xs text-muted-foreground">{t.subject}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">{t.name}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{t.subject}</span>
                 </span>
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap">
+
                 {PERIODS.map((p) => {
                   const selected = absence?.periods.includes(p);
                   const teaches = !!t.busy[p];
@@ -88,7 +92,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                       onClick={() => togglePeriod(t.id, p)}
                       title={teaches ? `Period ${p} — has a class` : `Period ${p} — free`}
                       className={cn(
-                        "h-8 w-10 rounded-md border text-xs font-medium transition-colors",
+                        "h-8 w-full rounded-md sm:w-10 border text-xs font-medium transition-colors",
                         selected
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-muted/50 text-muted-foreground",

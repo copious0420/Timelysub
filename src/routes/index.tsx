@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   Download,
   LayoutDashboard,
+  Menu,
   Printer,
   Save,
   Sparkles,
@@ -13,8 +14,16 @@ import {
   History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { TeacherRoster } from "@/components/TeacherRoster";
 import { AbsenteeTracker } from "@/components/AbsenteeTracker";
+
 import {
   DEMO_TEACHERS,
   generateSchedule,
@@ -62,6 +71,8 @@ function todayIso() {
 
 function Index() {
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [navOpen, setNavOpen] = useState(false);
+
   const [teachers, setTeachers] = useState<Teacher[]>(DEMO_TEACHERS);
   const [absences, setAbsences] = useState<Absence[]>([
     { teacherId: "t1", periods: [1, 2, 4] },
@@ -110,7 +121,7 @@ function Index() {
 
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
         <div className="px-2">
           <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
@@ -140,10 +151,55 @@ function Index() {
         </div>
       </aside>
 
-      <main className="flex-1 px-5 py-6 md:px-8">
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+      {/* Mobile top navbar */}
+      <div className="no-print sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
+        <Sheet open={navOpen} onOpenChange={setNavOpen}>
+          <SheetTrigger asChild>
+            <button
+              aria-label="Open navigation"
+              className="grid size-9 shrink-0 place-items-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground"
+            >
+              <Menu className="size-5" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 bg-sidebar text-sidebar-foreground">
+            <SheetHeader>
+              <SheetTitle className="text-sidebar-accent-foreground">Neev</SheetTitle>
+            </SheetHeader>
+            <nav className="mt-2 flex flex-col gap-1 px-2">
+              {NAV.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setTab(item.id);
+                    setNavOpen(false);
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                    tab === item.id
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "hover:bg-sidebar-accent/50",
+                  )}
+                >
+                  <item.icon className="size-4" />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
+            {NAV.find((n) => n.id === tab)?.label}
+          </p>
+          <p className="truncate text-xs text-sidebar-foreground/70">Neev Substitution App</p>
+        </div>
+      </div>
+
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-5 md:px-8">
+        <header className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {tab === "roster"
                 ? "Teacher Roster"
                 : tab === "absentees"
@@ -162,19 +218,8 @@ function Index() {
               })}
             </p>
           </div>
-          <nav className="no-print flex gap-1 md:hidden">
-            {NAV.map((item) => (
-              <Button
-                key={item.id}
-                size="sm"
-                variant={tab === item.id ? "default" : "outline"}
-                onClick={() => setTab(item.id)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </nav>
         </header>
+
 
         {tab === "roster" && <TeacherRoster teachers={teachers} onChange={setTeachers} />}
 
