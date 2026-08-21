@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
   Download,
   LayoutDashboard,
   Printer,
+  Save,
   Sparkles,
+  Trash2,
   Users,
   AlertTriangle,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeacherRoster } from "@/components/TeacherRoster";
@@ -19,7 +22,9 @@ import {
   type Absence,
   type Teacher,
 } from "@/lib/substitution";
+import { deleteSaved, loadSaved, saveSchedule, type SavedSchedule } from "@/lib/history";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,13 +46,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "dashboard" | "roster" | "absentees";
+type Tab = "dashboard" | "roster" | "absentees" | "history";
 
 const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "roster", label: "Teacher Roster", icon: Users },
   { id: "absentees", label: "Absentees", icon: CalendarCheck },
+  { id: "history", label: "Saved Days", icon: History },
 ];
+
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -73,19 +80,34 @@ function Index() {
     [absences],
   );
 
+  const [saved, setSaved] = useState<SavedSchedule[]>([]);
+  useEffect(() => setSaved(loadSaved()), []);
+
   const generate = () => setSchedule(generateSchedule(teachers, activeAbsences));
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
 
-  const downloadCsv = () => {
-    const blob = new Blob([toCsv(schedule, date)], { type: "text/csv;charset=utf-8" });
+  const save = () => {
+    if (schedule.length === 0) return;
+    setSaved(saveSchedule(date, schedule));
+  };
+
+  const restore = (entry: SavedSchedule) => {
+    setDate(entry.date);
+    setSchedule(entry.rows);
+    setTab("dashboard");
+  };
+
+  const downloadCsv = (rows = schedule, label = date) => {
+    const blob = new Blob([toCsv(rows, label)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `substitutions-${date}.csv`;
+    a.download = `substitutions-${label}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div className="flex min-h-screen">
@@ -126,8 +148,11 @@ function Index() {
                 ? "Teacher Roster"
                 : tab === "absentees"
                   ? "Daily Absentees"
-                  : "Substitution Dashboard"}
+                  : tab === "history"
+                    ? "Saved Schedules"
+                    : "Substitution Dashboard"}
             </h1>
+
             <p className="text-sm text-muted-foreground">
               {new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
                 weekday: "long",
@@ -187,13 +212,17 @@ function Index() {
                   <Button onClick={generate}>
                     <Sparkles /> Generate
                   </Button>
+                  <Button variant="outline" onClick={save} disabled={schedule.length === 0}>
+                    <Save /> Save day
+                  </Button>
                   <Button variant="outline" onClick={() => window.print()}>
                     <Printer /> Print / PDF
                   </Button>
-                  <Button variant="outline" onClick={downloadCsv}>
+                  <Button variant="outline" onClick={() => downloadCsv()}>
                     <Download /> CSV
                   </Button>
                 </div>
+
               </header>
 
               {schedule.length === 0 ? (
@@ -243,10 +272,70 @@ function Index() {
             )}
           </div>
         )}
+
+        {tab === "history" && (
+          <section className="panel overflow-hidden">
+            <header className="border-b border-border px-5 py-4">
+              <h2 className="text-base font-semibold">Saved Schedules</h2>
+              <p className="text-sm text-muted-foreground">
+                Previously saved days, kept on this device. Open one to view or export it.
+              </p>
+            </header>
+            {saved.length === 0 ? (
+              <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+                Nothing saved yet — generate a schedule and press “Save day”.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {saved.map((s) => (
+                  <li
+                    key={s.date}
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {s.rows.length} assignments · saved{" "}
+                        {new Date(s.savedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => restore(s)}>
+                        Open
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadCsv(s.rows, s.date)}
+                      >
+                        <Download /> CSV
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSaved(deleteSaved(s.date))}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
 }
+
 
 function Stat({
   label,
