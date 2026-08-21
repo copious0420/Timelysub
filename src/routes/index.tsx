@@ -272,10 +272,70 @@ function Index() {
             )}
           </div>
         )}
+
+        {tab === "history" && (
+          <section className="panel overflow-hidden">
+            <header className="border-b border-border px-5 py-4">
+              <h2 className="text-base font-semibold">Saved Schedules</h2>
+              <p className="text-sm text-muted-foreground">
+                Previously saved days, kept on this device. Open one to view or export it.
+              </p>
+            </header>
+            {saved.length === 0 ? (
+              <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+                Nothing saved yet — generate a schedule and press “Save day”.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {saved.map((s) => (
+                  <li
+                    key={s.date}
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {s.rows.length} assignments · saved{" "}
+                        {new Date(s.savedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => restore(s)}>
+                        Open
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadCsv(s.rows, s.date)}
+                      >
+                        <Download /> CSV
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSaved(deleteSaved(s.date))}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
 }
+
 
 function Stat({
   label,
