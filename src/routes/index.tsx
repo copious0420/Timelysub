@@ -80,19 +80,34 @@ function Index() {
     [absences],
   );
 
+  const [saved, setSaved] = useState<SavedSchedule[]>([]);
+  useEffect(() => setSaved(loadSaved()), []);
+
   const generate = () => setSchedule(generateSchedule(teachers, activeAbsences));
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
 
-  const downloadCsv = () => {
-    const blob = new Blob([toCsv(schedule, date)], { type: "text/csv;charset=utf-8" });
+  const save = () => {
+    if (schedule.length === 0) return;
+    setSaved(saveSchedule(date, schedule));
+  };
+
+  const restore = (entry: SavedSchedule) => {
+    setDate(entry.date);
+    setSchedule(entry.rows);
+    setTab("dashboard");
+  };
+
+  const downloadCsv = (rows = schedule, label = date) => {
+    const blob = new Blob([toCsv(rows, label)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `substitutions-${date}.csv`;
+    a.download = `substitutions-${label}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div className="flex min-h-screen">
