@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
   Download,
   LayoutDashboard,
   Printer,
+  Save,
   Sparkles,
+  Trash2,
   Users,
   AlertTriangle,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeacherRoster } from "@/components/TeacherRoster";
@@ -19,7 +22,9 @@ import {
   type Absence,
   type Teacher,
 } from "@/lib/substitution";
+import { deleteSaved, loadSaved, saveSchedule, type SavedSchedule } from "@/lib/history";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
