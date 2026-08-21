@@ -212,13 +212,17 @@ function Index() {
                   <Button onClick={generate}>
                     <Sparkles /> Generate
                   </Button>
+                  <Button variant="outline" onClick={save} disabled={schedule.length === 0}>
+                    <Save /> Save day
+                  </Button>
                   <Button variant="outline" onClick={() => window.print()}>
                     <Printer /> Print / PDF
                   </Button>
-                  <Button variant="outline" onClick={downloadCsv}>
+                  <Button variant="outline" onClick={() => downloadCsv()}>
                     <Download /> CSV
                   </Button>
                 </div>
+
               </header>
 
               {schedule.length === 0 ? (
