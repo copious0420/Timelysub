@@ -148,8 +148,11 @@ function Index() {
                 ? "Teacher Roster"
                 : tab === "absentees"
                   ? "Daily Absentees"
-                  : "Substitution Dashboard"}
+                  : tab === "history"
+                    ? "Saved Schedules"
+                    : "Substitution Dashboard"}
             </h1>
+
             <p className="text-sm text-muted-foreground">
               {new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
                 weekday: "long",
