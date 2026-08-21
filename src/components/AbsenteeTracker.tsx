@@ -92,7 +92,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                       onClick={() => togglePeriod(t.id, p)}
                       title={teaches ? `Period ${p} — has a class` : `Period ${p} — free`}
                       className={cn(
-                        "h-8 w-10 rounded-md border text-xs font-medium transition-colors",
+                        "h-8 w-full rounded-md sm:w-10 border text-xs font-medium transition-colors",
                         selected
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-muted/50 text-muted-foreground",
