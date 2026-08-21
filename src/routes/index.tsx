@@ -46,13 +46,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "dashboard" | "roster" | "absentees";
+type Tab = "dashboard" | "roster" | "absentees" | "history";
 
 const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "roster", label: "Teacher Roster", icon: Users },
   { id: "absentees", label: "Absentees", icon: CalendarCheck },
+  { id: "history", label: "Saved Days", icon: History },
 ];
+
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
