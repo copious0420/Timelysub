@@ -44,10 +44,12 @@ export const DEMO_TEACHERS: Teacher[] = [
  * Assign a free teacher to every absent period.
  * Priority: same subject first, then lowest substitution load today.
  */
-export function generateSchedule(teachers: Teacher[], absences: Absence[]): Assignment[] {
+export function generateSchedule(input: Teacher[], absences: Absence[]): Assignment[] {
+  const teachers = input.map((t) => ({ ...t, busy: { ...t.busy } }));
   const load: Record<string, number> = {};
   const absentIds = new Set(absences.map((a) => a.teacherId));
   const byId = new Map(teachers.map((t) => [t.id, t]));
+
 
   const rows: { period: number; teacher: Teacher }[] = [];
   for (const a of absences) {
