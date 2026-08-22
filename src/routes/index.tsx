@@ -246,27 +246,41 @@ function Index() {
             </div>
 
             <section className="panel print-area overflow-hidden">
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-                <div>
-                  <h2 className="text-base font-semibold">Daily Substitution Schedule</h2>
+              <header className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-semibold">Daily Substitution Schedule</h2>
                   <p className="text-sm text-muted-foreground">
                     {schedule.length} assignments for {date}
                   </p>
                 </div>
-                <div className="no-print flex flex-wrap gap-2">
-                  <Button onClick={generate}>
+                <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  <Button onClick={generate} className="w-full sm:w-auto">
                     <Sparkles /> Generate
                   </Button>
-                  <Button variant="outline" onClick={save} disabled={schedule.length === 0}>
+                  <Button
+                    variant="outline"
+                    onClick={save}
+                    disabled={schedule.length === 0}
+                    className="w-full sm:w-auto"
+                  >
                     <Save /> Save day
                   </Button>
-                  <Button variant="outline" onClick={() => window.print()}>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.print()}
+                    className="w-full sm:w-auto"
+                  >
                     <Printer /> Print / PDF
                   </Button>
-                  <Button variant="outline" onClick={() => downloadCsv()}>
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadCsv()}
+                    className="w-full sm:w-auto"
+                  >
                     <Download /> CSV
                   </Button>
                 </div>
+
 
               </header>
 
@@ -275,37 +289,78 @@ function Index() {
                   No absences selected yet. Add absentees, then press Generate.
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] text-sm">
-                    <thead>
-                      <tr className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                        <th className="px-5 py-3 font-medium">Period</th>
-                        <th className="px-3 py-3 font-medium">Absent teacher</th>
-                        <th className="px-3 py-3 font-medium">Subject</th>
-                        <th className="px-3 py-3 font-medium">Substitute</th>
-                        <th className="px-5 py-3 font-medium">Basis</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {schedule.map((r, i) => (
-                        <tr key={`${r.period}-${r.absentTeacherId}-${i}`} className="border-t border-border">
-                          <td className="px-5 py-3 font-medium">P{r.period}</td>
-                          <td className="px-3 py-3">{r.absentTeacherName}</td>
-                          <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
-                          <td
+                <>
+                  {/* Mobile: stacked cards */}
+                  <ul className="divide-y divide-border lg:hidden">
+                    {schedule.map((r, i) => (
+                      <li
+                        key={`m-${r.period}-${r.absentTeacherId}-${i}`}
+                        className="space-y-2 px-4 py-4 text-sm"
+                      >
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{r.absentTeacherName}</p>
+                            <p className="truncate text-xs text-muted-foreground">{r.subject}</p>
+                          </div>
+                          <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">
+                            P{r.period}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
+                          <span className="text-muted-foreground">Substitute</span>
+                          <span
                             className={cn(
-                              "px-3 py-3 font-medium",
+                              "min-w-0 break-words font-medium",
                               !r.substituteId && "text-destructive",
                             )}
                           >
                             {r.substituteName}
-                          </td>
-                          <td className="px-5 py-3 text-muted-foreground">{r.reason}</td>
+                          </span>
+                          <span className="text-muted-foreground">Basis</span>
+                          <span className="min-w-0 break-words text-muted-foreground">
+                            {r.reason}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Desktop: table */}
+                  <div className="hidden overflow-x-auto lg:block">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                          <th className="px-5 py-3 font-medium">Period</th>
+                          <th className="px-3 py-3 font-medium">Absent teacher</th>
+                          <th className="px-3 py-3 font-medium">Subject</th>
+                          <th className="px-3 py-3 font-medium">Substitute</th>
+                          <th className="px-5 py-3 font-medium">Basis</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {schedule.map((r, i) => (
+                          <tr
+                            key={`${r.period}-${r.absentTeacherId}-${i}`}
+                            className="border-t border-border"
+                          >
+                            <td className="px-5 py-3 font-medium">P{r.period}</td>
+                            <td className="px-3 py-3">{r.absentTeacherName}</td>
+                            <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
+                            <td
+                              className={cn(
+                                "px-3 py-3 font-medium",
+                                !r.substituteId && "text-destructive",
+                              )}
+                            >
+                              {r.substituteName}
+                            </td>
+                            <td className="px-5 py-3 text-muted-foreground">{r.reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </section>
 
@@ -335,9 +390,9 @@ function Index() {
                 {saved.map((s) => (
                   <li
                     key={s.date}
-                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                    className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium">
                         {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
                           weekday: "short",
@@ -351,14 +406,20 @@ function Index() {
                         {new Date(s.savedAt).toLocaleString()}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => restore(s)}>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => restore(s)}
+                        className="flex-1 sm:flex-none"
+                      >
                         Open
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => downloadCsv(s.rows, s.date)}
+                        className="flex-1 sm:flex-none"
                       >
                         <Download /> CSV
                       </Button>
