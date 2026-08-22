@@ -123,12 +123,12 @@ function Index() {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
-        <div className="px-2">
+        <Link to="/" className="block px-2">
           <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
             Neev
           </p>
-          <p className="text-xs text-sidebar-foreground/70">Substitution App</p>
-        </div>
+          <p className="text-xs text-sidebar-foreground/70">Substitution App · Home</p>
+        </Link>
         <nav className="mt-8 flex flex-col gap-1">
           {NAV.map((item) => (
             <button
