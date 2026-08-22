@@ -275,37 +275,78 @@ function Index() {
                   No absences selected yet. Add absentees, then press Generate.
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] text-sm">
-                    <thead>
-                      <tr className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                        <th className="px-5 py-3 font-medium">Period</th>
-                        <th className="px-3 py-3 font-medium">Absent teacher</th>
-                        <th className="px-3 py-3 font-medium">Subject</th>
-                        <th className="px-3 py-3 font-medium">Substitute</th>
-                        <th className="px-5 py-3 font-medium">Basis</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {schedule.map((r, i) => (
-                        <tr key={`${r.period}-${r.absentTeacherId}-${i}`} className="border-t border-border">
-                          <td className="px-5 py-3 font-medium">P{r.period}</td>
-                          <td className="px-3 py-3">{r.absentTeacherName}</td>
-                          <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
-                          <td
+                <>
+                  {/* Mobile: stacked cards */}
+                  <ul className="divide-y divide-border lg:hidden">
+                    {schedule.map((r, i) => (
+                      <li
+                        key={`m-${r.period}-${r.absentTeacherId}-${i}`}
+                        className="space-y-2 px-4 py-4 text-sm"
+                      >
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{r.absentTeacherName}</p>
+                            <p className="truncate text-xs text-muted-foreground">{r.subject}</p>
+                          </div>
+                          <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">
+                            P{r.period}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
+                          <span className="text-muted-foreground">Substitute</span>
+                          <span
                             className={cn(
-                              "px-3 py-3 font-medium",
+                              "min-w-0 break-words font-medium",
                               !r.substituteId && "text-destructive",
                             )}
                           >
                             {r.substituteName}
-                          </td>
-                          <td className="px-5 py-3 text-muted-foreground">{r.reason}</td>
+                          </span>
+                          <span className="text-muted-foreground">Basis</span>
+                          <span className="min-w-0 break-words text-muted-foreground">
+                            {r.reason}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Desktop: table */}
+                  <div className="hidden overflow-x-auto lg:block">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                          <th className="px-5 py-3 font-medium">Period</th>
+                          <th className="px-3 py-3 font-medium">Absent teacher</th>
+                          <th className="px-3 py-3 font-medium">Subject</th>
+                          <th className="px-3 py-3 font-medium">Substitute</th>
+                          <th className="px-5 py-3 font-medium">Basis</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {schedule.map((r, i) => (
+                          <tr
+                            key={`${r.period}-${r.absentTeacherId}-${i}`}
+                            className="border-t border-border"
+                          >
+                            <td className="px-5 py-3 font-medium">P{r.period}</td>
+                            <td className="px-3 py-3">{r.absentTeacherName}</td>
+                            <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
+                            <td
+                              className={cn(
+                                "px-3 py-3 font-medium",
+                                !r.substituteId && "text-destructive",
+                              )}
+                            >
+                              {r.substituteName}
+                            </td>
+                            <td className="px-5 py-3 text-muted-foreground">{r.reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </section>
 
