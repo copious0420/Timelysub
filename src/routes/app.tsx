@@ -188,12 +188,12 @@ function Index() {
             </nav>
           </SheetContent>
         </Sheet>
-        <div className="min-w-0">
+        <Link to="/" className="min-w-0">
           <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
             {NAV.find((n) => n.id === tab)?.label}
           </p>
-          <p className="truncate text-xs text-sidebar-foreground/70">Neev Substitution App</p>
-        </div>
+          <p className="truncate text-xs text-sidebar-foreground/70">Neev · back to home</p>
+        </Link>
       </div>
 
       <main className="min-w-0 flex-1 px-4 py-6 sm:px-5 md:px-8">
