@@ -246,27 +246,41 @@ function Index() {
             </div>
 
             <section className="panel print-area overflow-hidden">
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-                <div>
-                  <h2 className="text-base font-semibold">Daily Substitution Schedule</h2>
+              <header className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-semibold">Daily Substitution Schedule</h2>
                   <p className="text-sm text-muted-foreground">
                     {schedule.length} assignments for {date}
                   </p>
                 </div>
-                <div className="no-print flex flex-wrap gap-2">
-                  <Button onClick={generate}>
+                <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  <Button onClick={generate} className="w-full sm:w-auto">
                     <Sparkles /> Generate
                   </Button>
-                  <Button variant="outline" onClick={save} disabled={schedule.length === 0}>
+                  <Button
+                    variant="outline"
+                    onClick={save}
+                    disabled={schedule.length === 0}
+                    className="w-full sm:w-auto"
+                  >
                     <Save /> Save day
                   </Button>
-                  <Button variant="outline" onClick={() => window.print()}>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.print()}
+                    className="w-full sm:w-auto"
+                  >
                     <Printer /> Print / PDF
                   </Button>
-                  <Button variant="outline" onClick={() => downloadCsv()}>
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadCsv()}
+                    className="w-full sm:w-auto"
+                  >
                     <Download /> CSV
                   </Button>
                 </div>
+
 
               </header>
 
