@@ -390,9 +390,9 @@ function Index() {
                 {saved.map((s) => (
                   <li
                     key={s.date}
-                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                    className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium">
                         {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
                           weekday: "short",
@@ -406,8 +406,13 @@ function Index() {
                         {new Date(s.savedAt).toLocaleString()}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => restore(s)}>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => restore(s)}
+                        className="flex-1 sm:flex-none"
+                      >
                         Open
                       </Button>
                       <Button
