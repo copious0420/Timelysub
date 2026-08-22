@@ -419,6 +419,7 @@ function Index() {
                         size="sm"
                         variant="outline"
                         onClick={() => downloadCsv(s.rows, s.date)}
+                        className="flex-1 sm:flex-none"
                       >
                         <Download /> CSV
                       </Button>
