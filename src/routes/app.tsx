@@ -38,7 +38,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
-      { title: "Neev Substitution App — Automated Teacher Cover Scheduling" },
+      { title: "Dashboard — Neev Substitution App" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content:
