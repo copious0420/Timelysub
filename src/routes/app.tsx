@@ -439,6 +439,18 @@ function Index() {
             )}
           </section>
         )}
+
+        <footer className="no-print mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p>Timely Substitution App — Developed by Team Aeronics</p>
+            <a
+              href="mailto:developerstimely@gmai.com"
+              className="transition-colors hover:text-foreground"
+            >
+              Support: developerstimely@gmai.com
+            </a>
+          </div>
+        </footer>
       </main>
     </div>
   );
