@@ -141,7 +141,7 @@ function Landing() {
             style={{ animationDelay: "80ms" }}
           >
             Never scramble for a{" "}
-            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent text-glow">
               substitute teacher
             </span>{" "}
             again.
