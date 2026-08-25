@@ -299,8 +299,34 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
-        Timely Substitution App — smarter cover, every day.
+      <footer className="border-t border-border px-4 py-10 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
+          <div>
+            <p className="flex items-center gap-2 font-semibold text-foreground">
+              <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground">
+                <Sparkles className="size-3.5" />
+              </span>
+              Timely
+            </p>
+            <p className="mt-2">Smarter cover, every day.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Developed by</p>
+            <p className="mt-2">Team Aeronics</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Support</p>
+            <a
+              href="mailto:developerstimely@gmai.com"
+              className="mt-2 block transition-colors hover:text-foreground"
+            >
+              developerstimely@gmai.com
+            </a>
+          </div>
+        </div>
+        <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
+          Timely Substitution App — Automated teacher substitution scheduling for schools.
+        </p>
       </footer>
     </div>
   );
