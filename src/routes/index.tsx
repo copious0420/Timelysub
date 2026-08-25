@@ -120,8 +120,18 @@ function Landing() {
       <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-40 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-accent/50 blur-3xl animate-float-slow"
+          className="pointer-events-none absolute -top-40 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-primary/35 blur-3xl animate-float-slow"
         />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-24 -left-24 -z-10 size-[26rem] rounded-full bg-primary/25 blur-3xl animate-pulse-glow"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 top-64 -z-10 size-[24rem] rounded-full bg-success/20 blur-3xl animate-pulse-glow"
+          style={{ animationDelay: "2s" }}
+        />
+
         <div className="mx-auto max-w-3xl text-center">
           <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5 text-primary" /> Automated cover scheduling for schools
