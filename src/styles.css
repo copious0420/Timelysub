@@ -185,6 +185,9 @@
     border: none !important;
   }
   body {
-    background: white;
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
   }
+
 }
