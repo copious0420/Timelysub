@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Neev Substitution App — Smart Teacher Cover in Seconds" },
+      { title: "Timely Substitution App — Smart Teacher Cover in Seconds" },
       {
         name: "description",
         content:
-          "Neev turns your teacher roster and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
+          "Timely turns your teacher roster and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
       },
-      { property: "og:title", content: "Neev Substitution App" },
+      { property: "og:title", content: "Timely Substitution App" },
       {
         property: "og:description",
         content:
@@ -106,7 +106,7 @@ function Landing() {
             <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
               <Sparkles className="size-4" />
             </span>
-            <span className="truncate text-base font-semibold tracking-tight">Neev</span>
+            <span className="truncate text-base font-semibold tracking-tight">Timely</span>
           </div>
           <Button asChild size="sm">
             <Link to="/app">
@@ -150,7 +150,7 @@ function Landing() {
             className="animate-rise mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
-            Neev reads your roster and today's absences, then builds a fair, conflict-free
+            Timely reads your roster and today's absences, then builds a fair, conflict-free
             substitution plan in one tap — ready to print, export or save.
           </p>
           <div
@@ -293,14 +293,14 @@ function Landing() {
           </p>
           <Button asChild size="lg" className="mt-7 hover-scale">
             <Link to="/app">
-              Open Neev dashboard <ArrowRight />
+              Open Timely dashboard <ArrowRight />
             </Link>
           </Button>
         </div>
       </section>
 
       <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
-        Neev Substitution App — smarter cover, every day.
+        Timely Substitution App — smarter cover, every day.
       </footer>
     </div>
   );
