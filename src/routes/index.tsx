@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Neev Substitution App — Smart Teacher Cover in Seconds" },
+      { title: "Timely Substitution App — Smart Teacher Cover in Seconds" },
       {
         name: "description",
         content:
-          "Neev turns your teacher roster and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
+          "Timely turns your teacher roster and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
       },
-      { property: "og:title", content: "Neev Substitution App" },
+      { property: "og:title", content: "Timely Substitution App" },
       {
         property: "og:description",
         content:
@@ -106,7 +106,7 @@ function Landing() {
             <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
               <Sparkles className="size-4" />
             </span>
-            <span className="truncate text-base font-semibold tracking-tight">Neev</span>
+            <span className="truncate text-base font-semibold tracking-tight">Timely</span>
           </div>
           <Button asChild size="sm">
             <Link to="/app">
@@ -150,7 +150,7 @@ function Landing() {
             className="animate-rise mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
-            Neev reads your roster and today's absences, then builds a fair, conflict-free
+            Timely reads your roster and today's absences, then builds a fair, conflict-free
             substitution plan in one tap — ready to print, export or save.
           </p>
           <div
@@ -293,14 +293,40 @@ function Landing() {
           </p>
           <Button asChild size="lg" className="mt-7 hover-scale">
             <Link to="/app">
-              Open Neev dashboard <ArrowRight />
+              Open Timely dashboard <ArrowRight />
             </Link>
           </Button>
         </div>
       </section>
 
-      <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
-        Neev Substitution App — smarter cover, every day.
+      <footer className="border-t border-border px-4 py-10 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
+          <div>
+            <p className="flex items-center gap-2 font-semibold text-foreground">
+              <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground">
+                <Sparkles className="size-3.5" />
+              </span>
+              Timely
+            </p>
+            <p className="mt-2">Smarter cover, every day.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Developed by</p>
+            <p className="mt-2">Team Aeronics</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Support</p>
+            <a
+              href="mailto:developerstimely@gmai.com"
+              className="mt-2 block transition-colors hover:text-foreground"
+            >
+              developerstimely@gmai.com
+            </a>
+          </div>
+        </div>
+        <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
+          Timely Substitution App — Automated teacher substitution scheduling for schools.
+        </p>
       </footer>
     </div>
   );

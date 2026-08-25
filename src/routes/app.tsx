@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Neev Substitution App" },
+      { title: "Dashboard — Timely Substitution App" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       {
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/app")({
         content:
           "Manage the teacher roster, log daily absences and auto-generate a fair substitution schedule you can print or export as CSV.",
       },
-      { property: "og:title", content: "Neev Substitution App" },
+      { property: "og:title", content: "Timely Substitution App" },
       {
         property: "og:description",
         content:
@@ -127,7 +127,7 @@ function Index() {
       <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
         <Link to="/" className="block px-2">
           <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
-            Neev
+            Timely
           </p>
           <p className="text-xs text-sidebar-foreground/70">Substitution App · Home</p>
         </Link>
@@ -166,7 +166,7 @@ function Index() {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 bg-sidebar text-sidebar-foreground">
             <SheetHeader>
-              <SheetTitle className="text-sidebar-accent-foreground">Neev</SheetTitle>
+              <SheetTitle className="text-sidebar-accent-foreground">Timely</SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
               {NAV.map((item) => (
@@ -194,7 +194,7 @@ function Index() {
           <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
             {NAV.find((n) => n.id === tab)?.label}
           </p>
-          <p className="truncate text-xs text-sidebar-foreground/70">Neev · back to home</p>
+          <p className="truncate text-xs text-sidebar-foreground/70">Timely · back to home</p>
         </Link>
       </div>
 
@@ -439,6 +439,18 @@ function Index() {
             )}
           </section>
         )}
+
+        <footer className="no-print mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p>Timely Substitution App — Developed by Team Aeronics</p>
+            <a
+              href="mailto:developerstimely@gmai.com"
+              className="transition-colors hover:text-foreground"
+            >
+              Support: developerstimely@gmai.com
+            </a>
+          </div>
+        </footer>
       </main>
     </div>
   );
