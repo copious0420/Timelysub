@@ -36,34 +36,59 @@ const FEATURES = [
   {
     icon: Users,
     title: "Living teacher roster",
-    body: "Track every teacher, their subject and their free periods across the week — editable in a click.",
+    body: "Every teacher, their department and their week at a glance — edit inline, no spreadsheet round-trips.",
+    points: [
+      "Add, rename or remove staff instantly",
+      "Toggle Free/Busy for Periods 1–8",
+      "Ten demo teachers preloaded",
+    ],
   },
   {
     icon: CalendarCheck,
     title: "Daily absentee tracker",
-    body: "Pick the date, tick who is away and mark exactly which periods need cover.",
+    body: "Pick the date, tick who is away, and mark only the periods that actually need cover.",
+    points: [
+      "Date-scoped absence log",
+      "Per-period selection, not whole days",
+      "Busy periods pre-selected for you",
+    ],
   },
   {
     icon: Shuffle,
     title: "Fair auto-matching",
-    body: "Cover is matched by department first, then by whoever carries the lightest substitution load.",
+    body: "The generator only ever assigns a genuinely free teacher, then keeps the workload even.",
+    points: [
+      "Same subject/department first",
+      "Then lowest substitution count today",
+      "Conflicts flagged when nobody is free",
+    ],
   },
   {
     icon: Printer,
     title: "Print-ready schedules",
-    body: "A clean staffroom-ready table that prints or saves to PDF without any layout surprises.",
+    body: "A staffroom noticeboard table that prints exactly as it looks, in clean black on white.",
+    points: ["One-tap browser print", "Save as PDF from the print dialog", "No layout surprises"],
   },
   {
     icon: Download,
     title: "CSV export",
-    body: "Hand the day's plan to any other system, or archive it, with a single download.",
+    body: "Take the day's plan anywhere — attendance systems, email, or your own archive.",
+    points: ["Period, absentee, subject, substitute", "Opens in Excel or Sheets", "One-click download"],
   },
   {
     icon: Sparkles,
     title: "Saved days",
-    body: "Every generated day can be saved, reopened and re-exported later from your device.",
+    body: "Generated plans are stored on your device so yesterday is never lost.",
+    points: ["Save any generated day", "Reopen or re-export later", "Delete when it's no longer needed"],
   },
 ];
+
+const STATS = [
+  { k: "8", v: "periods tracked per teacher" },
+  { k: "2-step", v: "priority matching logic" },
+  { k: "0", v: "spreadsheets required" },
+];
+
 
 const STEPS = [
   { n: "01", t: "Set up the roster", d: "Add teachers, subjects and their free/busy periods." },
@@ -95,8 +120,18 @@ function Landing() {
       <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-40 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-accent/50 blur-3xl animate-float-slow"
+          className="pointer-events-none absolute -top-40 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-primary/35 blur-3xl animate-float-slow"
         />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-24 -left-24 -z-10 size-[26rem] rounded-full bg-primary/25 blur-3xl animate-pulse-glow"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 top-64 -z-10 size-[24rem] rounded-full bg-success/20 blur-3xl animate-pulse-glow"
+          style={{ animationDelay: "2s" }}
+        />
+
         <div className="mx-auto max-w-3xl text-center">
           <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5 text-primary" /> Automated cover scheduling for schools
@@ -106,7 +141,7 @@ function Landing() {
             style={{ animationDelay: "80ms" }}
           >
             Never scramble for a{" "}
-            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent text-glow">
               substitute teacher
             </span>{" "}
             again.
@@ -171,6 +206,22 @@ function Landing() {
         </div>
       </section>
 
+      {/* Stats */}
+      <section className="px-4 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-3">
+          {STATS.map((s, i) => (
+            <div
+              key={s.k}
+              className="panel animate-rise px-5 py-5 text-center"
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
@@ -184,19 +235,31 @@ function Landing() {
             {FEATURES.map((f, i) => (
               <article
                 key={f.title}
-                className="panel animate-rise px-5 py-5 transition-transform duration-200 hover:-translate-y-1"
+                className="panel animate-rise px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:glow-ring"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <span className="grid size-10 place-items-center rounded-xl bg-secondary text-secondary-foreground">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-primary glow-ring">
                   <f.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
+                <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
+                  {f.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span
+                        aria-hidden
+                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary"
+                      />
+                      <span className="min-w-0">{p}</span>
+                    </li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* How it works */}
       <section id="how-it-works" className="px-4 py-16 sm:px-6">
