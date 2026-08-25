@@ -206,6 +206,22 @@ function Landing() {
         </div>
       </section>
 
+      {/* Stats */}
+      <section className="px-4 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-3">
+          {STATS.map((s, i) => (
+            <div
+              key={s.k}
+              className="panel animate-rise px-5 py-5 text-center"
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
@@ -219,19 +235,31 @@ function Landing() {
             {FEATURES.map((f, i) => (
               <article
                 key={f.title}
-                className="panel animate-rise px-5 py-5 transition-transform duration-200 hover:-translate-y-1"
+                className="panel animate-rise px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:glow-ring"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <span className="grid size-10 place-items-center rounded-xl bg-secondary text-secondary-foreground">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-primary glow-ring">
                   <f.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
+                <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
+                  {f.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span
+                        aria-hidden
+                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary"
+                      />
+                      <span className="min-w-0">{p}</span>
+                    </li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* How it works */}
       <section id="how-it-works" className="px-4 py-16 sm:px-6">
