@@ -104,9 +104,7 @@ function Landing() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="size-4" />
-            </span>
+            <Logo size="md" />
             <span className="truncate text-base font-semibold tracking-tight">Timely</span>
           </div>
           <Button asChild size="sm">
@@ -304,9 +302,7 @@ function Landing() {
         <div className="mx-auto grid max-w-6xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
           <div>
             <p className="flex items-center gap-2 font-semibold text-foreground">
-              <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground">
-                <Sparkles className="size-3.5" />
-              </span>
+              <Logo size="sm" />
               Timely
             </p>
             <p className="mt-2">Smarter cover, every day.</p>

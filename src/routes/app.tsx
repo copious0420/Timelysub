@@ -126,11 +126,14 @@ function Index() {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
-        <Link to="/" className="block px-2">
-          <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
-            Timely
-          </p>
-          <p className="text-xs text-sidebar-foreground/70">Substitution App · Home</p>
+        <Link to="/" className="flex items-center gap-2 px-2">
+          <Logo size="md" className="shrink-0" />
+          <div>
+            <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
+              Timely
+            </p>
+            <p className="text-xs text-sidebar-foreground/70">Substitution App · Home</p>
+          </div>
         </Link>
         <nav className="mt-8 flex flex-col gap-1">
           {NAV.map((item) => (
@@ -167,7 +170,9 @@ function Index() {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 bg-sidebar text-sidebar-foreground">
             <SheetHeader>
-              <SheetTitle className="text-sidebar-accent-foreground">Timely</SheetTitle>
+              <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
+                <Logo size="sm" /> Timely
+              </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
               {NAV.map((item) => (
