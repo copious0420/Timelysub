@@ -3,7 +3,9 @@ import { Pencil, Plus, Trash2, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PERIODS, type Teacher } from "@/lib/substitution";
+import { TimetableImport } from "@/components/TimetableImport";
 import { cn } from "@/lib/utils";
+
 
 type Props = {
   teachers: Teacher[];
@@ -70,10 +72,14 @@ export function TeacherRoster({ teachers, onChange }: Props) {
             {teachers.length} teachers · tap a period chip while editing to flip Free / Busy
           </p>
         </div>
-        <Button onClick={addTeacher} size="sm" className="shrink-0">
-          <Plus /> <span className="hidden sm:inline">Add teacher</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <TimetableImport teachers={teachers} onChange={onChange} />
+          <Button onClick={addTeacher} size="sm" className="shrink-0">
+            <Plus /> <span className="hidden sm:inline">Add teacher</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        </div>
+
       </header>
 
       {/* Mobile: stacked cards */}
