@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { TeacherRoster } from "@/components/TeacherRoster";
 import { AbsenteeTracker } from "@/components/AbsenteeTracker";
+import { Logo } from "@/components/Logo";
 
 import {
   DEMO_TEACHERS,
