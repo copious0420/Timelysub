@@ -45,13 +45,13 @@ export const Route = createFileRoute("/app")({
       {
         name: "description",
         content:
-          "Manage the teacher roster, log daily absences and auto-generate a fair substitution schedule you can print or export as CSV.",
+          "Manage the teacher schedule, log daily absences and auto-generate a fair substitution schedule you can print or export as CSV.",
       },
       { property: "og:title", content: "Timely Substitution App" },
       {
         property: "og:description",
         content:
-          "Automated substitution scheduling for schools: roster, absentee tracking and instant cover plans.",
+          "Automated substitution scheduling for schools: schedule, absentee tracking and instant cover plans.",
       },
     ],
   }),
@@ -62,7 +62,7 @@ type Tab = "dashboard" | "roster" | "absentees" | "history";
 
 const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "roster", label: "Teacher Roster", icon: Users },
+  { id: "roster", label: "Teacher Schedule", icon: Users },
   { id: "absentees", label: "Absentees", icon: CalendarCheck },
   { id: "history", label: "Saved Days", icon: History },
 ];
@@ -209,7 +209,7 @@ function Index() {
           <div className="min-w-0">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {tab === "roster"
-                ? "Teacher Roster"
+                ? "Teacher Schedule"
                 : tab === "absentees"
                   ? "Daily Absentees"
                   : tab === "history"
@@ -244,7 +244,7 @@ function Index() {
         {tab === "dashboard" && (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="Teachers on roster" value={teachers.length} />
+              <Stat label="Teachers on schedule" value={teachers.length} />
               <Stat label="Absent today" value={activeAbsences.length} />
               <Stat
                 label="Periods needing cover"
@@ -375,7 +375,7 @@ function Index() {
             {unassigned > 0 && (
               <p className="no-print flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="size-4 text-warning" />
-                {unassigned} period(s) have no free teacher — free up a slot in the roster.
+                {unassigned} period(s) have no free teacher — free up a slot in the schedule.
               </p>
             )}
           </div>

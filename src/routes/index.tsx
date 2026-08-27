@@ -18,13 +18,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Timely turns your teacher roster and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
+          "Timely turns your teacher schedule and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
       },
       { property: "og:title", content: "Timely Substitution App" },
       {
         property: "og:description",
         content:
-          "Automated substitution scheduling for schools: roster management, absentee tracking and instant cover plans.",
+          "Automated substitution scheduling for schools: schedule management, absentee tracking and instant cover plans.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   {
     icon: Users,
-    title: "Living teacher roster",
+    title: "Living teacher schedule",
     body: "Every teacher, their department and their week at a glance — edit inline, no spreadsheet round-trips.",
     points: [
       "Add, rename or remove staff instantly",
@@ -92,7 +92,7 @@ const STATS = [
 
 
 const STEPS = [
-  { n: "01", t: "Set up the roster", d: "Add teachers, subjects and their free/busy periods." },
+  { n: "01", t: "Set up the schedule", d: "Add teachers, subjects and their free/busy periods." },
   { n: "02", t: "Log the absences", d: "Choose the date and the periods each absentee misses." },
   { n: "03", t: "Generate & share", d: "Press Generate, then print, export or save the day." },
 ];
@@ -149,7 +149,7 @@ function Landing() {
             className="animate-rise mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
-            Timely reads your roster and today's absences, then builds a fair, conflict-free
+            Timely reads your schedule and today's absences, then builds a fair, conflict-free
             substitution plan in one tap — ready to print, export or save.
           </p>
           <div

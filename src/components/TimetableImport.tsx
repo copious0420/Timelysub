@@ -158,10 +158,10 @@ export function TimetableImport({ teachers, onChange }: Props) {
 
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="outline" disabled={!parsed} onClick={() => apply("merge")}>
-            Merge into roster
+            Merge into schedule
           </Button>
           <Button disabled={!parsed} onClick={() => apply("replace")}>
-            Replace roster
+            Replace schedule
           </Button>
         </DialogFooter>
       </DialogContent>
