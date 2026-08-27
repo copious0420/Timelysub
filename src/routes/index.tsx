@@ -41,7 +41,7 @@ const FEATURES = [
     points: [
       "Add, rename or remove staff instantly",
       "Toggle Free/Busy for Periods 1–8",
-      "Ten demo teachers preloaded",
+      "Import a full timetable from Excel, Google Sheets or CSV",
     ],
   },
   {
@@ -287,8 +287,7 @@ function Landing() {
             Ready for tomorrow morning?
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            Demo data for ten teachers is already loaded — open the dashboard and generate a plan
-            right now.
+            Set up your schedule, log today's absentees, and generate a fair cover plan in seconds.
           </p>
           <Button asChild size="lg" className="mt-7 hover-scale">
             <Link to="/app">
