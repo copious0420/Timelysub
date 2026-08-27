@@ -80,7 +80,7 @@ export type Database = {
           busy?: Json
           category?: string
           created_at?: string
-          id?: string
+          id: string
           name: string
           subject?: string
           updated_at?: string
