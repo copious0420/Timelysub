@@ -41,7 +41,7 @@ const FEATURES = [
     points: [
       "Add, rename or remove staff instantly",
       "Toggle Free/Busy for Periods 1–8",
-      "Ten demo teachers preloaded",
+      "Import a full timetable from Excel, Google Sheets or CSV",
     ],
   },
   {
