@@ -67,7 +67,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
     <section className="panel overflow-hidden">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-4 sm:flex sm:flex-wrap sm:justify-between sm:px-5">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold">Teacher Roster</h2>
+          <h2 className="text-base font-semibold">Teacher Schedule</h2>
           <p className="text-sm text-muted-foreground">
             {teachers.length} teachers · tap a period chip while editing to flip Free / Busy
           </p>
