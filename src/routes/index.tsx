@@ -167,40 +167,35 @@ function Landing() {
           </div>
         </div>
 
-        {/* Floating mock schedule */}
+        {/* Differentiators */}
         <div
           className="animate-rise mx-auto mt-14 max-w-4xl"
           style={{ animationDelay: "320ms" }}
         >
-          <div className="panel overflow-hidden">
-            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-              <p className="truncate text-sm font-semibold">Today's substitution plan</p>
-              <span className="shrink-0 rounded-md bg-success/15 px-2 py-1 text-xs font-medium text-success">
-                All periods covered
-              </span>
-            </div>
-            <ul className="divide-y divide-border">
-              {[
-                ["P1", "R. Menon", "Physics", "A. Iyer"],
-                ["P3", "S. Kapoor", "History", "M. Das"],
-                ["P6", "N. Verma", "Maths", "K. Rao"],
-              ].map(([p, absent, subject, sub], i) => (
-                <li
-                  key={p}
-                  className="animate-rise grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-sm"
-                  style={{ animationDelay: `${400 + i * 120}ms` }}
-                >
-                  <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">
-                    {p}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium">{absent}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{subject}</span>
-                  </span>
-                  <span className="shrink-0 text-right text-xs font-medium sm:text-sm">{sub}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                k: "No accounts needed",
+                v: "Open the dashboard and start scheduling right away — no sign-up, no setup delays.",
+              },
+              {
+                k: "Works in the browser",
+                v: "Everything runs locally on your device, so your staff data never leaves the school.",
+              },
+              {
+                k: "Built for the bell",
+                v: "Generate, print and export a fair cover plan in under a minute — even on the busiest mornings.",
+              },
+            ].map((item, i) => (
+              <div
+                key={item.k}
+                className="panel animate-rise px-5 py-5 text-center"
+                style={{ animationDelay: `${400 + i * 120}ms` }}
+              >
+                <p className="text-base font-semibold text-primary text-glow">{item.k}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{item.v}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
