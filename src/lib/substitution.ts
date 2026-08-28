@@ -1,10 +1,14 @@
 export const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 export type Period = (typeof PERIODS)[number];
 
+export const CATEGORIES = ["PRT", "TGT", "PGT"] as const;
+export type Category = (typeof CATEGORIES)[number];
+
 export type Teacher = {
   id: string;
   name: string;
   subject: string;
+  category: Category;
   /** period -> true means BUSY (teaching), false/undefined means FREE */
   busy: Record<number, boolean>;
 };
@@ -19,8 +23,10 @@ export type Assignment = {
   absentTeacherId: string;
   absentTeacherName: string;
   subject: string;
+  absentCategory?: Category;
   substituteId: string | null;
   substituteName: string;
+  substituteCategory?: Category;
   reason: string;
 };
 
@@ -28,16 +34,16 @@ const b = (...periods: number[]): Record<number, boolean> =>
   Object.fromEntries(periods.map((p) => [p, true]));
 
 export const DEMO_TEACHERS: Teacher[] = [
-  { id: "t1", name: "Anita Sharma", subject: "Mathematics", busy: b(1, 2, 4, 6, 7) },
-  { id: "t2", name: "Rahul Verma", subject: "Mathematics", busy: b(2, 3, 5, 8) },
-  { id: "t3", name: "Priya Nair", subject: "Physics", busy: b(1, 3, 4, 7) },
-  { id: "t4", name: "Sameer Khan", subject: "Physics", busy: b(2, 5, 6) },
-  { id: "t5", name: "Divya Menon", subject: "English", busy: b(1, 2, 3, 6, 8) },
-  { id: "t6", name: "Arjun Rao", subject: "English", busy: b(4, 5, 7) },
-  { id: "t7", name: "Neha Gupta", subject: "Chemistry", busy: b(1, 4, 5, 8) },
-  { id: "t8", name: "Vikram Singh", subject: "History", busy: b(2, 3, 6, 7) },
-  { id: "t9", name: "Meera Iyer", subject: "Biology", busy: b(3, 4, 6) },
-  { id: "t10", name: "Karan Joshi", subject: "Computer Science", busy: b(1, 5, 7, 8) },
+  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7) },
+  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8) },
+  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7) },
+  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6) },
+  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8) },
+  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7) },
+  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8) },
+  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7) },
+  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6) },
+  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8) },
 ];
 
 /**
@@ -81,6 +87,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
         absentTeacherId: teacher.id,
         absentTeacherName: teacher.name,
         subject: teacher.subject,
+        absentCategory: teacher.category,
         substituteId: null,
         substituteName: "— Unassigned —",
         reason: "No free teacher available in this period",
@@ -96,8 +103,10 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
       absentTeacherId: teacher.id,
       absentTeacherName: teacher.name,
       subject: teacher.subject,
+      absentCategory: teacher.category,
       substituteId: pick.id,
       substituteName: pick.name,
+      substituteCategory: pick.category,
       reason:
         pick.subject === teacher.subject
           ? `Same department (${pick.subject})`
@@ -107,13 +116,24 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
 }
 
 export function toCsv(rows: Assignment[], dateLabel: string): string {
-  const head = ["Date", "Period", "Absent Teacher", "Subject", "Substitute", "Reason"];
+  const head = [
+    "Date",
+    "Period",
+    "Absent Teacher",
+    "Category",
+    "Subject",
+    "Substitute",
+    "Substitute Category",
+    "Reason",
+  ];
   const body = rows.map((r) => [
     dateLabel,
     `P${r.period}`,
     r.absentTeacherName,
+    r.absentCategory ?? "",
     r.subject,
     r.substituteName,
+    r.substituteCategory ?? "",
     r.reason,
   ]);
   return [head, ...body]
