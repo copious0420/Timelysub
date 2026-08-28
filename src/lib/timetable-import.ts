@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { PERIODS, type Teacher } from "./substitution";
+import { CATEGORIES, PERIODS, type Category, type Teacher } from "./substitution";
 
 export type ImportResult = {
   teachers: Teacher[];
@@ -66,6 +66,7 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
   const header = (rows[headerIdx] ?? []).map(norm);
   const nameCol = findColumn(header, ["teacher", "name", "faculty", "staff"]);
   const subjectCol = findColumn(header, ["subject", "department", "dept", "stream"]);
+  const categoryCol = findColumn(header, ["category", "level", "cadre", "designation", "grade"]);
   if (nameCol === -1)
     throw new Error("Could not find a teacher name column. Add a header cell named 'Teacher'.");
 
@@ -112,10 +113,15 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
       subject = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "General";
     }
 
+    const rawCategory = categoryCol === -1 ? "" : norm(row[categoryCol]).toUpperCase();
+    const category: Category =
+      (CATEGORIES as readonly string[]).includes(rawCategory) ? (rawCategory as Category) : "TGT";
+
     teachers.push({
       id: `imp${r}-${Math.random().toString(36).slice(2, 7)}`,
       name,
       subject,
+      category,
       busy,
     });
   }
@@ -132,7 +138,12 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
     const match = byName.get(imp.name.trim().toLowerCase());
     if (match) {
       const idx = result.findIndex((t) => t.id === match.id);
-      result[idx] = { ...match, subject: imp.subject || match.subject, busy: imp.busy };
+      result[idx] = {
+        ...match,
+        subject: imp.subject || match.subject,
+        category: imp.category || match.category,
+        busy: imp.busy,
+      };
     } else {
       result.push(imp);
     }
@@ -141,10 +152,10 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
 }
 
 export function downloadTimetableTemplate() {
-  const header = ["Teacher", "Subject", ...PERIODS.map((p) => `P${p}`)];
+  const header = ["Teacher", "Subject", "Category", ...PERIODS.map((p) => `P${p}`)];
   const rows = [
-    ["Anita Sharma", "Mathematics", "Maths 8A", "Maths 9B", "Free", "Maths 7C", "Free", "Maths 10A", "Free", "Free"],
-    ["Rahul Verma", "Physics", "Free", "Phy 11A", "Phy 12B", "Free", "Free", "Phy 11C", "Free", "Free"],
+    ["Anita Sharma", "Mathematics", "PGT", "Maths 8A", "Maths 9B", "Free", "Maths 7C", "Free", "Maths 10A", "Free", "Free"],
+    ["Rahul Verma", "Physics", "TGT", "Free", "Phy 11A", "Phy 12B", "Free", "Free", "Phy 11C", "Free", "Free"],
   ];
   const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
   const wb = XLSX.utils.book_new();
