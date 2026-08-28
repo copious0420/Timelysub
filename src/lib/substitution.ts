@@ -23,8 +23,10 @@ export type Assignment = {
   absentTeacherId: string;
   absentTeacherName: string;
   subject: string;
+  absentCategory?: Category;
   substituteId: string | null;
   substituteName: string;
+  substituteCategory?: Category;
   reason: string;
 };
 
@@ -32,16 +34,16 @@ const b = (...periods: number[]): Record<number, boolean> =>
   Object.fromEntries(periods.map((p) => [p, true]));
 
 export const DEMO_TEACHERS: Teacher[] = [
-  { id: "t1", name: "Anita Sharma", subject: "Mathematics", busy: b(1, 2, 4, 6, 7) },
-  { id: "t2", name: "Rahul Verma", subject: "Mathematics", busy: b(2, 3, 5, 8) },
-  { id: "t3", name: "Priya Nair", subject: "Physics", busy: b(1, 3, 4, 7) },
-  { id: "t4", name: "Sameer Khan", subject: "Physics", busy: b(2, 5, 6) },
-  { id: "t5", name: "Divya Menon", subject: "English", busy: b(1, 2, 3, 6, 8) },
-  { id: "t6", name: "Arjun Rao", subject: "English", busy: b(4, 5, 7) },
-  { id: "t7", name: "Neha Gupta", subject: "Chemistry", busy: b(1, 4, 5, 8) },
-  { id: "t8", name: "Vikram Singh", subject: "History", busy: b(2, 3, 6, 7) },
-  { id: "t9", name: "Meera Iyer", subject: "Biology", busy: b(3, 4, 6) },
-  { id: "t10", name: "Karan Joshi", subject: "Computer Science", busy: b(1, 5, 7, 8) },
+  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7) },
+  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8) },
+  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7) },
+  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6) },
+  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8) },
+  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7) },
+  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8) },
+  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7) },
+  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6) },
+  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8) },
 ];
 
 /**
