@@ -87,6 +87,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
         absentTeacherId: teacher.id,
         absentTeacherName: teacher.name,
         subject: teacher.subject,
+        absentCategory: teacher.category,
         substituteId: null,
         substituteName: "— Unassigned —",
         reason: "No free teacher available in this period",
@@ -102,8 +103,10 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
       absentTeacherId: teacher.id,
       absentTeacherName: teacher.name,
       subject: teacher.subject,
+      absentCategory: teacher.category,
       substituteId: pick.id,
       substituteName: pick.name,
+      substituteCategory: pick.category,
       reason:
         pick.subject === teacher.subject
           ? `Same department (${pick.subject})`
@@ -113,13 +116,24 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
 }
 
 export function toCsv(rows: Assignment[], dateLabel: string): string {
-  const head = ["Date", "Period", "Absent Teacher", "Subject", "Substitute", "Reason"];
+  const head = [
+    "Date",
+    "Period",
+    "Absent Teacher",
+    "Category",
+    "Subject",
+    "Substitute",
+    "Substitute Category",
+    "Reason",
+  ];
   const body = rows.map((r) => [
     dateLabel,
     `P${r.period}`,
     r.absentTeacherName,
+    r.absentCategory ?? "",
     r.subject,
     r.substituteName,
+    r.substituteCategory ?? "",
     r.reason,
   ]);
   return [head, ...body]
