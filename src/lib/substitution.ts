@@ -1,10 +1,14 @@
 export const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 export type Period = (typeof PERIODS)[number];
 
+export const CATEGORIES = ["PRT", "TGT", "PGT"] as const;
+export type Category = (typeof CATEGORIES)[number];
+
 export type Teacher = {
   id: string;
   name: string;
   subject: string;
+  category: Category;
   /** period -> true means BUSY (teaching), false/undefined means FREE */
   busy: Record<number, boolean>;
 };
