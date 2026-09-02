@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   CalendarCheck,
+  Check,
   Download,
   Printer,
   Shuffle,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ const FEATURES = [
     points: ["Period, absentee, subject, substitute", "Opens in Excel or Sheets", "One-click download"],
   },
   {
-    icon: Sparkles,
+    icon: Check,
     title: "Saved days",
     body: "Generated plans are stored on your device so yesterday is never lost.",
     points: ["Save any generated day", "Reopen or re-export later", "Delete when it's no longer needed"],
@@ -107,11 +107,23 @@ function Landing() {
             <Logo size="md" />
             <span className="truncate text-base font-semibold tracking-tight">Timely</span>
           </div>
-          <Button asChild size="sm">
-            <Link to="/app">
-              Open app <ArrowRight />
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="ghost" className="text-slate-700 hover:bg-transparent hover:text-foreground/80">
+              <Link to="/auth?tab=login">
+                Log in
+              </Link>
+            </Button>
+            <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90">
+              <Link to="/auth?tab=signup">
+                Sign up
+              </Link>
+            </Button>
+            <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90">
+              <Link to="/app">
+                Open app <ArrowRight />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -132,21 +144,24 @@ function Landing() {
         />
 
         <div className="mx-auto max-w-3xl text-center">
-          <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Sparkles className="size-3.5 text-primary" /> Automated cover scheduling for schools
+          <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-slate-700">
+            <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
           </p>
           <h1
             className="animate-rise mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl"
             style={{ animationDelay: "80ms" }}
           >
             Never scramble for a{" "}
-            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent text-glow">
-              substitute teacher
+            <span className="text-glow-blue">
+              substitute
+            </span>{" "}
+            <span className="text-glow-green">
+              teacher
             </span>{" "}
             again.
           </h1>
           <p
-            className="animate-rise mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
+            className="animate-rise mx-auto mt-5 max-w-xl text-base text-slate-700 sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
             Timely reads your schedule and today's absences, then builds a fair, conflict-free
@@ -193,7 +208,7 @@ function Landing() {
                 style={{ animationDelay: `${400 + i * 120}ms` }}
               >
                 <p className="text-base font-semibold text-primary text-glow">{item.k}</p>
-                <p className="mt-2 text-sm text-muted-foreground">{item.v}</p>
+                <p className="mt-2 text-sm text-slate-700">{item.v}</p>
               </div>
             ))}
           </div>
@@ -210,7 +225,7 @@ function Landing() {
               style={{ animationDelay: `${i * 100}ms` }}
             >
               <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
+              <p className="mt-1 text-sm text-slate-700">{s.v}</p>
             </div>
           ))}
         </div>
@@ -219,10 +234,10 @@ function Landing() {
       {/* Features */}
       <section className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl">
             Everything a timetable in-charge needs
           </h2>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
+          <p className="mt-2 max-w-2xl text-slate-700">
             Four screens, zero spreadsheets. Built for the ten minutes before the first bell.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -236,10 +251,10 @@ function Landing() {
                   <f.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
+                <p className="mt-1 text-sm text-slate-700">{f.body}</p>
                 <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
                   {f.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li key={p} className="flex items-start gap-2 text-sm text-slate-700">
                       <span
                         aria-hidden
                         className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary"
@@ -258,7 +273,7 @@ function Landing() {
       {/* How it works */}
       <section id="how-it-works" className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">How it works</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl">How it works</h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <li
@@ -268,7 +283,7 @@ function Landing() {
               >
                 <p className="text-3xl font-semibold text-primary/30">{s.n}</p>
                 <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+                <p className="mt-1 text-sm text-slate-700">{s.d}</p>
               </li>
             ))}
           </ol>
@@ -278,10 +293,10 @@ function Landing() {
       {/* CTA */}
       <section className="px-4 pb-20 sm:px-6">
         <div className="panel mx-auto max-w-6xl px-6 py-12 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl">
             Ready for tomorrow morning?
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-lg text-slate-700">
             Set up your schedule, log today's absentees, and generate a fair cover plan in seconds.
           </p>
           <Button asChild size="lg" className="mt-7 hover-scale">
@@ -293,32 +308,35 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border px-4 py-10 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
+        <div className="mx-auto grid max-w-6xl gap-8 text-sm text-slate-700 sm:grid-cols-3">
           <div>
-            <p className="flex items-center gap-2 font-semibold text-foreground">
+            <p className="flex items-center gap-2 font-semibold text-slate-700">
               <Logo size="sm" />
               Timely
             </p>
             <p className="mt-2">Smarter cover, every day.</p>
           </div>
           <div>
-            <p className="font-semibold text-foreground">Developed by</p>
+            <p className="font-semibold text-slate-700">Developed by</p>
             <p className="mt-2">Team Aeronics</p>
           </div>
           <div>
-            <p className="font-semibold text-foreground">Support</p>
+            <p className="font-semibold text-slate-700">Support</p>
             <a
               href="mailto:developerstimely@gmai.com"
-              className="mt-2 block transition-colors hover:text-foreground"
+              className="mt-2 block transition-colors hover:text-slate-700"
             >
               developerstimely@gmai.com
             </a>
           </div>
         </div>
-        <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-slate-700">
           Timely Substitution App — Automated teacher substitution scheduling for schools.
         </p>
       </footer>
     </div>
   );
 }
+
+
+

@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { upsertProfile } from "@/lib/cloud";
 
 export const Route = createFileRoute("/auth")({
@@ -33,6 +32,15 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  
+  // Get tab from URL search params
+  const getInitialTab = () => {
+    if (typeof window === "undefined") return "login";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") === "signup" ? "signup" : "login";
+  };
+  
+  const [tab, setTab] = useState<"login" | "signup">(getInitialTab);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -41,6 +49,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [schoolName, setSchoolName] = useState("");
+  const [googleConfigured, setGoogleConfigured] = useState(true);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -93,9 +102,23 @@ function AuthPage() {
   const google = async () => {
     setError(null);
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const { error: err } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/app`,
+        },
+      });
+      if (err) {
+        if (err.message?.includes("Unsupported provider") || err.message?.includes("OAuth secret")) {
+          setGoogleConfigured(false);
+          setError("Google sign-in is not yet configured. Please use email/password authentication for now.");
+        } else {
+          throw err;
+        }
+      }
+      // Note: On successful OAuth, Supabase will redirect, so this code may not execute
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Google sign-in failed.");
+      setError(e instanceof Error ? e.message : "Google sign-in failed. Please check your Supabase configuration.");
     }
   };
 
@@ -134,7 +157,7 @@ function AuthPage() {
             tick who is absent.
           </p>
 
-          <Tabs defaultValue="login" className="mt-5">
+          <Tabs value={tab} onValueChange={(value) => setTab(value as "login" | "signup")} className="mt-5">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Log in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
@@ -212,12 +235,21 @@ function AuthPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-          </div>
-          <Button variant="outline" className="w-full" onClick={() => void google()}>
-            Continue with Google
-          </Button>
+          {googleConfigured && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => void google()}
+                disabled={busy}
+              >
+                Continue with Google
+              </Button>
+            </>
+          )}
 
           {error && (
             <p className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">

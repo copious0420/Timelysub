@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
@@ -12,6 +12,8 @@ import {
   Users,
   AlertTriangle,
   History,
+  LogOut,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +36,9 @@ import {
 } from "@/lib/substitution";
 import { deleteSaved, loadSaved, saveSchedule, type SavedSchedule } from "@/lib/history";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { fetchTeachers, syncTeachers as syncTeachersToCloud, fetchSavedDays, saveDay, deleteDay, fetchProfile, upsertProfile } from "@/lib/cloud";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export const Route = createFileRoute("/app")({
@@ -73,6 +78,8 @@ function todayIso() {
 }
 
 function Index() {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [navOpen, setNavOpen] = useState(false);
 
@@ -88,6 +95,7 @@ function Index() {
       { teacherId: "t5", periods: [3, 6] },
     ]),
   );
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const activeAbsences = useMemo(
     () => absences.filter((a) => a.periods.length > 0),
@@ -95,21 +103,120 @@ function Index() {
   );
 
   const [saved, setSaved] = useState<SavedSchedule[]>([]);
-  useEffect(() => setSaved(loadSaved()), []);
+  
+  // Load data from cloud or localStorage based on authentication
+  useEffect(() => {
+    if (loading) return;
+    
+    const loadData = async () => {
+      try {
+        if (user) {
+          // Ensure profile exists for new OAuth users
+          const profile = await fetchProfile(user.id);
+          if (!profile) {
+            const meta = user.user_metadata as { full_name?: string } | undefined;
+            const fullName = meta?.full_name || user.email?.split("@")[0] || "User";
+            await upsertProfile(user.id, { 
+              fullName, 
+              schoolName: "" 
+            });
+          }
+          
+          // Load from cloud for authenticated users
+          const cloudTeachers = await fetchTeachers();
+          setTeachers(cloudTeachers.length > 0 ? cloudTeachers : DEMO_TEACHERS);
+          
+          const cloudSaved = await fetchSavedDays();
+          setSaved(cloudSaved);
+        } else {
+          // Load from localStorage for unauthenticated users
+          setSaved(loadSaved());
+        }
+        setDataLoaded(true);
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        // Fallback to demo/localStorage data
+        setSaved(loadSaved());
+        setDataLoaded(true);
+      }
+    };
+    
+    loadData();
+  }, [user, loading]);
+
+  // Sync teacher changes to cloud when authenticated
+  useEffect(() => {
+    if (!user || !dataLoaded) return;
+    
+    // Don't sync if still showing demo data
+    if (teachers === DEMO_TEACHERS) return;
+    
+    const sync = async () => {
+      try {
+        await syncTeachersToCloud(user.id, teachers);
+      } catch (error) {
+        console.error("Failed to sync teachers:", error);
+      }
+    };
+    
+    sync();
+  }, [teachers, user, dataLoaded]);
+
+  const CurrentActiveAbsences = useMemo(
+    () => absences.filter((a) => a.periods.length > 0),
+    [absences],
+  );
 
   const generate = () => setSchedule(generateSchedule(teachers, activeAbsences));
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
 
-  const save = () => {
+  const save = async () => {
     if (schedule.length === 0) return;
-    setSaved(saveSchedule(date, schedule));
+    try {
+      if (user) {
+        // Save to cloud for authenticated users
+        await saveDay(user.id, date, schedule);
+        const cloudSaved = await fetchSavedDays();
+        setSaved(cloudSaved);
+      } else {
+        // Save to localStorage for unauthenticated users
+        setSaved(saveSchedule(date, schedule));
+      }
+    } catch (error) {
+      console.error("Failed to save schedule:", error);
+      // Fallback to localStorage
+      setSaved(saveSchedule(date, schedule));
+    }
   };
 
   const restore = (entry: SavedSchedule) => {
     setDate(entry.date);
     setSchedule(entry.rows);
     setTab("dashboard");
+  };
+
+  const deleteSchedule = async (date: string) => {
+    try {
+      if (user) {
+        // Delete from cloud for authenticated users
+        await deleteDay(user.id, date);
+        const cloudSaved = await fetchSavedDays();
+        setSaved(cloudSaved);
+      } else {
+        // Delete from localStorage for unauthenticated users
+        setSaved(deleteSaved(date));
+      }
+    } catch (error) {
+      console.error("Failed to delete schedule:", error);
+      // Fallback to localStorage
+      setSaved(deleteSaved(date));
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/", replace: true });
   };
 
   const downloadCsv = (rows = schedule, label = date) => {
@@ -152,8 +259,26 @@ function Index() {
             </button>
           ))}
         </nav>
-        <div className="mt-auto rounded-lg border border-sidebar-border px-3 py-3 text-xs text-sidebar-foreground/70">
-          Cover matched by department first, then by lightest substitution load.
+        <div className="mt-auto space-y-2">
+          <div className="rounded-lg border border-sidebar-border px-3 py-3 text-xs text-sidebar-foreground/70">
+            Cover matched by department first, then by lightest substitution load.
+          </div>
+          {user && (
+            <div className="space-y-1">
+              <Link
+                to="/settings"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent/50"
+              >
+                <Settings className="size-4" /> Settings
+              </Link>
+              <button
+                onClick={() => void handleLogout()}
+                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent/50 text-left"
+              >
+                <LogOut className="size-4" /> Sign out
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -386,7 +511,9 @@ function Index() {
             <header className="border-b border-border px-5 py-4">
               <h2 className="text-base font-semibold">Saved Schedules</h2>
               <p className="text-sm text-muted-foreground">
-                Previously saved days, kept on this device. Open one to view or export it.
+                {user
+                  ? "All your saved days are stored securely in the cloud. Open one to view or export it."
+                  : "Previously saved days are kept on this device. Open one to view or export it."}
               </p>
             </header>
             {saved.length === 0 ? (
@@ -434,7 +561,7 @@ function Index() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setSaved(deleteSaved(s.date))}
+                        onClick={() => void deleteSchedule(s.date)}
                       >
                         <Trash2 />
                       </Button>

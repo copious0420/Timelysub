@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pencil, Plus, Trash2, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PERIODS, type Teacher } from "@/lib/substitution";
+import { PERIODS, CATEGORIES, type Teacher } from "@/lib/substitution";
 import { TimetableImport } from "@/components/TimetableImport";
 import { cn } from "@/lib/utils";
 
@@ -105,11 +105,33 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                         className="h-8"
                         placeholder="Subject"
                       />
+                      <div className="flex gap-1.5">
+                        {CATEGORIES.map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setDraft({ ...row, category: cat })}
+                            className={cn(
+                              "flex-1 rounded px-2 py-1.5 text-xs font-semibold transition-colors",
+                              row.category === cat
+                                ? "bg-primary text-primary-foreground"
+                                : "border border-border bg-muted text-muted-foreground hover:bg-muted/80"
+                            )}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
                     </>
                   ) : (
                     <>
                       <p className="truncate font-medium">{row.name}</p>
-                      <p className="truncate text-sm text-muted-foreground">{row.subject}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm text-muted-foreground">{row.subject}</p>
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                          {row.category}
+                        </span>
+                      </div>
                     </>
                   )}
                 </div>
@@ -202,13 +224,38 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                   </td>
                   <td className="px-3 py-2.5">
                     {editing ? (
-                      <Input
-                        value={row.subject}
-                        onChange={(e) => setDraft({ ...row, subject: e.target.value })}
-                        className="h-8 w-36"
-                      />
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          value={row.subject}
+                          onChange={(e) => setDraft({ ...row, subject: e.target.value })}
+                          className="h-8 w-36"
+                          placeholder="Subject"
+                        />
+                        <div className="flex gap-1">
+                          {CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setDraft({ ...row, category: cat })}
+                              className={cn(
+                                "flex-1 rounded px-1.5 py-1 text-xs font-semibold transition-colors",
+                                row.category === cat
+                                  ? "bg-primary text-primary-foreground"
+                                  : "border border-border bg-muted text-muted-foreground hover:bg-muted/80"
+                              )}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-muted-foreground">{row.subject}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">{row.subject}</span>
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                          {row.category}
+                        </span>
+                      </div>
                     )}
                   </td>
                   {PERIODS.map((p) => (

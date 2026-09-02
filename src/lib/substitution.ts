@@ -47,8 +47,19 @@ export const DEMO_TEACHERS: Teacher[] = [
 ];
 
 /**
+ * Check if a substitute (with substituteCategory) can cover for an absent teacher (with absentCategory).
+ * Hierarchy: PGT → TGT → PRT (higher can cover lower, but not vice versa)
+ */
+function canSubstitute(substituteCategory: Category, absentCategory: Category): boolean {
+  if (substituteCategory === absentCategory) return true; // Same category can always substitute
+  if (substituteCategory === "PGT") return true; // PGT can cover TGT or PRT
+  if (substituteCategory === "TGT" && absentCategory === "PRT") return true; // TGT can cover PRT
+  return false;
+}
+
+/**
  * Assign a free teacher to every absent period.
- * Priority: same subject first, then lowest substitution load today.
+ * Priority: same subject first, then same/eligible category, then lowest substitution load today.
  */
 export function generateSchedule(input: Teacher[], absences: Absence[]): Assignment[] {
   const teachers = input.map((t) => ({ ...t, busy: { ...t.busy } }));
@@ -66,17 +77,28 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
   rows.sort((x, y) => x.period - y.period || x.teacher.name.localeCompare(y.teacher.name));
 
   return rows.map(({ period, teacher }) => {
+    // Filter candidates: must be free, not absent, and able to substitute
     const candidates = teachers.filter(
-      (c) => c.id !== teacher.id && !absentIds.has(c.id) && !c.busy[period],
+      (c) => c.id !== teacher.id && !absentIds.has(c.id) && !c.busy[period] && canSubstitute(c.category, teacher.category),
     );
 
     candidates.sort((c1, c2) => {
+      // Priority 1: Same subject
       const s1 = c1.subject === teacher.subject ? 0 : 1;
       const s2 = c2.subject === teacher.subject ? 0 : 1;
       if (s1 !== s2) return s1 - s2;
+      
+      // Priority 2: Same category (exact match preferred over hierarchy)
+      const cat1 = c1.category === teacher.category ? 0 : 1;
+      const cat2 = c2.category === teacher.category ? 0 : 1;
+      if (cat1 !== cat2) return cat1 - cat2;
+      
+      // Priority 3: Lowest substitution load today
       const l1 = load[c1.id] ?? 0;
       const l2 = load[c2.id] ?? 0;
       if (l1 !== l2) return l1 - l2;
+      
+      // Priority 4: Alphabetical
       return c1.name.localeCompare(c2.name);
     });
 
