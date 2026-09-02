@@ -109,12 +109,12 @@ function Landing() {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="ghost" className="text-slate-700 hover:bg-transparent hover:text-foreground/80">
-              <Link to="/auth?tab=login">
+              <Link to="/auth" search={{ tab: "login" }}>
                 Log in
               </Link>
             </Button>
             <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90">
-              <Link to="/auth?tab=signup">
+              <Link to="/auth" search={{ tab: "signup" }}>
                 Sign up
               </Link>
             </Button>

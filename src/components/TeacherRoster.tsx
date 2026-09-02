@@ -38,6 +38,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
       id: `t${Date.now()}`,
       name: "New Teacher",
       subject: "General",
+      category: "TGT",
       busy: {},
     };
     onChange([...teachers, t]);
