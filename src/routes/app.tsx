@@ -7,7 +7,6 @@ import {
   Menu,
   Printer,
   Save,
-  Sparkles,
   Trash2,
   Users,
   AlertTriangle,
@@ -388,7 +387,7 @@ function Index() {
                 </div>
                 <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <Button onClick={generate} className="w-full sm:w-auto">
-                    <Sparkles /> Generate
+                    <Logo size="sm" /> Generate
                   </Button>
                   <Button
                     variant="outline"
@@ -476,7 +475,7 @@ function Index() {
                             key={`${r.period}-${r.absentTeacherId}-${i}`}
                             className="border-t border-border"
                           >
-                            <td className="px-5 py-3 font-medium">P{r.period}</td>
+                            <td className="px-5 py-3 font-medium text-sky-400">P{r.period}</td>
                             <td className="px-3 py-3">{r.absentTeacherName}</td>
                             <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
                             <td
