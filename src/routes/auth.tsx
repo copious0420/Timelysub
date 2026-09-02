@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { upsertProfile } from "@/lib/cloud";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: search.tab === "signup" ? "signup" : "login",
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — Timely Substitution App" },
@@ -32,15 +35,9 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { tab: initialTab } = Route.useSearch();
   
-  // Get tab from URL search params
-  const getInitialTab = () => {
-    if (typeof window === "undefined") return "login";
-    const params = new URLSearchParams(window.location.search);
-    return params.get("tab") === "signup" ? "signup" : "login";
-  };
-  
-  const [tab, setTab] = useState<"login" | "signup">(getInitialTab);
+  const [tab, setTab] = useState<"login" | "signup">(initialTab);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
