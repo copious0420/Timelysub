@@ -388,7 +388,7 @@ function Index() {
                 </div>
                 <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <Button onClick={generate} className="w-full sm:w-auto">
-                    <Logo size="sm" /> Generate
+                    <Check className="size-4" /> Generate
                   </Button>
                   <Button
                     variant="outline"
