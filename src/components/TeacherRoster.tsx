@@ -171,7 +171,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <div className="mt-3 grid grid-cols-4 gap-1.5 sm:grid-cols-8">
                 {PERIODS.map((p) => (
                   <div key={p} className="text-center">
-                    <p className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-sky-400">
                       P{p}
                     </p>
                     <button
@@ -198,7 +198,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <th className="px-5 py-3 font-medium">Teacher</th>
               <th className="px-3 py-3 font-medium">Subject</th>
               {PERIODS.map((p) => (
-                <th key={p} className="px-2 py-3 text-center font-medium">
+                <th key={p} className="px-2 py-3 text-center font-medium text-sky-400">
                   P{p}
                 </th>
               ))}
