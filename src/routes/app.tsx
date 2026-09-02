@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
+  Check,
   Download,
   LayoutDashboard,
   Menu,
@@ -387,7 +388,7 @@ function Index() {
                 </div>
                 <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <Button onClick={generate} className="w-full sm:w-auto">
-                    <Logo size="sm" /> Generate
+                    <Check className="size-4" /> Generate
                   </Button>
                   <Button
                     variant="outline"
