@@ -59,7 +59,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
     cn(
       "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border text-xs font-medium transition-colors sm:w-11",
       busy
-        ? "border-transparent bg-accent text-accent-foreground"
+        ? "border-transparent bg-sky-400 text-white"
         : "border-transparent bg-success/12 text-success",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
