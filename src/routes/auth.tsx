@@ -11,7 +11,7 @@ import { upsertProfile } from "@/lib/cloud";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: search.tab === "signup" ? "signup" : "login",
+    tab: (search['tab'] === "signup" ? "signup" : "login") as "login" | "signup",
   }),
   head: () => ({
     meta: [
