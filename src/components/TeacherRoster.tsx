@@ -57,10 +57,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
 
   const slotClass = (busy: boolean, editing: boolean) =>
     cn(
-      "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border text-xs font-medium transition-colors sm:w-11",
+      "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border-2 text-xs font-semibold transition-colors sm:w-11",
       busy
-        ? "border-transparent bg-primary text-primary-foreground"
-        : "border-transparent bg-success/12 text-success",
+        ? "border-secondary bg-secondary text-foreground"
+        : "border-primary bg-primary text-foreground",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
 
@@ -192,18 +192,18 @@ export function TeacherRoster({ teachers, onChange }: Props) {
       </ul>
 
       {/* Desktop: table */}
-      <div className="hidden overflow-x-auto lg:block">
+      <div className="hidden max-h-[calc(100vh-13rem)] overflow-auto lg:block">
         <table className="w-full min-w-[880px] text-sm">
           <thead>
-            <tr className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-5 py-3 font-medium">Teacher</th>
-              <th className="px-3 py-3 font-medium">Subject</th>
+            <tr className="bg-muted/95 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <th className="sticky top-0 z-10 bg-muted/95 px-5 py-3 font-medium">Teacher</th>
+              <th className="sticky top-0 z-10 bg-muted/95 px-3 py-3 font-medium">Subject</th>
               {PERIODS.map((p) => (
-                <th key={p} className="px-2 py-3 text-center font-medium text-primary">
+                <th key={p} className="sticky top-0 z-10 bg-muted/95 px-2 py-3 text-center font-medium text-primary">
                   P{p}
                 </th>
               ))}
-              <th className="px-5 py-3 text-right font-medium">Actions</th>
+              <th className="sticky top-0 z-10 bg-muted/95 px-5 py-3 text-right font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -211,8 +211,8 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               const editing = editingId === t.id && draft;
               const row = editing ? draft! : t;
               return (
-                <tr key={t.id} className="border-t border-border align-middle">
-                  <td className="px-5 py-2.5">
+                <tr key={t.id} className="border-t border-border align-middle odd:bg-background even:bg-muted/30">
+                  <td className="px-5 py-3.5">
                     {editing ? (
                       <Input
                         value={row.name}
@@ -223,7 +223,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                       <span className="font-medium">{row.name}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-3.5">
                     {editing ? (
                       <div className="flex flex-col gap-2">
                         <Input
@@ -260,7 +260,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                     )}
                   </td>
                   {PERIODS.map((p) => (
-                    <td key={p} className="px-2 py-2.5 text-center">
+                    <td key={p} className="px-2 py-3.5 text-center">
                       <button
                         type="button"
                         disabled={!editing}
@@ -271,7 +271,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                       </button>
                     </td>
                   ))}
-                  <td className="px-5 py-2.5 text-right">
+                  <td className="px-5 py-3.5 text-right">
                     <div className="flex justify-end gap-1">
                       {editing ? (
                         <>

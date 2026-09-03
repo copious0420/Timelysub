@@ -17,30 +17,30 @@
   --color-card-foreground: #0f172a;
   --color-popover: #F8FAFC;
   --color-popover-foreground: #0f172a;
-  --color-primary: #8aecff;
+  --color-primary: #98FB98;
   --color-primary-foreground: #0f172a;
-  --color-secondary: #83f28f;
+  --color-secondary: #B2F4FF;
   --color-secondary-foreground: #0f172a;
   --color-muted: #E2E8F0;
   --color-muted-foreground: #475569;
-  --color-accent: #8aecff;
+  --color-accent: #B2F4FF;
   --color-accent-foreground: #0f172a;
   --color-destructive: #F43F5E;
   --color-destructive-foreground: #FFFFFF;
-  --color-success: #83f28f;
+  --color-success: #98FB98;
   --color-success-foreground: #0f172a;
   --color-warning: #F59E0B;
   --color-warning-foreground: #000000;
   --color-border: #E2E8F0;
   --color-input: #F8FAFC;
-  --color-ring: #8aecff;
+  --color-ring: #98FB98;
   --color-sidebar: #F8FAFC;
   --color-sidebar-foreground: #0f172a;
-  --color-sidebar-accent: #83f28f;
+  --color-sidebar-accent: #98FB98;
   --color-sidebar-accent-foreground: #0f172a;
   --color-sidebar-border: #E2E8F0;
   --shadow-panel: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.16);
-  --shadow-glow: 0 0 20px rgba(138, 236, 255, 0.35), 0 0 40px rgba(138, 236, 255, 0.25);
+  --shadow-glow: 0 0 20px rgba(152, 251, 152, 0.45), 0 0 40px rgba(152, 251, 152, 0.25);
 }
 
 :root {
@@ -89,7 +89,7 @@
   }
 
   a {
-    color: #0ea5e9;
+    color: #B2F4FF;
   }
 
   button, input, select, textarea {
@@ -285,32 +285,32 @@ p, span, h1, h2, h3, h4, h5, h6, a, button, label {
   &:focus,
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #F8FAFC, 0 0 20px rgba(138, 236, 255, 0.35);
+    box-shadow: 0 0 0 2px #F8FAFC, 0 0 20px rgba(152, 251, 152, 0.5);
   }
 }
 
 @utility glow-accent {
-  color: #8aecff;
-  text-shadow: 0 0 20px rgba(138, 236, 255, 0.5), 0 0 40px rgba(138, 236, 255, 0.3);
+  color: #98FB98;
+  text-shadow: 0 0 20px rgba(152, 251, 152, 0.6), 0 0 40px rgba(152, 251, 152, 0.35);
   contain: paint;
 }
 
 @utility text-glow {
-  text-shadow: 0 0 20px rgba(138, 236, 255, 0.4), 0 0 10px rgba(138, 236, 255, 0.2);
+  text-shadow: 0 0 20px rgba(152, 251, 152, 0.5), 0 0 10px rgba(152, 251, 152, 0.3);
   will-change: opacity;
   backface-visibility: hidden;
 }
 
 @utility text-glow-blue {
-  color: #8aecff;
-  text-shadow: 0 0 20px rgba(138, 236, 255, 0.5), 0 0 40px rgba(138, 236, 255, 0.3);
+  color: #B2F4FF;
+  text-shadow: 0 0 20px rgba(178, 244, 255, 0.6), 0 0 40px rgba(178, 244, 255, 0.35);
   will-change: opacity;
   backface-visibility: hidden;
 }
 
 @utility text-glow-green {
-  color: #83f28f;
-  text-shadow: 0 0 20px rgba(131, 242, 143, 0.5), 0 0 40px rgba(131, 242, 143, 0.3);
+  color: #98FB98;
+  text-shadow: 0 0 20px rgba(152, 251, 152, 0.6), 0 0 40px rgba(152, 251, 152, 0.35);
   will-change: opacity;
   backface-visibility: hidden;
 }

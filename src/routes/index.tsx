@@ -113,12 +113,12 @@ function Landing() {
                 Log in
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
+            <Button asChild size="sm" className="bg-primary text-foreground hover:bg-primary/90">
               <Link to="/auth" search={{ tab: "signup" }}>
                 Sign up
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
+            <Button asChild size="sm" className="bg-primary text-foreground hover:bg-primary/90">
               <Link to="/app">
                 Open app <ArrowRight />
               </Link>
@@ -139,7 +139,7 @@ function Landing() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 top-64 -z-10 size-[24rem] rounded-full bg-success/20 blur-3xl animate-pulse-glow"
+          className="pointer-events-none absolute -right-24 top-64 -z-10 size-[24rem] rounded-full bg-secondary/20 blur-3xl animate-pulse-glow"
           style={{ animationDelay: "2s" }}
         />
 
@@ -247,7 +247,7 @@ function Landing() {
                 className="panel animate-rise px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:glow-ring"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-secondary glow-ring">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-foreground glow-ring">
                   <f.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
@@ -323,10 +323,10 @@ function Landing() {
           <div>
             <p className="font-semibold text-slate-700">Support</p>
             <a
-              href="mailto:developerstimely@gmai.com"
+              href="mailto:developerstimely@gmail.com"
               className="mt-2 block transition-colors hover:text-slate-700"
             >
-              developerstimely@gmai.com
+              developerstimely@gmail.com
             </a>
           </div>
         </div>

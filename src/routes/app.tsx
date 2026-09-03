@@ -474,20 +474,23 @@ function Index() {
                         {schedule.map((r, i) => (
                           <tr
                             key={`${r.period}-${r.absentTeacherId}-${i}`}
-                            className="border-t border-border"
+                            className={cn(
+                              "border-t border-border odd:bg-background even:bg-muted/30",
+                              !r.substituteId && "bg-destructive/10",
+                            )}
                           >
-                            <td className="px-5 py-3 font-medium text-primary">P{r.period}</td>
-                            <td className="px-3 py-3">{r.absentTeacherName}</td>
-                            <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
+                            <td className="px-5 py-3.5 font-medium text-primary">P{r.period}</td>
+                            <td className="px-3 py-3.5">{r.absentTeacherName}</td>
+                            <td className="px-3 py-3.5 text-muted-foreground">{r.subject}</td>
                             <td
                               className={cn(
-                                "px-3 py-3 font-medium",
+                                "px-3 py-3.5 font-medium",
                                 !r.substituteId && "text-destructive",
                               )}
                             >
                               {r.substituteName}
                             </td>
-                            <td className="px-5 py-3 text-muted-foreground">{r.reason}</td>
+                            <td className="px-5 py-3.5 text-muted-foreground">{r.reason}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -577,10 +580,10 @@ function Index() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p>Timely Substitution App — Developed by Team Aeronics</p>
             <a
-              href="mailto:developerstimely@gmai.com"
+              href="mailto:developerstimely@gmail.com"
               className="transition-colors hover:text-foreground"
             >
-              Support: developerstimely@gmai.com
+              Support: developerstimely@gmail.com
             </a>
           </div>
         </footer>
@@ -600,17 +603,25 @@ function Stat({
   tone?: "default" | "ok" | "warn";
 }) {
   return (
-    <div className="panel px-5 py-4">
+    <div
+      className={cn(
+        "panel px-5 py-4",
+        tone === "warn" && "border-l-4 border-l-destructive bg-destructive/5",
+      )}
+    >
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p
-        className={cn(
-          "mt-1 text-2xl font-semibold",
-          tone === "warn" && "text-destructive",
-          tone === "ok" && "text-success",
-        )}
-      >
-        {value}
-      </p>
+      <div className="mt-1 flex items-center gap-2">
+        <p
+          className={cn(
+            "text-2xl font-semibold",
+            tone === "warn" && "text-destructive",
+            tone === "ok" && "text-success",
+          )}
+        >
+          {value}
+        </p>
+        {tone === "warn" && <AlertTriangle className="size-5 text-destructive" aria-label="Needs attention" />}
+      </div>
     </div>
   );
 }
