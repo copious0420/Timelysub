@@ -83,21 +83,22 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
 
                 {PERIODS.map((p) => {
                   const selected = absence?.periods.includes(p);
-                  const teaches = !!t.busy[p];
                   return (
                     <button
                       key={p}
                       type="button"
                       disabled={!absence}
                       onClick={() => togglePeriod(t.id, p)}
-                      title={teaches ? `Period ${p} — has a class` : `Period ${p} — free`}
+                      title={
+                        selected
+                          ? `Period ${p} — selected as missed`
+                          : `Period ${p} — not selected as missed`
+                      }
                       className={cn(
                         "h-8 w-full rounded-md sm:w-10 border-2 text-xs font-semibold transition-colors",
                         selected
                           ? "border-primary bg-primary text-primary-foreground"
-                          : teaches
-                            ? "border-secondary bg-secondary text-foreground"
-                            : "border-primary bg-primary text-foreground",
+                          : "border-border bg-muted/50 text-muted-foreground",
                         !absence && "opacity-40",
                         absence && !selected && "hover:border-primary/40",
                       )}
