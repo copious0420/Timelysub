@@ -12,8 +12,8 @@ export function renderErrorPage(): string {
       p { color: #64748B; margin: 0 0 1.5rem; }
       .actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
       a, button { padding: 0.5rem 1rem; border-radius: 0.375rem; font: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
-      .primary { background: #4F46E5; color: #fff; }
-      .secondary { background: #fff; color: #4F46E5; border-color: #E2E8F0; }
+      .primary { background: #8aecff; color: #0f172a; }
+      .secondary { background: #fff; color: #0ea5e9; border-color: #E2E8F0; }
     </style>
   </head>
   <body>
