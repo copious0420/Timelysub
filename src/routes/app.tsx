@@ -476,7 +476,7 @@ function Index() {
                             key={`${r.period}-${r.absentTeacherId}-${i}`}
                             className="border-t border-border"
                           >
-                            <td className="px-5 py-3 font-medium text-sky-400">P{r.period}</td>
+                            <td className="px-5 py-3 font-medium text-primary">P{r.period}</td>
                             <td className="px-3 py-3">{r.absentTeacherName}</td>
                             <td className="px-3 py-3 text-muted-foreground">{r.subject}</td>
                             <td

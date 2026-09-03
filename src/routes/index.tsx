@@ -113,12 +113,12 @@ function Landing() {
                 Log in
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90">
+            <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
               <Link to="/auth" search={{ tab: "signup" }}>
                 Sign up
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90">
+            <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
               <Link to="/app">
                 Open app <ArrowRight />
               </Link>
@@ -247,7 +247,7 @@ function Landing() {
                 className="panel animate-rise px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:glow-ring"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-primary glow-ring">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-secondary glow-ring">
                   <f.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
@@ -257,7 +257,7 @@ function Landing() {
                     <li key={p} className="flex items-start gap-2 text-sm text-slate-700">
                       <span
                         aria-hidden
-                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary"
+                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-secondary"
                       />
                       <span className="min-w-0">{p}</span>
                     </li>
@@ -281,7 +281,7 @@ function Landing() {
                 className="panel animate-rise px-5 py-6"
                 style={{ animationDelay: `${i * 120}ms` }}
               >
-                <p className="text-3xl font-semibold text-primary/30">{s.n}</p>
+                <p className="text-3xl font-semibold text-secondary/30">{s.n}</p>
                 <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
                 <p className="mt-1 text-sm text-slate-700">{s.d}</p>
               </li>

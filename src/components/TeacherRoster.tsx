@@ -59,7 +59,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
     cn(
       "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border text-xs font-medium transition-colors sm:w-11",
       busy
-        ? "border-transparent bg-sky-400 text-white"
+        ? "border-transparent bg-primary text-primary-foreground"
         : "border-transparent bg-success/12 text-success",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
@@ -129,7 +129,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                       <p className="truncate font-medium">{row.name}</p>
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm text-muted-foreground">{row.subject}</p>
-                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-semibold text-secondary">
                           {row.category}
                         </span>
                       </div>
@@ -172,7 +172,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <div className="mt-3 grid grid-cols-4 gap-1.5 sm:grid-cols-8">
                 {PERIODS.map((p) => (
                   <div key={p} className="text-center">
-                    <p className="mb-1 text-[10px] uppercase tracking-wide text-sky-400">
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-primary">
                       P{p}
                     </p>
                     <button
@@ -199,7 +199,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <th className="px-5 py-3 font-medium">Teacher</th>
               <th className="px-3 py-3 font-medium">Subject</th>
               {PERIODS.map((p) => (
-                <th key={p} className="px-2 py-3 text-center font-medium text-sky-400">
+                <th key={p} className="px-2 py-3 text-center font-medium text-primary">
                   P{p}
                 </th>
               ))}
@@ -253,7 +253,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">{row.subject}</span>
-                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-semibold text-secondary">
                           {row.category}
                         </span>
                       </div>
