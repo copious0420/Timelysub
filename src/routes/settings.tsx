@@ -28,7 +28,7 @@ function SettingsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   const [fullName, setFullName] = useState("");
   const [schoolName, setSchoolName] = useState("");
 
@@ -93,16 +93,19 @@ function SettingsPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-background px-4 py-4 sm:px-6">
+      <header className="border-b border-primary bg-background px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3">
           <Link to="/app">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="size-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
-            <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
+          <div className="flex items-center gap-2">
+            <Logo size="sm" />
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+              <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
+            </div>
           </div>
         </div>
       </header>
@@ -110,19 +113,13 @@ function SettingsPage() {
       <div className="flex-1 px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-md space-y-6">
           {/* Profile Section */}
-          <section className="rounded-lg border border-border bg-card p-6">
+          <section className="rounded-lg border border-primary bg-background p-6">
             <h2 className="text-lg font-semibold tracking-tight mb-4">Profile</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user.email || ""}
-                  disabled
-                  className="mt-1"
-                />
+                <Input id="email" type="email" value={user.email || ""} disabled className="mt-1" />
                 <p className="mt-1 text-xs text-muted-foreground">Cannot be changed</p>
               </div>
 
@@ -160,11 +157,7 @@ function SettingsPage() {
                 </p>
               )}
 
-              <Button
-                onClick={() => void handleSave()}
-                disabled={busy}
-                className="w-full"
-              >
+              <Button onClick={() => void handleSave()} disabled={busy} className="w-full">
                 {busy ? <Loader2 className="animate-spin" /> : null}
                 Save changes
               </Button>
@@ -172,19 +165,15 @@ function SettingsPage() {
           </section>
 
           {/* Account Section */}
-          <section className="rounded-lg border border-border bg-card p-6">
+          <section className="rounded-lg border border-primary bg-background p-6">
             <h2 className="text-lg font-semibold tracking-tight mb-4">Account</h2>
-            
+
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
                 Signed in as <strong>{user.email}</strong>
               </p>
-              
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => void handleLogout()}
-              >
+
+              <Button variant="destructive" className="w-full" onClick={() => void handleLogout()}>
                 Sign out
               </Button>
             </div>

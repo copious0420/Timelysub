@@ -120,8 +120,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="min-h-screen">
+        <div className="animated-bg" aria-hidden="true">
+          <div className="gradient-blob blob-1" />
+          <div className="gradient-blob blob-2" />
+          <div className="gradient-blob blob-3" />
+        </div>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </div>
     </QueryClientProvider>
   );
 }

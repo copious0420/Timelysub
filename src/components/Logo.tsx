@@ -1,3 +1,4 @@
+import { CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -13,14 +14,15 @@ const sizes = {
 
 export function Logo({ className, size = "md" }: LogoProps) {
   return (
-    <img
-      src="/timely-logo.png"
-      alt="Timely schedule calendar"
+    <span
+      aria-label="Timely"
       className={cn(
-        "block shrink-0 object-contain",
+        "grid shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground",
         sizes[size],
         className,
       )}
-    />
+    >
+      <CalendarCheck aria-hidden="true" className="size-[62%]" strokeWidth={2.4} />
+    </span>
   );
 }

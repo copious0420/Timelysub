@@ -6,7 +6,6 @@ import { PERIODS, CATEGORIES, type Teacher } from "@/lib/substitution";
 import { TimetableImport } from "@/components/TimetableImport";
 import { cn } from "@/lib/utils";
 
-
 type Props = {
   teachers: Teacher[];
   onChange: (teachers: Teacher[]) => void;
@@ -59,8 +58,8 @@ export function TeacherRoster({ teachers, onChange }: Props) {
     cn(
       "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border-2 text-xs font-semibold transition-colors sm:w-11",
       busy
-        ? "border-primary bg-primary text-foreground"
-        : "border-secondary bg-secondary text-foreground",
+        ? "border-primary bg-primary text-primary-foreground"
+        : "border-secondary bg-secondary text-secondary-foreground",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
 
@@ -80,7 +79,6 @@ export function TeacherRoster({ teachers, onChange }: Props) {
             <span className="sm:hidden">Add</span>
           </Button>
         </div>
-
       </header>
 
       {/* Mobile: stacked cards */}
@@ -116,7 +114,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                               "flex-1 rounded px-2 py-1.5 text-xs font-semibold transition-colors",
                               row.category === cat
                                 ? "bg-primary text-primary-foreground"
-                                : "border border-border bg-muted text-muted-foreground hover:bg-muted/80"
+                                : "border border-border bg-muted text-muted-foreground hover:bg-muted/80",
                             )}
                           >
                             {cat}
@@ -129,7 +127,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                       <p className="truncate font-medium">{row.name}</p>
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm text-muted-foreground">{row.subject}</p>
-                        <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-semibold text-secondary">
+                        <span className="shrink-0 rounded-full bg-secondary/50 px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
                           {row.category}
                         </span>
                       </div>
@@ -172,9 +170,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <div className="mt-3 grid grid-cols-4 gap-1.5 sm:grid-cols-8">
                 {PERIODS.map((p) => (
                   <div key={p} className="text-center">
-                    <p className="mb-1 text-[10px] uppercase tracking-wide text-primary">
-                      P{p}
-                    </p>
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-primary">P{p}</p>
                     <button
                       type="button"
                       disabled={!editing}
@@ -199,11 +195,16 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               <th className="sticky top-0 z-10 bg-muted/95 px-5 py-3 font-medium">Teacher</th>
               <th className="sticky top-0 z-10 bg-muted/95 px-3 py-3 font-medium">Subject</th>
               {PERIODS.map((p) => (
-                <th key={p} className="sticky top-0 z-10 bg-muted/95 px-2 py-3 text-center font-medium text-primary">
+                <th
+                  key={p}
+                  className="sticky top-0 z-10 bg-muted/95 px-2 py-3 text-center font-medium text-primary"
+                >
                   P{p}
                 </th>
               ))}
-              <th className="sticky top-0 z-10 bg-muted/95 px-5 py-3 text-right font-medium">Actions</th>
+              <th className="sticky top-0 z-10 bg-muted/95 px-5 py-3 text-right font-medium">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -211,7 +212,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
               const editing = editingId === t.id && draft;
               const row = editing ? draft! : t;
               return (
-                <tr key={t.id} className="border-t border-border align-middle odd:bg-background even:bg-muted/30">
+                <tr
+                  key={t.id}
+                  className="border-t border-border align-middle odd:bg-background even:bg-muted/30"
+                >
                   <td className="px-5 py-3.5">
                     {editing ? (
                       <Input
@@ -242,7 +246,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                                 "flex-1 rounded px-1.5 py-1 text-xs font-semibold transition-colors",
                                 row.category === cat
                                   ? "bg-primary text-primary-foreground"
-                                  : "border border-border bg-muted text-muted-foreground hover:bg-muted/80"
+                                  : "border border-border bg-muted text-muted-foreground hover:bg-muted/80",
                               )}
                             >
                               {cat}
@@ -253,7 +257,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">{row.subject}</span>
-                        <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-semibold text-secondary">
+                        <span className="shrink-0 rounded-full bg-secondary/50 px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
                           {row.category}
                         </span>
                       </div>

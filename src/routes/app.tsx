@@ -4,28 +4,24 @@ import {
   CalendarCheck,
   Check,
   Download,
-  LayoutDashboard,
   Menu,
   Printer,
   Save,
+  Shuffle,
   Trash2,
   Users,
   AlertTriangle,
   History,
   LogOut,
   Settings,
+  UserRoundCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherRoster } from "@/components/TeacherRoster";
 import { AbsenteeTracker } from "@/components/AbsenteeTracker";
 import { Logo } from "@/components/Logo";
+import { OverrideDrawer } from "@/components/OverrideDrawer";
 
 import {
   DEMO_TEACHERS,
@@ -37,9 +33,17 @@ import {
 import { deleteSaved, loadSaved, saveSchedule, type SavedSchedule } from "@/lib/history";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchTeachers, syncTeachers as syncTeachersToCloud, fetchSavedDays, saveDay, deleteDay, fetchProfile, upsertProfile } from "@/lib/cloud";
+import {
+  fetchTeachers,
+  syncTeachers as syncTeachersToCloud,
+  fetchSavedDays,
+  saveDay,
+  deleteDay,
+  fetchProfile,
+  upsertProfile,
+} from "@/lib/cloud";
 import { supabase } from "@/integrations/supabase/client";
-
+import { AnimatePresence, motion } from "framer-motion";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -63,15 +67,14 @@ export const Route = createFileRoute("/app")({
   component: Index,
 });
 
-type Tab = "dashboard" | "roster" | "absentees" | "history";
+type Tab = "roster" | "absentees" | "generator" | "history";
 
 const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "roster", label: "Teacher Schedule", icon: Users },
-  { id: "absentees", label: "Absentees", icon: CalendarCheck },
-  { id: "history", label: "Saved Days", icon: History },
+  { id: "roster", label: "Roster & Timetable", icon: Users },
+  { id: "absentees", label: "Absence Logger", icon: CalendarCheck },
+  { id: "generator", label: "Substitution Generator", icon: Shuffle },
+  { id: "history", label: "Daily Schedule & History", icon: History },
 ];
-
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -80,8 +83,9 @@ function todayIso() {
 function Index() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [tab, setTab] = useState<Tab>("dashboard");
+  const [tab, setTab] = useState<Tab>("generator");
   const [navOpen, setNavOpen] = useState(false);
+  const [overrideIndex, setOverrideIndex] = useState<number | null>(null);
 
   const [teachers, setTeachers] = useState<Teacher[]>(DEMO_TEACHERS);
   const [absences, setAbsences] = useState<Absence[]>([
@@ -97,17 +101,14 @@ function Index() {
   );
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  const activeAbsences = useMemo(
-    () => absences.filter((a) => a.periods.length > 0),
-    [absences],
-  );
+  const activeAbsences = useMemo(() => absences.filter((a) => a.periods.length > 0), [absences]);
 
   const [saved, setSaved] = useState<SavedSchedule[]>([]);
-  
+
   // Load data from cloud or localStorage based on authentication
   useEffect(() => {
     if (loading) return;
-    
+
     const loadData = async () => {
       try {
         if (user) {
@@ -116,16 +117,16 @@ function Index() {
           if (!profile) {
             const meta = user.user_metadata as { full_name?: string } | undefined;
             const fullName = meta?.full_name || user.email?.split("@")[0] || "User";
-            await upsertProfile(user.id, { 
-              fullName, 
-              schoolName: "" 
+            await upsertProfile(user.id, {
+              fullName,
+              schoolName: "",
             });
           }
-          
+
           // Load from cloud for authenticated users
           const cloudTeachers = await fetchTeachers();
           setTeachers(cloudTeachers.length > 0 ? cloudTeachers : DEMO_TEACHERS);
-          
+
           const cloudSaved = await fetchSavedDays();
           setSaved(cloudSaved);
         } else {
@@ -140,17 +141,17 @@ function Index() {
         setDataLoaded(true);
       }
     };
-    
+
     loadData();
   }, [user, loading]);
 
   // Sync teacher changes to cloud when authenticated
   useEffect(() => {
     if (!user || !dataLoaded) return;
-    
+
     // Don't sync if still showing demo data
     if (teachers === DEMO_TEACHERS) return;
-    
+
     const sync = async () => {
       try {
         await syncTeachersToCloud(user.id, teachers);
@@ -158,7 +159,7 @@ function Index() {
         console.error("Failed to sync teachers:", error);
       }
     };
-    
+
     sync();
   }, [teachers, user, dataLoaded]);
 
@@ -170,6 +171,26 @@ function Index() {
   const generate = () => setSchedule(generateSchedule(teachers, activeAbsences));
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
+  const overrideRow = overrideIndex === null ? null : schedule[overrideIndex];
+
+  const overrideAssignment = (index: number, teacherId: string) => {
+    const substitute = teachers.find((teacher) => teacher.id === teacherId);
+    if (!substitute) return;
+    setSchedule((rows) =>
+      rows.map((row, rowIndex) =>
+        rowIndex === index
+          ? {
+              ...row,
+              substituteId: substitute.id,
+              substituteName: substitute.name,
+              substituteCategory: substitute.category,
+              reason: "Manually overridden",
+            }
+          : row,
+      ),
+    );
+    setOverrideIndex(null);
+  };
 
   const save = async () => {
     if (schedule.length === 0) return;
@@ -193,7 +214,7 @@ function Index() {
   const restore = (entry: SavedSchedule) => {
     setDate(entry.date);
     setSchedule(entry.rows);
-    setTab("dashboard");
+    setTab("history");
   };
 
   const deleteSchedule = async (date: string) => {
@@ -229,10 +250,14 @@ function Index() {
     URL.revokeObjectURL(url);
   };
 
-
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
+      <motion.aside
+        initial={{ opacity: 0, x: -18 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[16px] md:flex"
+      >
         <Link to="/" className="flex items-center gap-2 px-2">
           <Logo size="md" className="shrink-0" />
           <div>
@@ -244,19 +269,25 @@ function Index() {
         </Link>
         <nav className="mt-8 flex flex-col gap-1">
           {NAV.map((item) => (
-            <button
+            <motion.button
               key={item.id}
               onClick={() => setTab(item.id)}
+              whileTap={{ scale: 0.98 }}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                tab === item.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "hover:bg-sidebar-accent/50",
+                "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm",
+                tab === item.id ? "text-foreground" : "hover:bg-secondary/60",
               )}
             >
-              <item.icon className="size-4" />
-              {item.label}
-            </button>
+              {tab === item.id && (
+                <motion.span
+                  layoutId="desktop-active-nav"
+                  className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px]"
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              )}
+              <item.icon className="relative z-10 size-4" />
+              <span className="relative z-10">{item.label}</span>
+            </motion.button>
           ))}
         </nav>
         <div className="mt-auto space-y-2">
@@ -280,20 +311,23 @@ function Index() {
             </div>
           )}
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Mobile top navbar */}
-      <div className="no-print sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
+      <div className="no-print sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger asChild>
             <button
               aria-label="Open navigation"
-              className="grid size-9 shrink-0 place-items-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground"
+              className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand text-primary-foreground"
             >
               <Menu className="size-5" />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 bg-sidebar text-sidebar-foreground">
+          <SheetContent
+            side="left"
+            className="w-64 border-sidebar-border bg-sidebar/95 text-foreground backdrop-blur-xl"
+          >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
                 <Logo size="sm" /> Timely
@@ -301,31 +335,40 @@ function Index() {
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
               {NAV.map((item) => (
-                <button
+                <motion.button
                   key={item.id}
                   onClick={() => {
                     setTab(item.id);
                     setNavOpen(false);
                   }}
+                  whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                    tab === item.id
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "hover:bg-sidebar-accent/50",
+                    "relative flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm",
+                    tab === item.id ? "text-foreground" : "hover:bg-secondary/60",
                   )}
                 >
-                  <item.icon className="size-4" />
-                  {item.label}
-                </button>
+                  {tab === item.id && (
+                    <motion.span
+                      layoutId="mobile-active-nav"
+                      className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px]"
+                      transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                    />
+                  )}
+                  <item.icon className="relative z-10 size-4" />
+                  <span className="relative z-10">{item.label}</span>
+                </motion.button>
               ))}
             </nav>
           </SheetContent>
         </Sheet>
-        <Link to="/" className="min-w-0">
-          <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
-            {NAV.find((n) => n.id === tab)?.label}
-          </p>
-          <p className="truncate text-xs text-sidebar-foreground/70">Timely · back to home</p>
+        <Link to="/" className="flex min-w-0 items-center gap-2">
+          <Logo size="sm" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
+              {NAV.find((n) => n.id === tab)?.label}
+            </p>
+            <p className="truncate text-xs text-sidebar-foreground/70">Timely · back to home</p>
+          </div>
         </Link>
       </div>
 
@@ -334,12 +377,14 @@ function Index() {
           <div className="min-w-0">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {tab === "roster"
-                ? "Teacher Schedule"
+                ? "Roster & Timetable"
                 : tab === "absentees"
-                  ? "Daily Absentees"
+                  ? "Absence Logger"
+                  : tab === "generator"
+                    ? "Substitution Generator"
                   : tab === "history"
-                    ? "Saved Schedules"
-                    : "Substitution Dashboard"}
+                    ? "Daily Schedule & History"
+                    : ""}
             </h1>
 
             <p className="text-sm text-muted-foreground">
@@ -353,7 +398,14 @@ function Index() {
           </div>
         </header>
 
-
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
         {tab === "roster" && <TeacherRoster teachers={teachers} onChange={setTeachers} />}
 
         {tab === "absentees" && (
@@ -366,7 +418,7 @@ function Index() {
           />
         )}
 
-        {tab === "dashboard" && (
+        {tab === "generator" && (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat label="Teachers on schedule" value={teachers.length} />
@@ -377,8 +429,16 @@ function Index() {
               />
               <Stat label="Unassigned" value={unassigned} tone={unassigned ? "warn" : "ok"} />
             </div>
+            <p className="text-sm text-muted-foreground">
+              Matching hierarchy: same department first, then same or eligible category, then the
+              lightest substitution load.
+            </p>
+          </div>
+        )}
 
-            <section className="panel print-area overflow-hidden">
+        {(tab === "generator" || tab === "history") && (
+          <div className="space-y-6">
+            <section className="panel data-panel print-area overflow-hidden p-0">
               <header className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
                 <div className="min-w-0">
                   <h2 className="truncate text-base font-semibold">Daily Substitution Schedule</h2>
@@ -387,34 +447,37 @@ function Index() {
                   </p>
                 </div>
                 <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                  <Button onClick={generate} className="w-full sm:w-auto">
-                    <Check className="size-4" /> Generate
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={save}
-                    disabled={schedule.length === 0}
-                    className="w-full sm:w-auto"
-                  >
-                    <Save /> Save day
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.print()}
-                    className="w-full sm:w-auto"
-                  >
-                    <Printer /> Print / PDF
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => downloadCsv()}
-                    className="w-full sm:w-auto"
-                  >
-                    <Download /> CSV
-                  </Button>
+                  {tab === "generator" ? (
+                    <Button onClick={generate} className="w-full sm:w-auto">
+                      <Check className="size-4" /> Generate
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={save}
+                        disabled={schedule.length === 0}
+                        className="w-full sm:w-auto"
+                      >
+                        <Save /> Save day
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => window.print()}
+                        className="w-full sm:w-auto"
+                      >
+                        <Printer /> Print / PDF
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => downloadCsv()}
+                        className="w-full sm:w-auto"
+                      >
+                        <Download /> CSV
+                      </Button>
+                    </>
+                  )}
                 </div>
-
-
               </header>
 
               {schedule.length === 0 ? (
@@ -441,14 +504,12 @@ function Index() {
                         </div>
                         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
                           <span className="text-muted-foreground">Substitute</span>
-                          <span
-                            className={cn(
-                              "min-w-0 break-words font-medium",
-                              !r.substituteId && "text-destructive",
-                            )}
-                          >
+                          <span className={cn("min-w-0 break-words font-medium", !r.substituteId && "text-destructive")}>
                             {r.substituteName}
                           </span>
+                          <Button size="sm" variant="ghost" className="col-span-2 justify-self-start" onClick={() => setOverrideIndex(i)}>
+                            <UserRoundCheck /> Override
+                          </Button>
                           <span className="text-muted-foreground">Basis</span>
                           <span className="min-w-0 break-words text-muted-foreground">
                             {r.reason}
@@ -467,7 +528,8 @@ function Index() {
                           <th className="px-3 py-3 font-medium">Absent teacher</th>
                           <th className="px-3 py-3 font-medium">Subject</th>
                           <th className="px-3 py-3 font-medium">Substitute</th>
-                          <th className="px-5 py-3 font-medium">Basis</th>
+                          <th className="px-3 py-3 font-medium">Basis</th>
+                          <th className="px-5 py-3 font-medium">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -490,7 +552,12 @@ function Index() {
                             >
                               {r.substituteName}
                             </td>
-                            <td className="px-5 py-3.5 text-muted-foreground">{r.reason}</td>
+                            <td className="px-3 py-3.5 text-muted-foreground">{r.reason}</td>
+                            <td className="px-5 py-3.5">
+                              <Button size="sm" variant="ghost" onClick={() => setOverrideIndex(i)}>
+                                <UserRoundCheck /> Override
+                              </Button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -509,8 +576,21 @@ function Index() {
           </div>
         )}
 
+        <OverrideDrawer
+          open={overrideIndex !== null}
+          onOpenChange={(open) => !open && setOverrideIndex(null)}
+          row={overrideRow}
+          teachers={teachers}
+          absentTeacherIds={activeAbsences
+            .filter((absence) => overrideRow?.period !== undefined && absence.periods.includes(overrideRow.period))
+            .map((absence) => absence.teacherId)}
+          onConfirm={(teacherId) =>
+            overrideIndex !== null && overrideAssignment(overrideIndex, teacherId)
+          }
+        />
+
         {tab === "history" && (
-          <section className="panel overflow-hidden">
+          <section className="panel data-panel overflow-hidden p-0">
             <header className="border-b border-border px-5 py-4">
               <h2 className="text-base font-semibold">Saved Schedules</h2>
               <p className="text-sm text-muted-foreground">
@@ -540,8 +620,7 @@ function Index() {
                         })}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {s.rows.length} assignments · saved{" "}
-                        {new Date(s.savedAt).toLocaleString()}
+                        {s.rows.length} assignments · saved {new Date(s.savedAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -575,6 +654,8 @@ function Index() {
             )}
           </section>
         )}
+          </motion.div>
+        </AnimatePresence>
 
         <footer className="no-print mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -592,7 +673,6 @@ function Index() {
   );
 }
 
-
 function Stat({
   label,
   value,
@@ -605,7 +685,7 @@ function Stat({
   return (
     <div
       className={cn(
-        "panel px-5 py-4",
+        "panel data-panel px-5 py-4",
         tone === "warn" && "border-l-4 border-l-destructive bg-destructive/5",
       )}
     >
@@ -620,7 +700,9 @@ function Stat({
         >
           {value}
         </p>
-        {tone === "warn" && <AlertTriangle className="size-5 text-destructive" aria-label="Needs attention" />}
+        {tone === "warn" && (
+          <AlertTriangle className="size-5 text-destructive" aria-label="Needs attention" />
+        )}
       </div>
     </div>
   );
