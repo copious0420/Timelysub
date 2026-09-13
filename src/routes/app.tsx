@@ -171,7 +171,7 @@ function Index() {
   const generate = () => setSchedule(generateSchedule(teachers, activeAbsences));
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
-  const overrideRow = overrideIndex === null ? null : schedule[overrideIndex];
+  const overrideRow = overrideIndex === null ? null : (schedule[overrideIndex] ?? null);
 
   const overrideAssignment = (index: number, teacherId: string) => {
     const substitute = teachers.find((teacher) => teacher.id === teacherId);

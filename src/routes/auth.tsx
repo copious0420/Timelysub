@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { upsertProfile } from "@/lib/cloud";
 
 export const Route = createFileRoute("/auth")({
@@ -46,7 +47,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [schoolName, setSchoolName] = useState("");
-  const [googleConfigured, setGoogleConfigured] = useState(true);
+  
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -99,23 +100,17 @@ function AuthPage() {
   const google = async () => {
     setError(null);
     try {
-      const { error: err } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/app`,
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth`,
       });
-      if (err) {
-        if (err.message?.includes("Unsupported provider") || err.message?.includes("OAuth secret")) {
-          setGoogleConfigured(false);
-          setError("Google sign-in is not yet configured. Please use email/password authentication for now.");
-        } else {
-          throw err;
-        }
-      }
-      // Note: On successful OAuth, Supabase will redirect, so this code may not execute
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      // In the preview iframe the session is set directly; in a full browser
+      // OAuth will redirect back to this page and the useEffect above forwards
+      // an existing session to /app.
+      navigate({ to: "/app", replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Google sign-in failed. Please check your Supabase configuration.");
+      setError(e instanceof Error ? e.message : "Google sign-in failed. Please try again.");
     }
   };
 
@@ -182,6 +177,12 @@ function AuthPage() {
               <Button className="w-full" disabled={busy} onClick={() => void logIn()}>
                 {busy ? <Loader2 className="animate-spin" /> : <LogIn />} Log in
               </Button>
+              <div className="my-2 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => void google()} disabled={busy}>
+                Continue with Google
+              </Button>
               <button
                 type="button"
                 onClick={() => void forgot()}
@@ -229,24 +230,15 @@ function AuthPage() {
               <Button className="w-full" disabled={busy} onClick={() => void signUp()}>
                 {busy ? <Loader2 className="animate-spin" /> : <UserPlus />} Create account
               </Button>
+              <div className="my-2 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => void google()} disabled={busy}>
+                Continue with Google
+              </Button>
             </TabsContent>
           </Tabs>
 
-          {googleConfigured && (
-            <>
-              <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-              </div>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => void google()}
-                disabled={busy}
-              >
-                Continue with Google
-              </Button>
-            </>
-          )}
 
           {error && (
             <p className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
