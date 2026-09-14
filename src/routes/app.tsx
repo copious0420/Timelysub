@@ -326,7 +326,7 @@ function Index() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-64 border-sidebar-border bg-sidebar/95 text-foreground backdrop-blur-xl"
+            className="glass-sheet w-64 border-sidebar-border text-foreground"
           >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
