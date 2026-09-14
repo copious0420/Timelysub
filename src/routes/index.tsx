@@ -100,7 +100,7 @@ function Landing() {
   return (
     <div className="landing-page min-h-screen overflow-x-hidden">
       {/* Nav */}
-      <header className="top-navbar sticky top-0 z-30 backdrop-blur-[10px]">
+      <header className="top-navbar sticky top-0 z-30">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Logo size="md" />
@@ -217,7 +217,7 @@ function Landing() {
             {FEATURES.map((f) => (
               <article
                 key={f.title}
-                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[20px]"
+                className="panel feature-card rounded-xl px-5 py-5"
               >
                 <span className="feature-icon grid size-10 place-items-center rounded-xl">
                   <f.icon className="size-5 text-primary" />
