@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PERIODS, type Absence, type Teacher } from "@/lib/substitution";
 import { cn } from "@/lib/utils";
+import { getTeacherScheduleForDate } from "@/lib/timetableParser";
 
 type Props = {
   teachers: Teacher[];
@@ -14,13 +15,24 @@ type Props = {
 
 export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChange }: Props) {
   const get = (id: string) => absences.find((a) => a.teacherId === id);
+  const scheduleDate = new Date(`${date}T00:00:00`);
 
   const toggleTeacher = (t: Teacher) => {
     if (get(t.id)) {
       onChange(absences.filter((a) => a.teacherId !== t.id));
     } else {
-      const busyPeriods = PERIODS.filter((p) => t.busy[p]);
-      onChange([...absences, { teacherId: t.id, periods: busyPeriods }]);
+      const daySchedule = getTeacherScheduleForDate(t, scheduleDate);
+      const busyPeriods = PERIODS.filter((p) => !daySchedule[p].isFree);
+      onChange([
+        ...absences,
+        {
+          teacherId: t.id,
+          periods: busyPeriods,
+          vacantClass: Object.fromEntries(
+            busyPeriods.map((period) => [period, daySchedule[period].classSection || "Unassigned"]),
+          ),
+        },
+      ]);
     }
   };
 
@@ -33,6 +45,20 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
               periods: a.periods.includes(period)
                 ? a.periods.filter((p) => p !== period)
                 : [...a.periods, period].sort((x, y) => x - y),
+              vacantClass: a.periods.includes(period)
+                ? Object.fromEntries(
+                    Object.entries(a.vacantClass ?? {}).filter(([key]) => Number(key) !== period),
+                  )
+                : {
+                    ...(a.vacantClass ?? {}),
+                    [period]: (() => {
+                      const teacher = teachers.find((candidate) => candidate.id === id);
+                      return teacher
+                        ? getTeacherScheduleForDate(teacher, scheduleDate)[period].classSection ||
+                            "Unassigned"
+                        : "Unassigned";
+                    })(),
+                  },
             }
           : a,
       ),

@@ -22,6 +22,7 @@ import { TeacherRoster } from "@/components/TeacherRoster";
 import { AbsenteeTracker } from "@/components/AbsenteeTracker";
 import { Logo } from "@/components/Logo";
 import { OverrideDrawer } from "@/components/OverrideDrawer";
+import { ExcelImporterModal } from "@/components/ExcelImporterModal";
 
 import {
   DEMO_TEACHERS,
@@ -256,7 +257,7 @@ function Index() {
         initial={{ opacity: 0, x: -18 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[16px] md:flex"
+        className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[16px] backdrop-saturate-[180%] md:flex"
       >
         <Link to="/" className="flex items-center gap-2 px-2">
           <Logo size="md" className="shrink-0" />
@@ -281,7 +282,7 @@ function Index() {
               {tab === item.id && (
                 <motion.span
                   layoutId="desktop-active-nav"
-                  className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px]"
+                  className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px] backdrop-saturate-[180%]"
                   transition={{ type: "spring", stiffness: 420, damping: 32 }}
                 />
               )}
@@ -326,7 +327,7 @@ function Index() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-64 border-sidebar-border bg-sidebar/95 text-foreground backdrop-blur-xl"
+            className="glass-highlight w-64 border-sidebar-border bg-sidebar/95 text-foreground backdrop-blur-xl backdrop-saturate-[180%]"
           >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
@@ -350,7 +351,7 @@ function Index() {
                   {tab === item.id && (
                     <motion.span
                       layoutId="mobile-active-nav"
-                      className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px]"
+                      className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px] backdrop-saturate-[180%]"
                       transition={{ type: "spring", stiffness: 420, damping: 32 }}
                     />
                   )}
@@ -406,7 +407,14 @@ function Index() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-        {tab === "roster" && <TeacherRoster teachers={teachers} onChange={setTeachers} />}
+        {tab === "roster" && (
+          <div className="space-y-3">
+            <div className="flex justify-end">
+              <ExcelImporterModal onImport={(imported) => setTeachers((current) => [...current, ...imported])} />
+            </div>
+            <TeacherRoster teachers={teachers} onChange={setTeachers} date={date} />
+          </div>
+        )}
 
         {tab === "absentees" && (
           <AbsenteeTracker

@@ -4,6 +4,12 @@ export type Period = (typeof PERIODS)[number];
 export const CATEGORIES = ["PRT", "TGT", "PGT"] as const;
 export type Category = (typeof CATEGORIES)[number];
 
+export type TimetablePeriod = {
+  subject: string;
+  classSection: string;
+  isFree: boolean;
+};
+
 export type Teacher = {
   id: string;
   name: string;
@@ -11,11 +17,14 @@ export type Teacher = {
   category: Category;
   /** period -> true means BUSY (teaching), false/undefined means FREE */
   busy: Record<number, boolean>;
+  timetable?: Record<number, TimetablePeriod>;
+  weeklyTimetable?: Record<number, Record<number, TimetablePeriod>>;
 };
 
 export type Absence = {
   teacherId: string;
   periods: number[];
+  vacantClass?: Record<number, string>;
 };
 
 export type Assignment = {
@@ -23,6 +32,7 @@ export type Assignment = {
   absentTeacherId: string;
   absentTeacherName: string;
   subject: string;
+  classSection: string;
   absentCategory?: Category;
   substituteId: string | null;
   substituteName: string;
@@ -33,28 +43,35 @@ export type Assignment = {
 const b = (...periods: number[]): Record<number, boolean> =>
   Object.fromEntries(periods.map((p) => [p, true]));
 
+const timetable = (subject: string, classSection: string, busy: Record<number, boolean>) =>
+  Object.fromEntries(
+    PERIODS.map((period) => [
+      period,
+      { subject, classSection, isFree: !busy[period] },
+    ]),
+  ) as Record<number, TimetablePeriod>;
+
 export const DEMO_TEACHERS: Teacher[] = [
-  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7) },
-  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8) },
-  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7) },
-  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6) },
-  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8) },
-  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7) },
-  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8) },
-  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7) },
-  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6) },
-  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8) },
+  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7), timetable: timetable("Mathematics", "Grade 10-A", b(1, 2, 4, 6, 7)) },
+  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8), timetable: timetable("Mathematics", "Grade 9-B", b(2, 3, 5, 8)) },
+  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7), timetable: timetable("Physics", "Grade 12-A", b(1, 3, 4, 7)) },
+  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6), timetable: timetable("Physics", "Grade 9-A", b(2, 5, 6)) },
+  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8), timetable: timetable("English", "Grade 10-B", b(1, 2, 3, 6, 8)) },
+  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7), timetable: timetable("English", "Grade 8-A", b(4, 5, 7)) },
+  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8), timetable: timetable("Chemistry", "Grade 11-A", b(1, 4, 5, 8)) },
+  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7), timetable: timetable("History", "Grade 9-C", b(2, 3, 6, 7)) },
+  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6), timetable: timetable("Biology", "Grade 11-B", b(3, 4, 6)) },
+  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8), timetable: timetable("Computer Science", "Grade 8-B", b(1, 5, 7, 8)) },
 ];
 
 /**
  * Check if a substitute (with substituteCategory) can cover for an absent teacher (with absentCategory).
- * Hierarchy: PGT → TGT → PRT (higher can cover lower, but not vice versa)
+ * Eligibility follows the school coverage rules: PGT→PGT, TGT→PGT/TGT, PRT→TGT/PRT.
  */
 function canSubstitute(substituteCategory: Category, absentCategory: Category): boolean {
-  if (substituteCategory === absentCategory) return true; // Same category can always substitute
-  if (substituteCategory === "PGT") return true; // PGT can cover TGT or PRT
-  if (substituteCategory === "TGT" && absentCategory === "PRT") return true; // TGT can cover PRT
-  return false;
+  if (absentCategory === "PGT") return substituteCategory === "PGT";
+  if (absentCategory === "TGT") return substituteCategory === "PGT" || substituteCategory === "TGT";
+  return substituteCategory === "TGT" || substituteCategory === "PRT";
 }
 
 /**
@@ -68,18 +85,24 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
   const byId = new Map(teachers.map((t) => [t.id, t]));
 
 
-  const rows: { period: number; teacher: Teacher }[] = [];
+  const rows: { period: number; teacher: Teacher; vacantClass?: string }[] = [];
   for (const a of absences) {
     const t = byId.get(a.teacherId);
     if (!t) continue;
-    for (const p of a.periods) rows.push({ period: p, teacher: t });
+    for (const p of a.periods) {
+      rows.push({ period: p, teacher: t, vacantClass: a.vacantClass?.[p] });
+    }
   }
   rows.sort((x, y) => x.period - y.period || x.teacher.name.localeCompare(y.teacher.name));
 
-  return rows.map(({ period, teacher }) => {
+  return rows.map(({ period, teacher, vacantClass }) => {
     // Filter candidates: must be free, not absent, and able to substitute
     const candidates = teachers.filter(
-      (c) => c.id !== teacher.id && !absentIds.has(c.id) && !c.busy[period] && canSubstitute(c.category, teacher.category),
+      (c) =>
+        c.id !== teacher.id &&
+        !absentIds.has(c.id) &&
+        (c.timetable?.[period]?.isFree ?? !c.busy[period]) &&
+        canSubstitute(c.category, teacher.category),
     );
 
     candidates.sort((c1, c2) => {
@@ -88,12 +111,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
       const s2 = c2.subject === teacher.subject ? 0 : 1;
       if (s1 !== s2) return s1 - s2;
       
-      // Priority 2: Same category (exact match preferred over hierarchy)
-      const cat1 = c1.category === teacher.category ? 0 : 1;
-      const cat2 = c2.category === teacher.category ? 0 : 1;
-      if (cat1 !== cat2) return cat1 - cat2;
-      
-      // Priority 3: Lowest substitution load today
+      // Priority 2: Lowest substitution load today
       const l1 = load[c1.id] ?? 0;
       const l2 = load[c2.id] ?? 0;
       if (l1 !== l2) return l1 - l2;
@@ -109,6 +127,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
         absentTeacherId: teacher.id,
         absentTeacherName: teacher.name,
         subject: teacher.subject,
+        classSection: vacantClass ?? teacher.timetable?.[period]?.classSection ?? "Unassigned",
         absentCategory: teacher.category,
         substituteId: null,
         substituteName: "— Unassigned —",
@@ -119,12 +138,19 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
     load[pick.id] = (load[pick.id] ?? 0) + 1;
     // block the substitute so they are not double-booked
     pick.busy = { ...pick.busy, [period]: true };
+    if (pick.timetable?.[period]) {
+      pick.timetable = {
+        ...pick.timetable,
+        [period]: { ...pick.timetable[period], isFree: false },
+      };
+    }
 
     return {
       period,
       absentTeacherId: teacher.id,
       absentTeacherName: teacher.name,
       subject: teacher.subject,
+      classSection: vacantClass ?? teacher.timetable?.[period]?.classSection ?? "Unassigned",
       absentCategory: teacher.category,
       substituteId: pick.id,
       substituteName: pick.name,
@@ -144,6 +170,7 @@ export function toCsv(rows: Assignment[], dateLabel: string): string {
     "Absent Teacher",
     "Category",
     "Subject",
+    "Class / Section",
     "Substitute",
     "Substitute Category",
     "Reason",
@@ -154,6 +181,7 @@ export function toCsv(rows: Assignment[], dateLabel: string): string {
     r.absentTeacherName,
     r.absentCategory ?? "",
     r.subject,
+    r.classSection,
     r.substituteName,
     r.substituteCategory ?? "",
     r.reason,

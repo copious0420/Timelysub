@@ -1,5 +1,7 @@
 import * as XLSX from "xlsx";
 import { CATEGORIES, PERIODS, type Category, type Teacher } from "./substitution";
+import { inferTeacherCategoryFromClasses } from "./inferCategory";
+import { parseTimetableCell } from "./timetableParser";
 
 export type ImportResult = {
   teachers: Teacher[];
@@ -90,32 +92,42 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
     seen.add(lower);
 
     const busy: Record<number, boolean> = {};
-    const codes: string[] = [];
+    const timetable: NonNullable<Teacher["timetable"]> = {};
+    const weeklyTimetable: NonNullable<Teacher["weeklyTimetable"]> = {};
+    const classesTaught: string[] = [];
     for (const p of PERIODS) {
       const col = periodCols[p];
       if (col === undefined) continue;
       const cell = norm(row[col]);
-      const isFree = FREE_TOKENS.has(cell.toLowerCase());
+      const parsedDays = parseTimetableCell(cell);
+      const hasDayEntry = parsedDays.some((day) => day.isBusy);
+      const isFree = hasDayEntry ? !parsedDays[0].isBusy : FREE_TOKENS.has(cell.toLowerCase());
       if (!isFree) {
         busy[p] = true;
-        codes.push(cell);
       }
+      for (const day of parsedDays) {
+        if (day.isBusy && day.classSection) classesTaught.push(day.classSection);
+      }
+      const classSection = parsedDays.find((day) => day.isBusy)?.classSection ?? "";
+      timetable[p] = { subject: "", classSection, isFree };
+      weeklyTimetable[p] = Object.fromEntries(
+        parsedDays.map((day) => [
+          day.day,
+          { subject: "", classSection: day.classSection, isFree: !day.isBusy },
+        ]),
+      );
     }
 
     let subject = subjectCol === -1 ? "" : norm(row[subjectCol]);
     if (!subject) {
-      // Infer from the most frequent busy-cell label (e.g. "Maths 8A").
-      const counts = new Map<string, number>();
-      for (const c of codes) {
-        const key = c.split(/[-–/|,(]/)[0]!.replace(/\b\d+[A-Za-z]?\b/g, "").trim();
-        if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
-      }
-      subject = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "General";
+      subject = norm(row[findColumn(header, ["department", "dept", "stream"])]) || "General";
     }
 
     const rawCategory = categoryCol === -1 ? "" : norm(row[categoryCol]).toUpperCase();
     const category: Category =
-      (CATEGORIES as readonly string[]).includes(rawCategory) ? (rawCategory as Category) : "TGT";
+      (CATEGORIES as readonly string[]).includes(rawCategory)
+        ? (rawCategory as Category)
+        : inferTeacherCategoryFromClasses(classesTaught);
 
     teachers.push({
       id: `imp${r}-${Math.random().toString(36).slice(2, 7)}`,
@@ -123,6 +135,23 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
       subject,
       category,
       busy,
+      timetable: Object.fromEntries(
+        PERIODS.map((period) => [
+          period,
+          { ...timetable[period], subject },
+        ]),
+      ) as Teacher["timetable"],
+      weeklyTimetable: Object.fromEntries(
+        PERIODS.map((period) => [
+          period,
+          Object.fromEntries(
+            Object.entries(weeklyTimetable[period] ?? {}).map(([day, value]) => [
+              day,
+              { ...value, subject },
+            ]),
+          ),
+        ]),
+      ),
     });
   }
 
@@ -143,6 +172,8 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
         subject: imp.subject || match.subject,
         category: imp.category || match.category,
         busy: imp.busy,
+        timetable: imp.timetable || match.timetable,
+        weeklyTimetable: imp.weeklyTimetable || match.weeklyTimetable,
       };
     } else {
       result.push(imp);

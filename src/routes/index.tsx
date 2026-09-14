@@ -100,13 +100,21 @@ function Landing() {
   return (
     <div className="landing-page min-h-screen overflow-x-hidden">
       {/* Nav */}
-      <header className="top-navbar sticky top-0 z-30 backdrop-blur-[10px]">
+      <header className="top-navbar sticky top-0 z-30 backdrop-blur-[10px] backdrop-saturate-[180%]">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Logo size="md" />
             <span className="truncate text-base font-semibold tracking-tight">Timely</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              asChild
+              size="sm"
+              variant="ghost"
+              className="hidden text-foreground hover:bg-white/50 hover:text-foreground sm:inline-flex"
+            >
+              <Link to="/student">Student Schedule</Link>
+            </Button>
             <Button
               asChild
               size="sm"
@@ -138,7 +146,7 @@ function Landing() {
           className="absolute left-1/2 top-1/2 -z-10 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/30 blur-3xl"
         />
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-md">
+          <p className="glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-md backdrop-saturate-[180%]">
             <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
           </p>
           <h1 className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -159,7 +167,7 @@ function Landing() {
               asChild
               size="lg"
               variant="outline"
-              className="w-full border-border bg-card/60 backdrop-blur-md sm:w-auto"
+              className="glass-highlight w-full border-border bg-card/60 backdrop-blur-md backdrop-saturate-[180%] sm:w-auto"
             >
               <a href="#how-it-works">See how it works</a>
             </Button>
@@ -217,7 +225,7 @@ function Landing() {
             {FEATURES.map((f) => (
               <article
                 key={f.title}
-                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[20px]"
+                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[20px] backdrop-saturate-[180%]"
               >
                 <span className="feature-icon grid size-10 place-items-center rounded-xl">
                   <f.icon className="size-5 text-primary" />

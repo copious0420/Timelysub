@@ -5,31 +5,63 @@ import { Input } from "@/components/ui/input";
 import { PERIODS, CATEGORIES, type Teacher } from "@/lib/substitution";
 import { TimetableImport } from "@/components/TimetableImport";
 import { cn } from "@/lib/utils";
+import { inferTeacherCategoryFromClasses } from "@/lib/inferCategory";
+import { getTeacherScheduleForDate } from "@/lib/timetableParser";
 
 type Props = {
   teachers: Teacher[];
   onChange: (teachers: Teacher[]) => void;
+  date: string;
 };
 
-export function TeacherRoster({ teachers, onChange }: Props) {
+export function TeacherRoster({ teachers, onChange, date }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Teacher | null>(null);
+  const [categoryOverridden, setCategoryOverridden] = useState(false);
+  const [newTeacherIds, setNewTeacherIds] = useState<Set<string>>(() => new Set());
 
   const startEdit = (t: Teacher) => {
     setEditingId(t.id);
     setDraft({ ...t, busy: { ...t.busy } });
+    setCategoryOverridden(false);
   };
 
   const save = () => {
     if (!draft) return;
-    onChange(teachers.map((t) => (t.id === draft.id ? draft : t)));
+    onChange(
+      teachers.map((t) =>
+        t.id === draft.id
+          ? {
+              ...draft,
+              category:
+                  categoryOverridden || !newTeacherIds.has(draft.id)
+                  ? draft.category
+                  : inferTeacherCategoryFromClasses(
+                      Object.values(draft.timetable ?? {}).map((period) => period.classSection),
+                    ),
+              timetable: Object.fromEntries(
+                PERIODS.map((period) => [
+                  period,
+                  {
+                    subject: draft.subject,
+                    classSection: draft.timetable?.[period]?.classSection ?? "Unassigned",
+                    isFree: !draft.busy[period],
+                  },
+                ]),
+              ),
+            }
+          : t,
+      ),
+    );
     setEditingId(null);
     setDraft(null);
+    setCategoryOverridden(false);
   };
 
   const cancel = () => {
     setEditingId(null);
     setDraft(null);
+    setCategoryOverridden(false);
   };
 
   const addTeacher = () => {
@@ -41,6 +73,7 @@ export function TeacherRoster({ teachers, onChange }: Props) {
       busy: {},
     };
     onChange([...teachers, t]);
+    setNewTeacherIds((ids) => new Set(ids).add(t.id));
     startEdit(t);
   };
 
@@ -51,7 +84,19 @@ export function TeacherRoster({ teachers, onChange }: Props) {
 
   const toggleSlot = (period: number) => {
     if (!draft) return;
-    setDraft({ ...draft, busy: { ...draft.busy, [period]: !draft.busy[period] } });
+    const isBusy = !draft.busy[period];
+    setDraft({
+      ...draft,
+      busy: { ...draft.busy, [period]: isBusy },
+      timetable: {
+        ...(draft.timetable ?? {}),
+        [period]: {
+          subject: draft.subject,
+          classSection: draft.timetable?.[period]?.classSection ?? "Unassigned",
+          isFree: !isBusy,
+        },
+      },
+    });
   };
 
   const slotClass = (busy: boolean, editing: boolean) =>
@@ -62,6 +107,8 @@ export function TeacherRoster({ teachers, onChange }: Props) {
         : "border-secondary bg-secondary text-secondary-foreground",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
+  const scheduleDate = new Date(`${date}T00:00:00`);
+  const dailySchedule = (teacher: Teacher) => getTeacherScheduleForDate(teacher, scheduleDate);
 
   return (
     <section className="panel overflow-hidden">
@@ -86,6 +133,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
         {teachers.map((t) => {
           const editing = editingId === t.id && draft;
           const row = editing ? draft! : t;
+          const daySchedule = dailySchedule(row);
+          const classSections = [...new Set(
+            PERIODS.map((period) => daySchedule[period].classSection).filter(Boolean),
+          )];
           return (
             <li key={t.id} className="px-4 py-4">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
@@ -109,7 +160,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                           <button
                             key={cat}
                             type="button"
-                            onClick={() => setDraft({ ...row, category: cat })}
+                            onClick={() => {
+                              setCategoryOverridden(true);
+                              setDraft({ ...row, category: cat });
+                            }}
                             className={cn(
                               "flex-1 rounded px-2 py-1.5 text-xs font-semibold transition-colors",
                               row.category === cat
@@ -130,6 +184,11 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                         <span className="shrink-0 rounded-full bg-secondary/50 px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
                           {row.category}
                         </span>
+                        {classSections.length > 0 && (
+                          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                            {classSections.join(", ")}
+                          </span>
+                        )}
                       </div>
                     </>
                   )}
@@ -175,9 +234,12 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                       type="button"
                       disabled={!editing}
                       onClick={() => toggleSlot(p)}
-                      className={slotClass(!!row.busy[p], !!editing)}
+                      className={slotClass(
+                        editing ? !!row.busy[p] : !dailySchedule(row)[p].isFree,
+                        !!editing,
+                      )}
                     >
-                      {row.busy[p] ? "Busy" : "Free"}
+                      {editing ? (row.busy[p] ? "Busy" : "Free") : dailySchedule(row)[p].isFree ? "Free" : "Busy"}
                     </button>
                   </div>
                 ))}
@@ -211,6 +273,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
             {teachers.map((t) => {
               const editing = editingId === t.id && draft;
               const row = editing ? draft! : t;
+              const daySchedule = dailySchedule(row);
+              const classSections = [...new Set(
+                PERIODS.map((period) => daySchedule[period].classSection).filter(Boolean),
+              )];
               return (
                 <tr
                   key={t.id}
@@ -241,7 +307,10 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                             <button
                               key={cat}
                               type="button"
-                              onClick={() => setDraft({ ...row, category: cat })}
+                              onClick={() => {
+                                setCategoryOverridden(true);
+                                setDraft({ ...row, category: cat });
+                              }}
                               className={cn(
                                 "flex-1 rounded px-1.5 py-1 text-xs font-semibold transition-colors",
                                 row.category === cat
@@ -260,6 +329,11 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                         <span className="shrink-0 rounded-full bg-secondary/50 px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
                           {row.category}
                         </span>
+                        {classSections.length > 0 && (
+                          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                            {classSections.join(", ")}
+                          </span>
+                        )}
                       </div>
                     )}
                   </td>
@@ -269,9 +343,12 @@ export function TeacherRoster({ teachers, onChange }: Props) {
                         type="button"
                         disabled={!editing}
                         onClick={() => toggleSlot(p)}
-                        className={slotClass(!!row.busy[p], !!editing)}
+                        className={slotClass(
+                          editing ? !!row.busy[p] : !daySchedule[p].isFree,
+                          !!editing,
+                        )}
                       >
-                        {row.busy[p] ? "Busy" : "Free"}
+                        {editing ? (row.busy[p] ? "Busy" : "Free") : daySchedule[p].isFree ? "Free" : "Busy"}
                       </button>
                     </td>
                   ))}
