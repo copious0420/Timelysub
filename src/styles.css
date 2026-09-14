@@ -218,6 +218,12 @@
     background: var(--color-primary);
     color: var(--color-primary-foreground);
   }
+
+  .glass-sheet {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    color: var(--color-foreground);
+  }
 }
 
 .animated-bg {
