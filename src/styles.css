@@ -47,6 +47,15 @@
 
 :root {
   --radius: 0.5rem;
+
+  /* iOS Liquid Glass tokens */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.40);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-border-strong: rgba(255, 255, 255, 0.60);
+  --glass-blur: 28px;
+  --glass-saturate: 160%;
 }
 
 @layer base {
@@ -91,7 +100,7 @@
   }
 
   .flashcard {
-    background-color: rgba(255, 255, 255, 0.72) !important;
+    background-color: var(--glass-bg) !important;
     transition:
       transform 150ms ease,
       box-shadow 150ms ease !important;
@@ -106,20 +115,18 @@
 }
 
 @utility panel {
-  background: rgba(255, 255, 255, 0.32);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   box-shadow: 0 8px 32px rgba(30, 58, 138, 0.08);
   color: var(--color-foreground);
 }
 
 @utility data-panel {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(30, 58, 138, 0.1);
   color: var(--color-foreground);
@@ -128,89 +135,82 @@
 
 @layer components {
   .panel {
-    background: rgba(255, 255, 255, 0.32) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border) !important;
     color: var(--color-foreground);
   }
 
   .panel.data-panel {
-    background: rgba(255, 255, 255, 0.35) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: var(--glass-bg-strong) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border) !important;
   }
 
   .app-sidebar {
     background: linear-gradient(
       180deg,
-      rgba(30, 58, 138, 0.12),
-      rgba(96, 165, 250, 0.18)
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.08)
     ) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border) !important;
   }
 
   .sidebar-active-pill {
-    background: rgba(255, 255, 255, 0.6) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(96, 165, 250, 0.4) !important;
+    background: var(--glass-bg-strong) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border-strong) !important;
     color: var(--color-foreground);
   }
 
   .landing-page .panel:not(.feature-card) {
-    background: rgba(255, 255, 255, 0.32);
-    -webkit-backdrop-filter: blur(18px);
-    backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
     color: var(--color-foreground);
   }
 
   .landing-page .feature-card {
-    background: rgba(255, 255, 255, 0.28) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: 16px !important;
     box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
       0 8px 32px rgba(30, 58, 138, 0.12),
       0 0 20px rgba(96, 165, 250, 0.3) !important;
   }
 
   .landing-page .feature-card:hover {
     box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
       0 8px 32px rgba(30, 58, 138, 0.16),
       0 0 36px rgba(96, 165, 250, 0.55) !important;
     transform: translateY(-2px);
   }
 
   .landing-cta-glass {
-    background: rgba(255, 255, 255, 0.32) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: var(--glass-bg-strong) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: 16px !important;
     box-shadow: 0 8px 32px rgba(30, 58, 138, 0.12);
     color: var(--color-foreground);
   }
 
   .top-navbar {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    background: var(--glass-bg-subtle) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
     border: none !important;
     box-shadow: none !important;
     color: var(--color-foreground);
   }
 
   .navbar-button-secondary {
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-border);
     color: var(--color-foreground);
   }
 
@@ -287,12 +287,12 @@
 }
 
 @utility feature-card {
-  background: rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
     0 8px 32px rgba(30, 58, 138, 0.12),
     0 0 20px rgba(96, 165, 250, 0.3);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -300,6 +300,7 @@
 
   &:hover {
     box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
       0 8px 32px rgba(30, 58, 138, 0.16),
       0 0 36px rgba(96, 165, 250, 0.55);
     transform: translateY(-2px);
