@@ -22,7 +22,7 @@ function classLevels(value: string): number[] {
   const numericPattern = /(?:^|[^\d])(1[0-2]|[1-9])(?:\s*[A-Z]|[-\s]|$)/g;
 
   for (const match of normalized.matchAll(romanPattern)) {
-    const level = ROMAN_LEVELS[match[1]];
+    const level = match[1] ? ROMAN_LEVELS[match[1]] : undefined;
     if (level) levels.push(level);
   }
   for (const match of normalized.matchAll(numericPattern)) levels.push(Number(match[1]));

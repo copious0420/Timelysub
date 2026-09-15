@@ -90,7 +90,8 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
     const t = byId.get(a.teacherId);
     if (!t) continue;
     for (const p of a.periods) {
-      rows.push({ period: p, teacher: t, vacantClass: a.vacantClass?.[p] });
+      const vacantClass = a.vacantClass?.[p];
+      rows.push(vacantClass ? { period: p, teacher: t, vacantClass } : { period: p, teacher: t });
     }
   }
   rows.sort((x, y) => x.period - y.period || x.teacher.name.localeCompare(y.teacher.name));

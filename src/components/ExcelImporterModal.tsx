@@ -51,7 +51,7 @@ function findColumn(headers: string[], names: string[]) {
 
 function parseRows(rows: unknown[][]): ParsedTeacher[] {
   if (rows.length < 2) return [];
-  const headers = rows[0].map((header) => String(header ?? ""));
+  const headers = (rows[0] ?? []).map((header) => String(header ?? ""));
   const nameIndex = findColumn(headers, ["teacher name", "teacher", "name"]);
   const subjectIndex = findColumn(headers, [
     "department subject",
@@ -96,7 +96,7 @@ function parseRows(rows: unknown[][]): ParsedTeacher[] {
         }
         timetable[period] = {
           subject,
-          classSection: parsedDays[0].classSection || classSection,
+          classSection: parsedDays[0]?.classSection || classSection,
           isFree: !value,
         };
         weeklyTimetable[period] = Object.fromEntries(
@@ -147,7 +147,8 @@ export function ExcelImporterModal({ onImport }: Props) {
     setFileName(file.name);
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const firstSheetName = workbook.SheetNames[0];
+      const firstSheet = firstSheetName ? workbook.Sheets[firstSheetName] : undefined;
       if (!firstSheet) throw new Error("The workbook does not contain a worksheet.");
       const rows = XLSX.utils.sheet_to_json<unknown[]>(firstSheet, {
         header: 1,
