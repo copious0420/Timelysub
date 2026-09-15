@@ -72,7 +72,7 @@ function SettingsPage() {
       setSuccess("Profile saved successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save profile");
+      setError(err instanceof Error ? err.message : "Failed to save profile. Please try again.");
     } finally {
       setBusy(false);
     }

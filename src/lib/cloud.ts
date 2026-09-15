@@ -41,10 +41,15 @@ export async function upsertProfile(userId: string, profile: Profile) {
       id: userId,
       full_name: profile.fullName,
       school_name: profile.schoolName,
-      school_id: profile.schoolId,
-      student_passcode: profile.studentPasscode,
+      school_id: profile.schoolId.trim().toUpperCase(),
+      student_passcode: profile.studentPasscode.trim(),
     });
-  if (error) throw error;
+  if (error) {
+    if (error.code === "23505" && error.message.includes("profiles_school_id_unique")) {
+      throw new Error("This School ID is already in use. Please choose a different School ID.");
+    }
+    throw error;
+  }
 }
 
 export async function verifyStudentAccess(schoolId: string, studentPasscode: string) {
