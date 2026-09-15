@@ -8,17 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchStudentSubstitutions, verifyStudentAccess, type SubstitutionRecord } from "@/lib/cloud";
-import {
-  DEMO_TEACHERS,
-  generateSchedule,
-  type Assignment,
-} from "@/lib/substitution";
 
-const DEMO_ABSENCES = [
-  { teacherId: "t1", periods: [1, 2, 4] },
-  { teacherId: "t5", periods: [3, 6] },
-];
 const STUDENT_ACCESS_KEY = "timely.studentAccess";
+type StudentScheduleRow = {
+  period: number;
+  classSection: string;
+  absentTeacherName: string;
+  substituteId: string | null;
+  substituteName: string;
+  status: "assigned" | "overridden";
+};
 
 export const Route = createFileRoute("/student")({
   head: () => ({
@@ -35,22 +34,6 @@ export const Route = createFileRoute("/student")({
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
-}
-
-function loadSchoolSchedule(schoolId: string, date: string): Assignment[] {
-  if (typeof window !== "undefined") {
-    const stored = window.localStorage.getItem(`timely.studentSchedules.${schoolId}`);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as { date?: string; rows?: Assignment[] };
-        if (parsed.date === date && Array.isArray(parsed.rows)) return parsed.rows;
-      } catch {
-        // Ignore malformed student noticeboard data and use the read-only demo schedule.
-      }
-    }
-  }
-
-  return generateSchedule(DEMO_TEACHERS, DEMO_ABSENCES);
 }
 
 function StudentNoticeboard() {
@@ -143,7 +126,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-  const { data: substitutions = [], isError } = useQuery<SubstitutionRecord[]>({
+  const { data: substitutions = [], isError, isLoading } = useQuery<SubstitutionRecord[]>({
     queryKey: ["substitutions", schoolId, date],
     queryFn: () => fetchStudentSubstitutions(schoolId, date),
     enabled: Boolean(schoolId && date),
@@ -157,33 +140,26 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
     console.error("[Student View] Failed to fetch substitutions.");
   }
 
-  const schedule = useMemo(() => {
-    const baseSchedule = loadSchoolSchedule(schoolId, date);
-    const bySlot = new Map(
-      baseSchedule.map((row) => [`${row.period}:${row.classSection}`, row] as const),
-    );
-    for (const substitution of substitutions) {
-      const key = `${substitution.period}:${substitution.className}` as const;
-      const base = bySlot.get(key);
-      bySlot.set(key, {
-        period: substitution.period,
-        absentTeacherId: substitution.originalTeacherId,
-        absentTeacherName: substitution.originalTeacherName,
-        subject: base?.subject ?? "Substitution",
-        classSection: substitution.className,
-        substituteId: substitution.substituteTeacherId,
-        substituteName: substitution.substituteTeacherName,
-        reason: substitution.status === "overridden" ? "Manually overridden" : "Active substitution",
-      });
-    }
-    return [...bySlot.values()].sort((a, b) => a.period - b.period);
-  }, [date, schoolId, substitutions]);
+  const schedule = useMemo(
+    () =>
+      substitutions
+        .map((substitution) => ({
+          period: substitution.period,
+          classSection: substitution.className,
+          absentTeacherName: substitution.originalTeacherName,
+          substituteId: substitution.substituteTeacherId,
+          substituteName: substitution.substituteTeacherName,
+          status: substitution.status,
+        }))
+        .sort((a, b) => a.period - b.period),
+    [substitutions],
+  );
   const filteredSchedule = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return schedule.filter((row) =>
       (classFilter === "all" || row.classSection === classFilter) &&
-      [row.subject, row.absentTeacherName, row.substituteName, row.classSection, `p${row.period}`]
+      [row.absentTeacherName, row.substituteName, row.classSection, `p${row.period}`]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery),
@@ -280,12 +256,12 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
             </p>
           </div>
 
-          {filteredSchedule.length === 0 ? (
+          {isLoading || schedule.length === 0 ? (
             <div className="rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-slate-600 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
-              No substitutions match your search.
+              No substitution
             </div>
           ) : (
-            filteredSchedule.map((row) => <ScheduleCard key={`${row.period}-${row.absentTeacherId}`} row={row} />)
+            filteredSchedule.map((row) => <ScheduleCard key={`${row.period}-${row.classSection}`} row={row} />)
           )}
         </section>
       </div>
@@ -293,7 +269,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
   );
 }
 
-function ScheduleCard({ row }: { row: Assignment }) {
+function ScheduleCard({ row }: { row: StudentScheduleRow }) {
   const hasSubstitute = Boolean(row.substituteId);
 
   return (
@@ -305,7 +281,7 @@ function ScheduleCard({ row }: { row: Assignment }) {
           </span>
           <div className="min-w-0">
             <p className="truncate text-base font-semibold text-slate-900">
-              P{row.period} · {row.classSection} · {row.subject}
+              P{row.period} · {row.classSection}
             </p>
             <p className="mt-1 text-sm text-slate-600">Regular teacher: {row.absentTeacherName}</p>
           </div>
