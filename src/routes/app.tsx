@@ -33,7 +33,7 @@ import {
 } from "@/lib/substitution";
 import { deleteSaved, loadSaved, saveSchedule, type SavedSchedule } from "@/lib/history";
 import { cn } from "@/lib/utils";
-import { dayIndexForDate, getTeacherScheduleForDay } from "@/lib/timetableParser";
+import { dayIndexForDate } from "@/lib/timetableParser";
 import { useAuth } from "@/hooks/use-auth";
 import {
   fetchTeachers,
@@ -104,27 +104,8 @@ function Index() {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   const activeAbsences = useMemo(() => {
-    const day = dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1;
-    return absences
-      .map((absence) => {
-        const teacher = teachers.find((candidate) => candidate.id === absence.teacherId);
-        const daySchedule = teacher ? getTeacherScheduleForDay(teacher, day) : undefined;
-        const periods = absence.periods.filter(
-          (period) => !daySchedule || (!daySchedule[period].isFree && Boolean(daySchedule[period].classSection)),
-        );
-        return {
-          ...absence,
-          periods,
-          vacantClass: Object.fromEntries(
-            periods.map((period) => [
-              period,
-              absence.vacantClass?.[period] || daySchedule?.[period].classSection || "Unassigned",
-            ]),
-          ),
-        };
-      })
-      .filter((absence) => absence.periods.length > 0);
-  }, [absences, date, teachers]);
+    return absences.filter((absence) => absence.periods.length > 0);
+  }, [absences]);
 
   const [saved, setSaved] = useState<SavedSchedule[]>([]);
 

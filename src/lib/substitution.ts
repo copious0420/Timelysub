@@ -131,8 +131,13 @@ export function generateSchedule(input: Teacher[], absences: Absence[], day?: nu
       const s1 = c1.subject === teacher.subject ? 0 : 1;
       const s2 = c2.subject === teacher.subject ? 0 : 1;
       if (s1 !== s2) return s1 - s2;
-      
-      // Priority 2: Lowest substitution load today
+
+      // Priority 2: Same category, when eligible
+      const c1Category = c1.category === teacher.category ? 0 : 1;
+      const c2Category = c2.category === teacher.category ? 0 : 1;
+      if (c1Category !== c2Category) return c1Category - c2Category;
+
+      // Priority 3: Lowest substitution load today
       const l1 = load[c1.id] ?? 0;
       const l2 = load[c2.id] ?? 0;
       if (l1 !== l2) return l1 - l2;

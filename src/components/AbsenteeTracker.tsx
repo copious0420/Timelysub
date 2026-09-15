@@ -130,19 +130,19 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
 
                 {PERIODS.map((p) => {
                   const assigned = !daySchedule[p].isFree && Boolean(daySchedule[p].classSection);
-                  const selected = absence?.periods.includes(p) && assigned;
+                  const selected = absence?.periods.includes(p);
                   return (
                     <button
                       key={p}
                       type="button"
-                      disabled={!absence || !assigned}
+                      disabled={!absence}
                       onClick={() => togglePeriod(t.id, p)}
                       title={
                         selected
-                          ? `Period ${p}${daySchedule[p].classSection ? ` — Class ${daySchedule[p].classSection}` : ""} — selected as missed`
+                          ? `Period ${p}${daySchedule[p].classSection ? ` — Class ${daySchedule[p].classSection}` : " — Free"} — selected as missed`
                           : assigned
                             ? `Period ${p} — Class ${daySchedule[p].classSection} — not selected as missed`
-                            : `Period ${p} — Free — not available for absence`
+                            : `Period ${p} — Free — not selected as missed`
                       }
                       className={cn(
                         "h-10 w-full rounded-md sm:w-12 border-2 text-xs font-semibold transition-colors",
@@ -150,7 +150,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-muted/50 text-muted-foreground",
                         !absence && "opacity-40",
-                        !assigned && "cursor-not-allowed opacity-50",
+                        !assigned && "border-dashed opacity-70",
                         absence && !selected && "hover:border-primary/40",
                       )}
                     >
