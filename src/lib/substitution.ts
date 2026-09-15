@@ -27,6 +27,20 @@ export type Absence = {
   vacantClass?: Record<number, string>;
 };
 
+function scheduleForPeriod(teacher: Teacher, period: number, day?: number): TimetablePeriod | undefined {
+  return (day ? teacher.weeklyTimetable?.[period]?.[day] : undefined) ?? teacher.timetable?.[period];
+}
+
+function isAssigned(teacher: Teacher, period: number, day?: number): boolean {
+  const slot = scheduleForPeriod(teacher, period, day);
+  return slot ? !slot.isFree && Boolean(slot.classSection) : Boolean(teacher.busy[period]);
+}
+
+function isFreeForDay(teacher: Teacher, period: number, day?: number): boolean {
+  const slot = scheduleForPeriod(teacher, period, day);
+  return slot ? slot.isFree || !slot.classSection : !teacher.busy[period];
+}
+
 export type Assignment = {
   period: number;
   absentTeacherId: string;
@@ -78,20 +92,25 @@ function canSubstitute(substituteCategory: Category, absentCategory: Category): 
  * Assign a free teacher to every absent period.
  * Priority: same subject first, then same/eligible category, then lowest substitution load today.
  */
-export function generateSchedule(input: Teacher[], absences: Absence[]): Assignment[] {
+export function generateSchedule(input: Teacher[], absences: Absence[], day?: number): Assignment[] {
   const teachers = input.map((t) => ({ ...t, busy: { ...t.busy } }));
   const load: Record<string, number> = {};
   const absentIds = new Set(absences.map((a) => a.teacherId));
   const byId = new Map(teachers.map((t) => [t.id, t]));
-
+  const blocked = new Set<string>();
 
   const rows: { period: number; teacher: Teacher; vacantClass?: string }[] = [];
   for (const a of absences) {
     const t = byId.get(a.teacherId);
     if (!t) continue;
     for (const p of a.periods) {
-      const vacantClass = a.vacantClass?.[p];
-      rows.push(vacantClass ? { period: p, teacher: t, vacantClass } : { period: p, teacher: t });
+      if (!isAssigned(t, p, day)) continue;
+      const slot = scheduleForPeriod(t, p, day);
+      rows.push({
+        period: p,
+        teacher: t,
+        vacantClass: a.vacantClass?.[p] || slot?.classSection,
+      });
     }
   }
   rows.sort((x, y) => x.period - y.period || x.teacher.name.localeCompare(y.teacher.name));
@@ -102,7 +121,8 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
       (c) =>
         c.id !== teacher.id &&
         !absentIds.has(c.id) &&
-        (c.timetable?.[period]?.isFree ?? !c.busy[period]) &&
+        !blocked.has(`${c.id}:${period}`) &&
+        isFreeForDay(c, period, day) &&
         canSubstitute(c.category, teacher.category),
     );
 
@@ -137,6 +157,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[]): Assignm
     }
 
     load[pick.id] = (load[pick.id] ?? 0) + 1;
+    blocked.add(`${pick.id}:${period}`);
     // block the substitute so they are not double-booked
     pick.busy = { ...pick.busy, [period]: true };
     if (pick.timetable?.[period]) {
