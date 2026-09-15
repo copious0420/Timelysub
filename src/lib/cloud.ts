@@ -45,6 +45,7 @@ export async function upsertProfile(userId: string, profile: Profile) {
       student_passcode: profile.studentPasscode.trim(),
     });
   if (error) {
+    console.error("Profile save error:", error);
     if (error.code === "23505" && error.message.includes("profiles_school_id_unique")) {
       throw new Error("This School ID is already in use. Please choose a different School ID.");
     }
