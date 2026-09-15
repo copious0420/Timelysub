@@ -43,6 +43,7 @@ import {
   deleteDay,
   fetchProfile,
   upsertProfile,
+  saveSubstitutions,
 } from "@/lib/cloud";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -102,6 +103,7 @@ function Index() {
     ]),
   );
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [schoolId, setSchoolId] = useState("");
 
   const activeAbsences = useMemo(() => {
     return absences.filter((absence) => absence.periods.length > 0);
@@ -129,6 +131,9 @@ function Index() {
               schoolId: meta?.school_id ?? "",
               studentPasscode: meta?.student_passcode ?? "",
             });
+            setSchoolId((meta?.school_id ?? "").trim().toUpperCase());
+          } else {
+            setSchoolId(profile.schoolId.trim().toUpperCase());
           }
 
           // Load from cloud for authenticated users
@@ -176,8 +181,24 @@ function Index() {
     [absences],
   );
 
-  const generate = () =>
-    setSchedule(generateSchedule(teachers, activeAbsences, dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1));
+  const persistSchedule = async (rows: typeof schedule) => {
+    if (!user || !schoolId) return;
+    try {
+      await saveSubstitutions(user.id, schoolId, date, rows);
+    } catch (error) {
+      console.error("Failed to sync substitutions:", error);
+    }
+  };
+
+  const generate = () => {
+    const rows = generateSchedule(
+      teachers,
+      activeAbsences,
+      dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1,
+    );
+    setSchedule(rows);
+    void persistSchedule(rows);
+  };
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
   const overrideRow = overrideIndex === null ? null : (schedule[overrideIndex] ?? null);
@@ -185,19 +206,19 @@ function Index() {
   const overrideAssignment = (index: number, teacherId: string) => {
     const substitute = teachers.find((teacher) => teacher.id === teacherId);
     if (!substitute) return;
-    setSchedule((rows) =>
-      rows.map((row, rowIndex) =>
-        rowIndex === index
-          ? {
-              ...row,
-              substituteId: substitute.id,
-              substituteName: substitute.name,
-              substituteCategory: substitute.category,
-              reason: "Manually overridden",
-            }
-          : row,
-      ),
+    const updatedRows = schedule.map((row, rowIndex) =>
+      rowIndex === index
+        ? {
+            ...row,
+            substituteId: substitute.id,
+            substituteName: substitute.name,
+            substituteCategory: substitute.category,
+            reason: "Manually overridden",
+          }
+        : row,
     );
+    setSchedule(updatedRows);
+    void persistSchedule(updatedRows);
     setOverrideIndex(null);
   };
 

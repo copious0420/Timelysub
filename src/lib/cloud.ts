@@ -134,3 +134,70 @@ export async function deleteDay(userId: string, date: string) {
     .eq("day", date);
   if (error) throw error;
 }
+
+export type SubstitutionRecord = {
+  schoolId: string;
+  date: string;
+  period: number;
+  className: string;
+  originalTeacherId: string;
+  originalTeacherName: string;
+  substituteTeacherId: string | null;
+  substituteTeacherName: string;
+  status: "assigned" | "overridden";
+};
+
+export async function saveSubstitutions(
+  userId: string,
+  schoolId: string,
+  date: string,
+  rows: Assignment[],
+) {
+  const normalizedSchoolId = schoolId.trim().toUpperCase();
+  const { error: deleteError } = await supabase
+    .from("substitutions")
+    .delete()
+    .eq("created_by", userId)
+    .eq("school_id", normalizedSchoolId)
+    .eq("date", date);
+  if (deleteError) throw deleteError;
+
+  const records = rows.map((row) => ({
+    school_id: normalizedSchoolId,
+    date,
+    period: row.period,
+    class_name: row.classSection,
+    original_teacher_id: row.absentTeacherId,
+    original_teacher_name: row.absentTeacherName,
+    substitute_teacher_id: row.substituteId,
+    substitute_teacher_name: row.substituteName,
+    status: row.reason === "Manually overridden" ? "overridden" : "assigned",
+    created_by: userId,
+  }));
+  if (records.length === 0) return;
+
+  const { error } = await supabase.from("substitutions").insert(records);
+  if (error) throw error;
+}
+
+export async function fetchStudentSubstitutions(
+  schoolId: string,
+  date: string,
+): Promise<SubstitutionRecord[]> {
+  const { data, error } = await supabase.rpc("fetch_student_substitutions", {
+    requested_school_id: schoolId.trim().toUpperCase(),
+    requested_date: date,
+  });
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    schoolId: row.school_id,
+    date: row.date,
+    period: row.period,
+    className: row.class_name,
+    originalTeacherId: row.original_teacher_id,
+    originalTeacherName: row.original_teacher_name,
+    substituteTeacherId: row.substitute_teacher_id,
+    substituteTeacherName: row.substitute_teacher_name,
+    status: row.status === "overridden" ? "overridden" : "assigned",
+  }));
+}

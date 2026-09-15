@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, Search } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { verifyStudentAccess } from "@/lib/cloud";
+import { fetchStudentSubstitutions, verifyStudentAccess, type SubstitutionRecord } from "@/lib/cloud";
 import {
   DEMO_TEACHERS,
   generateSchedule,
@@ -137,8 +137,49 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
+  const [substitutions, setSubstitutions] = useState<SubstitutionRecord[]>([]);
 
-  const schedule = useMemo(() => loadSchoolSchedule(schoolId, date), [date, schoolId]);
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      try {
+        const latest = await fetchStudentSubstitutions(schoolId, date);
+        if (active) setSubstitutions(latest);
+      } catch (error) {
+        console.error("Failed to load student substitutions:", error);
+      }
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 10000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [date, schoolId]);
+
+  const schedule = useMemo(() => {
+    const baseSchedule = loadSchoolSchedule(schoolId, date);
+    const bySlot = new Map(
+      baseSchedule.map((row) => [`${row.period}:${row.classSection}`, row] as const),
+    );
+    for (const substitution of substitutions) {
+      const key = `${substitution.period}:${substitution.className}`;
+      const base = bySlot.get(key);
+      bySlot.set(key, {
+        period: substitution.period,
+        absentTeacherId: substitution.originalTeacherId,
+        absentTeacherName: substitution.originalTeacherName,
+        subject: base?.subject ?? "Substitution",
+        classSection: substitution.className,
+        substituteId: substitution.substituteTeacherId,
+        substituteName: substitution.substituteTeacherName,
+        reason: substitution.status === "overridden" ? "Manually overridden" : "Active substitution",
+      });
+    }
+    return [...bySlot.values()].sort((a, b) => a.period - b.period);
+  }, [date, schoolId, substitutions]);
   const filteredSchedule = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -263,7 +304,9 @@ function ScheduleCard({ row }: { row: Assignment }) {
           </div>
         </div>
         <div className="min-w-0 sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Substitute teacher</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            {hasSubstitute ? `Substituted: ${row.substituteName}` : "Substitute teacher"}
+          </p>
           <span
             className={`mt-1 inline-flex max-w-full rounded-full px-3 py-1.5 text-sm font-semibold ${
               hasSubstitute
