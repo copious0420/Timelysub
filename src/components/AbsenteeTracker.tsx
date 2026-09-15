@@ -60,7 +60,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                     [period]: (() => {
                       const teacher = teachers.find((candidate) => candidate.id === id);
                       return teacher
-                        ? getTeacherScheduleForDay(teacher, selectedDay)[period].classSection ||
+                        ? getTeacherScheduleForDay(teacher, selectedDay)[period as Period]?.classSection ||
                             "Unassigned"
                         : "Unassigned";
                     })(),
