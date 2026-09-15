@@ -111,9 +111,9 @@ function Landing() {
               asChild
               size="sm"
               variant="ghost"
-              className="hidden text-foreground hover:bg-white/50 hover:text-foreground sm:inline-flex"
+              className="text-foreground hover:bg-white/50 hover:text-foreground"
             >
-              <Link to="/student">Student Schedule</Link>
+              <Link to="/student">Student Portal</Link>
             </Button>
             <Button
               asChild
@@ -302,6 +302,9 @@ function Landing() {
             <a href="mailto:developerstimely@gmail.com" className="mt-2 block hover:text-foreground">
               developerstimely@gmail.com
             </a>
+            <Link to="/student" className="mt-2 block font-medium text-primary hover:underline">
+              Student Portal
+            </Link>
           </div>
         </div>
         <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">

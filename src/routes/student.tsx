@@ -17,6 +17,7 @@ const DEMO_ABSENCES = [
   { teacherId: "t1", periods: [1, 2, 4] },
   { teacherId: "t5", periods: [3, 6] },
 ];
+const STUDENT_ACCESS_KEY = "timely.studentAccess";
 
 export const Route = createFileRoute("/student")({
   head: () => ({
@@ -52,7 +53,10 @@ function loadSchoolSchedule(schoolId: string, date: string): Assignment[] {
 }
 
 function StudentNoticeboard() {
-  const [verifiedSchoolId, setVerifiedSchoolId] = useState<string | null>(null);
+  const [verifiedSchoolId, setVerifiedSchoolId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(STUDENT_ACCESS_KEY);
+  });
 
   if (!verifiedSchoolId) {
     return <StudentAccessGate onVerified={setVerifiedSchoolId} />;
@@ -78,6 +82,7 @@ function StudentAccessGate({ onVerified }: { onVerified: (schoolId: string) => v
         setError("That School ID and Student Passcode do not match.");
         return;
       }
+      window.localStorage.setItem(STUDENT_ACCESS_KEY, normalizedSchoolId);
       onVerified(normalizedSchoolId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not verify access. Please try again.");
@@ -199,7 +204,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100 px-4 py-6 text-slate-900 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <Logo size="md" />
             <div>
@@ -212,12 +217,21 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
               </div>
             </div>
           </div>
-          <Link
-            to="/"
-            className="text-sm font-medium text-blue-800 underline-offset-4 hover:underline"
-          >
-            Back to Timely
-          </Link>
+          <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+            <button
+              type="button"
+              onClick={() => {
+                window.localStorage.removeItem(STUDENT_ACCESS_KEY);
+                window.location.reload();
+              }}
+              className="text-blue-800 underline-offset-4 hover:underline"
+            >
+              Change school
+            </button>
+            <Link to="/" className="text-blue-800 underline-offset-4 hover:underline">
+              Back to Timely
+            </Link>
+          </div>
         </header>
 
         <section className="mb-6 rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">

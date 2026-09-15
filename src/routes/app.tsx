@@ -321,6 +321,12 @@ function Index() {
           ))}
         </nav>
         <div className="mt-auto space-y-2">
+          <Link
+            to="/student"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent/50"
+          >
+            <Users className="size-4" /> Student Portal
+          </Link>
           <div className="rounded-lg border border-sidebar-border px-3 py-3 text-xs text-sidebar-foreground/70">
             Cover matched by department first, then by lightest substitution load.
           </div>
@@ -388,6 +394,13 @@ function Index() {
                   <span className="relative z-10">{item.label}</span>
                 </motion.button>
               ))}
+              <Link
+                to="/student"
+                onClick={() => setNavOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-secondary/60"
+              >
+                <Users className="size-4" /> Student Portal
+              </Link>
             </nav>
           </SheetContent>
         </Sheet>
