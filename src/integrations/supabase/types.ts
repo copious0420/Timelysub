@@ -71,6 +71,54 @@ export type Database = {
         }
         Relationships: []
       }
+      substitutions: {
+        Row: {
+          class_name: string
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          original_teacher_id: string
+          original_teacher_name: string
+          period: number
+          school_id: string
+          status: string
+          substitute_teacher_id: string | null
+          substitute_teacher_name: string
+          updated_at: string
+        }
+        Insert: {
+          class_name?: string
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          original_teacher_id?: string
+          original_teacher_name?: string
+          period: number
+          school_id: string
+          status?: string
+          substitute_teacher_id?: string | null
+          substitute_teacher_name?: string
+          updated_at?: string
+        }
+        Update: {
+          class_name?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          original_teacher_id?: string
+          original_teacher_name?: string
+          period?: number
+          school_id?: string
+          status?: string
+          substitute_teacher_id?: string | null
+          substitute_teacher_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       teachers: {
         Row: {
           busy: Json
@@ -115,6 +163,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fetch_student_substitutions: {
+        Args: { requested_date: string; requested_school_id: string }
+        Returns: {
+          class_name: string
+          date: string
+          original_teacher_id: string
+          original_teacher_name: string
+          period: number
+          school_id: string
+          status: string
+          substitute_teacher_id: string
+          substitute_teacher_name: string
+        }[]
+      }
       verify_student_access: {
         Args: { requested_passcode: string; requested_school_id: string }
         Returns: boolean
