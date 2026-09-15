@@ -101,7 +101,9 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
       const cell = norm(row[col]);
       const parsedDays = parseTimetableCell(cell);
       const hasDayEntry = parsedDays.some((day) => day.isBusy);
-      const isFree = hasDayEntry ? !parsedDays[0].isBusy : FREE_TOKENS.has(cell.toLowerCase());
+      const isFree = hasDayEntry
+        ? parsedDays.every((day) => !day.isBusy)
+        : FREE_TOKENS.has(cell.toLowerCase());
       if (!isFree) {
         busy[p] = true;
       }
@@ -185,8 +187,8 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
 export function downloadTimetableTemplate() {
   const header = ["Teacher", "Subject", "Category", ...PERIODS.map((p) => `P${p}`)];
   const rows = [
-    ["Anita Sharma", "Mathematics", "PGT", "Maths 8A", "Maths 9B", "Free", "Maths 7C", "Free", "Maths 10A", "Free", "Free"],
-    ["Rahul Verma", "Physics", "TGT", "Free", "Phy 11A", "Phy 12B", "Free", "Free", "Phy 11C", "Free", "Free"],
+    ["Anita Sharma", "Mathematics", "PGT", "XII B 1-6", "XI A 1-3", "Free", "X B 2,4", "Free", "XII B+G 1-6", "Free", "Free"],
+    ["Rahul Verma", "Physics", "TGT", "Free", "XI A 1-3", "XII B 2,5", "Free", "Free", "XI C 1-6", "Free", "Free"],
   ];
   const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
   const wb = XLSX.utils.book_new();

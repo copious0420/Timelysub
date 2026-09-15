@@ -31,6 +31,8 @@ function SettingsPage() {
 
   const [fullName, setFullName] = useState("");
   const [schoolName, setSchoolName] = useState("");
+  const [schoolId, setSchoolId] = useState("");
+  const [studentPasscode, setStudentPasscode] = useState("");
 
   useEffect(() => {
     if (loading || !user) return;
@@ -41,6 +43,8 @@ function SettingsPage() {
         if (profile) {
           setFullName(profile.fullName);
           setSchoolName(profile.schoolName);
+          setSchoolId(profile.schoolId);
+          setStudentPasscode(profile.studentPasscode);
         }
       } catch (err) {
         console.error("Failed to load profile:", err);
@@ -64,7 +68,7 @@ function SettingsPage() {
     setSuccess(null);
 
     try {
-      await upsertProfile(user.id, { fullName, schoolName });
+      await upsertProfile(user.id, { fullName, schoolName, schoolId, studentPasscode });
       setSuccess("Profile saved successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -142,6 +146,29 @@ function SettingsPage() {
                   onChange={(e) => setSchoolName(e.target.value)}
                   className="mt-1"
                   placeholder="Enter your school name"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="school-id">School ID</Label>
+                <Input
+                  id="school-id"
+                  value={schoolId}
+                  onChange={(e) => setSchoolId(e.target.value.toUpperCase())}
+                  className="mt-1"
+                  placeholder="SCH-123456"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="student-passcode">Student Access Passcode</Label>
+                <Input
+                  id="student-passcode"
+                  type="password"
+                  value={studentPasscode}
+                  onChange={(e) => setStudentPasscode(e.target.value)}
+                  className="mt-1"
+                  placeholder="Enter the student passcode"
                 />
               </div>
 

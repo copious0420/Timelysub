@@ -116,11 +116,15 @@ function Index() {
           // Ensure profile exists for new OAuth users
           const profile = await fetchProfile(user.id);
           if (!profile) {
-            const meta = user.user_metadata as { full_name?: string } | undefined;
+            const meta = user.user_metadata as
+              | { full_name?: string; school_id?: string; student_passcode?: string }
+              | undefined;
             const fullName = meta?.full_name || user.email?.split("@")[0] || "User";
             await upsertProfile(user.id, {
               fullName,
               schoolName: "",
+              schoolId: meta?.school_id ?? "",
+              studentPasscode: meta?.student_passcode ?? "",
             });
           }
 
@@ -257,7 +261,7 @@ function Index() {
         initial={{ opacity: 0, x: -18 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[16px] backdrop-saturate-[180%] md:flex"
+        className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%] md:flex"
       >
         <Link to="/" className="flex items-center gap-2 px-2">
           <Logo size="md" className="shrink-0" />
@@ -282,7 +286,7 @@ function Index() {
               {tab === item.id && (
                 <motion.span
                   layoutId="desktop-active-nav"
-                  className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px] backdrop-saturate-[180%]"
+                  className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[10px] backdrop-saturate-[180%]"
                   transition={{ type: "spring", stiffness: 420, damping: 32 }}
                 />
               )}
@@ -327,7 +331,7 @@ function Index() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="glass-highlight w-64 border-sidebar-border bg-sidebar/95 text-foreground backdrop-blur-xl backdrop-saturate-[180%]"
+            className="glass-highlight w-64 border-sidebar-border bg-white/5 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%]"
           >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
@@ -351,7 +355,7 @@ function Index() {
                   {tab === item.id && (
                     <motion.span
                       layoutId="mobile-active-nav"
-                      className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[20px] backdrop-saturate-[180%]"
+                      className="sidebar-active-pill absolute inset-0 rounded-lg backdrop-blur-[10px] backdrop-saturate-[180%]"
                       transition={{ type: "spring", stiffness: 420, damping: 32 }}
                     />
                   )}
@@ -441,6 +445,19 @@ function Index() {
               Matching hierarchy: same department first, then same or eligible category, then the
               lightest substitution load.
             </p>
+            {activeAbsences.some((absence) => Object.values(absence.vacantClass ?? {}).some(Boolean)) && (
+              <p className="text-sm text-muted-foreground">
+                Coverage:{" "}
+                {activeAbsences
+                  .flatMap((absence) =>
+                    absence.periods.map((period) => {
+                      const classSection = absence.vacantClass?.[period];
+                      return `P${period}${classSection ? ` — Class ${classSection}` : ""}`;
+                    }),
+                  )
+                  .join(" · ")}
+              </p>
+            )}
           </div>
         )}
 
@@ -508,6 +525,9 @@ function Index() {
                           </div>
                           <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">
                             P{r.period}
+                            {r.classSection && r.classSection !== "Unassigned"
+                              ? ` — Class ${r.classSection}`
+                              : ""}
                           </span>
                         </div>
                         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
@@ -549,7 +569,12 @@ function Index() {
                               !r.substituteId && "bg-destructive/10",
                             )}
                           >
-                            <td className="px-5 py-3.5 font-medium text-primary">P{r.period}</td>
+                            <td className="px-5 py-3.5 font-medium text-primary">
+                              P{r.period}
+                              {r.classSection && r.classSection !== "Unassigned"
+                                ? ` — Class ${r.classSection}`
+                                : ""}
+                            </td>
                             <td className="px-3 py-3.5">{r.absentTeacherName}</td>
                             <td className="px-3 py-3.5 text-muted-foreground">{r.subject}</td>
                             <td

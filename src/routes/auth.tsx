@@ -47,7 +47,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [schoolName, setSchoolName] = useState("");
-  
+  const [schoolId, setSchoolId] = useState(() => `SCH-${Math.floor(100000 + Math.random() * 900000)}`);
+  const [studentPasscode, setStudentPasscode] = useState("");
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -56,6 +57,10 @@ function AuthPage() {
   }, [navigate]);
 
   const signUp = async () => {
+    if (!fullName.trim() || !schoolName.trim() || !schoolId.trim() || !studentPasscode.trim()) {
+      setError("Complete your name, school name, School ID, and Student Access Passcode.");
+      return;
+    }
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -65,12 +70,17 @@ function AuthPage() {
         password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { full_name: fullName, school_name: schoolName },
+          data: {
+            full_name: fullName,
+            school_name: schoolName,
+            school_id: schoolId,
+            student_passcode: studentPasscode,
+          },
         },
       });
       if (err) throw err;
       if (data.session?.user) {
-        await upsertProfile(data.session.user.id, { fullName, schoolName });
+        await upsertProfile(data.session.user.id, { fullName, schoolName, schoolId, studentPasscode });
         navigate({ to: "/app", replace: true });
       } else {
         setNotice("Check your email to confirm your account, then log in.");
@@ -207,6 +217,25 @@ function AuthPage() {
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
                   autoComplete="organization"
+                />
+              </Field>
+              <Field id="su-school-id" label="School ID">
+                <Input
+                  id="su-school-id"
+                  value={schoolId}
+                  onChange={(e) => setSchoolId(e.target.value.toUpperCase())}
+                  autoComplete="organization"
+                  required
+                />
+              </Field>
+              <Field id="su-student-passcode" label="Student Access Passcode">
+                <Input
+                  id="su-student-passcode"
+                  type="password"
+                  value={studentPasscode}
+                  onChange={(e) => setStudentPasscode(e.target.value)}
+                  autoComplete="new-password"
+                  required
                 />
               </Field>
               <Field id="su-email" label="Email">

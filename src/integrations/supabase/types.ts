@@ -19,21 +19,27 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          school_id: string
           school_name: string
+          student_passcode: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           full_name?: string
           id: string
+          school_id?: string
           school_name?: string
+          student_passcode?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           full_name?: string
           id?: string
+          school_id?: string
           school_name?: string
+          student_passcode?: string
           updated_at?: string
         }
         Relationships: []
@@ -73,8 +79,10 @@ export type Database = {
           id: string
           name: string
           subject: string
+          timetable: Json
           updated_at: string
           user_id: string
+          weekly_timetable: Json
         }
         Insert: {
           busy?: Json
@@ -83,8 +91,10 @@ export type Database = {
           id: string
           name: string
           subject?: string
+          timetable?: Json
           updated_at?: string
           user_id: string
+          weekly_timetable?: Json
         }
         Update: {
           busy?: Json
@@ -93,8 +103,10 @@ export type Database = {
           id?: string
           name?: string
           subject?: string
+          timetable?: Json
           updated_at?: string
           user_id?: string
+          weekly_timetable?: Json
         }
         Relationships: []
       }
@@ -103,7 +115,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_student_access: {
+        Args: {
+          requested_passcode: string
+          requested_school_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

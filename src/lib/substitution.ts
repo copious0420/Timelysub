@@ -52,16 +52,16 @@ const timetable = (subject: string, classSection: string, busy: Record<number, b
   ) as Record<number, TimetablePeriod>;
 
 export const DEMO_TEACHERS: Teacher[] = [
-  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7), timetable: timetable("Mathematics", "Grade 10-A", b(1, 2, 4, 6, 7)) },
-  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8), timetable: timetable("Mathematics", "Grade 9-B", b(2, 3, 5, 8)) },
-  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7), timetable: timetable("Physics", "Grade 12-A", b(1, 3, 4, 7)) },
-  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6), timetable: timetable("Physics", "Grade 9-A", b(2, 5, 6)) },
-  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8), timetable: timetable("English", "Grade 10-B", b(1, 2, 3, 6, 8)) },
-  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7), timetable: timetable("English", "Grade 8-A", b(4, 5, 7)) },
-  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8), timetable: timetable("Chemistry", "Grade 11-A", b(1, 4, 5, 8)) },
-  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7), timetable: timetable("History", "Grade 9-C", b(2, 3, 6, 7)) },
-  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6), timetable: timetable("Biology", "Grade 11-B", b(3, 4, 6)) },
-  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8), timetable: timetable("Computer Science", "Grade 8-B", b(1, 5, 7, 8)) },
+  { id: "t1", name: "Anita Sharma", subject: "Mathematics", category: "PGT", busy: b(1, 2, 4, 6, 7), timetable: timetable("Mathematics", "X-A", b(1, 2, 4, 6, 7)) },
+  { id: "t2", name: "Rahul Verma", subject: "Mathematics", category: "TGT", busy: b(2, 3, 5, 8), timetable: timetable("Mathematics", "IX-B", b(2, 3, 5, 8)) },
+  { id: "t3", name: "Priya Nair", subject: "Physics", category: "PGT", busy: b(1, 3, 4, 7), timetable: timetable("Physics", "XII-A", b(1, 3, 4, 7)) },
+  { id: "t4", name: "Sameer Khan", subject: "Physics", category: "TGT", busy: b(2, 5, 6), timetable: timetable("Physics", "IX-A", b(2, 5, 6)) },
+  { id: "t5", name: "Divya Menon", subject: "English", category: "TGT", busy: b(1, 2, 3, 6, 8), timetable: timetable("English", "X-B", b(1, 2, 3, 6, 8)) },
+  { id: "t6", name: "Arjun Rao", subject: "English", category: "PRT", busy: b(4, 5, 7), timetable: timetable("English", "VIII-A", b(4, 5, 7)) },
+  { id: "t7", name: "Neha Gupta", subject: "Chemistry", category: "PGT", busy: b(1, 4, 5, 8), timetable: timetable("Chemistry", "XI-A", b(1, 4, 5, 8)) },
+  { id: "t8", name: "Vikram Singh", subject: "History", category: "TGT", busy: b(2, 3, 6, 7), timetable: timetable("History", "IX-C", b(2, 3, 6, 7)) },
+  { id: "t9", name: "Meera Iyer", subject: "Biology", category: "PGT", busy: b(3, 4, 6), timetable: timetable("Biology", "XI-B", b(3, 4, 6)) },
+  { id: "t10", name: "Karan Joshi", subject: "Computer Science", category: "PRT", busy: b(1, 5, 7, 8), timetable: timetable("Computer Science", "VIII-B", b(1, 5, 7, 8)) },
 ];
 
 /**

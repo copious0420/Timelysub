@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PERIODS, type Absence, type Teacher } from "@/lib/substitution";
 import { cn } from "@/lib/utils";
-import { getTeacherScheduleForDate } from "@/lib/timetableParser";
+import { dayIndexForDate, getTeacherScheduleForDay } from "@/lib/timetableParser";
 
 type Props = {
   teachers: Teacher[];
@@ -16,12 +17,17 @@ type Props = {
 export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChange }: Props) {
   const get = (id: string) => absences.find((a) => a.teacherId === id);
   const scheduleDate = new Date(`${date}T00:00:00`);
+  const [selectedDay, setSelectedDay] = useState<number>(dayIndexForDate(scheduleDate) ?? 1);
+
+  useEffect(() => {
+    setSelectedDay(dayIndexForDate(scheduleDate) ?? 1);
+  }, [date]);
 
   const toggleTeacher = (t: Teacher) => {
     if (get(t.id)) {
       onChange(absences.filter((a) => a.teacherId !== t.id));
     } else {
-      const daySchedule = getTeacherScheduleForDate(t, scheduleDate);
+      const daySchedule = getTeacherScheduleForDay(t, selectedDay);
       const busyPeriods = PERIODS.filter((p) => !daySchedule[p].isFree);
       onChange([
         ...absences,
@@ -54,7 +60,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                     [period]: (() => {
                       const teacher = teachers.find((candidate) => candidate.id === id);
                       return teacher
-                        ? getTeacherScheduleForDate(teacher, scheduleDate)[period].classSection ||
+                        ? getTeacherScheduleForDay(teacher, selectedDay)[period].classSection ||
                             "Unassigned"
                         : "Unassigned";
                     })(),
@@ -84,6 +90,20 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
               className="mt-1 h-9 w-[9.5rem]"
             />
           </label>
+          <label className="text-xs font-medium text-muted-foreground">
+            Active day
+            <select
+              value={selectedDay}
+              onChange={(event) => setSelectedDay(Number(event.target.value))}
+              className="mt-1 h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+            >
+              {[1, 2, 3, 4, 5, 6].map((day) => (
+                <option key={day} value={day}>
+                  Day {day}
+                </option>
+              ))}
+            </select>
+          </label>
           <Button variant="outline" size="sm" onClick={() => onChange([])}>
             Clear all
           </Button>
@@ -93,6 +113,7 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
       <ul className="divide-y divide-border">
         {teachers.map((t) => {
           const absence = get(t.id);
+          const daySchedule = getTeacherScheduleForDay(t, selectedDay);
           return (
             <li
               key={t.id}
@@ -117,11 +138,11 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                       onClick={() => togglePeriod(t.id, p)}
                       title={
                         selected
-                          ? `Period ${p} — selected as missed`
-                          : `Period ${p} — not selected as missed`
+                          ? `Period ${p}${daySchedule[p].classSection ? ` — Class ${daySchedule[p].classSection}` : ""} — selected as missed`
+                          : `Period ${p}${daySchedule[p].classSection ? ` — Class ${daySchedule[p].classSection}` : ""} — not selected as missed`
                       }
                       className={cn(
-                        "h-8 w-full rounded-md sm:w-10 border-2 text-xs font-semibold transition-colors",
+                        "h-10 w-full rounded-md sm:w-12 border-2 text-xs font-semibold transition-colors",
                         selected
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-muted/50 text-muted-foreground",
@@ -129,7 +150,12 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                         absence && !selected && "hover:border-primary/40",
                       )}
                     >
-                      P{p}
+                      <span className="leading-tight">
+                        <span className="block">P{p}</span>
+                        <span className="block max-w-20 truncate text-[10px] font-normal">
+                          {daySchedule[p].isFree ? "Free" : daySchedule[p].classSection || "Busy"}
+                        </span>
+                      </span>
                     </button>
                   );
                 })}

@@ -52,9 +52,30 @@ export function parseTimetableCell(cellText: string): ParsedTimetableDay[] {
   return result;
 }
 
-function dayIndexForDate(targetDate: Date): number | null {
+export function dayIndexForDate(targetDate: Date): number | null {
   const day = targetDate.getDay();
   return day === 0 ? null : day;
+}
+
+export function getTeacherScheduleForDay(
+  teacher: Teacher,
+  day: number | null,
+): TeacherDaySchedule {
+  return Object.fromEntries(
+    PERIODS.map((period) => {
+      const legacy = teacher.timetable?.[period];
+      const weekly = day ? teacher.weeklyTimetable?.[period]?.[day] : undefined;
+      return [
+        period,
+        weekly ??
+          legacy ?? {
+            subject: teacher.subject,
+            classSection: "",
+            isFree: !teacher.busy[period],
+          },
+      ];
+    }),
+  );
 }
 
 /**
@@ -65,24 +86,12 @@ export function getTeacherScheduleForDate(
   targetDate: Date,
 ): TeacherDaySchedule {
   const day = dayIndexForDate(targetDate);
-  return Object.fromEntries(
-    PERIODS.map((period) => {
-      const legacy = teacher.timetable?.[period];
-      const weekly = day ? teacher.weeklyTimetable?.[period]?.[day] : undefined;
-      return [
-        period,
-        day === null
-          ? {
-              subject: teacher.subject,
-              classSection: "",
-              isFree: true,
-            }
-          : weekly ?? legacy ?? {
-          subject: teacher.subject,
-          classSection: "",
-          isFree: !teacher.busy[period],
-        },
-      ];
-    }),
-  );
+  return day === null
+    ? Object.fromEntries(
+        PERIODS.map((period) => [
+          period,
+          { subject: teacher.subject, classSection: "", isFree: true },
+        ]),
+      )
+    : getTeacherScheduleForDay(teacher, day);
 }

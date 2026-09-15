@@ -15,7 +15,10 @@ import { cn } from "@/lib/utils";
 type OverrideDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  row: Pick<Assignment, "period" | "absentTeacherId" | "absentTeacherName" | "subject"> | null;
+  row: Pick<
+    Assignment,
+    "period" | "classSection" | "absentTeacherId" | "absentTeacherName" | "subject"
+  > | null;
   teachers: Teacher[];
   absentTeacherIds: string[];
   onConfirm: (teacherId: string) => void;
@@ -48,11 +51,14 @@ export function OverrideDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="mx-auto max-h-[85vh] w-full max-w-xl border-white/10 bg-sidebar/95 text-foreground">
+      <DrawerContent className="mx-auto max-h-[85vh] w-full max-w-xl border-white/10 bg-white/5 text-foreground">
         <DrawerHeader className="text-left">
           <DrawerTitle className="flex items-center gap-2 text-foreground">
             <UserRoundCheck className="size-5 text-primary" />
             Override P{row?.period ?? ""}
+            {row?.classSection && row.classSection !== "Unassigned"
+              ? ` — Class ${row.classSection}`
+              : ""}
           </DrawerTitle>
           <DrawerDescription>
             {row
@@ -71,7 +77,7 @@ export function OverrideDrawer({
                 disabled={busy}
                 onClick={() => setSelectedTeacherId(teacher.id)}
                 className={cn(
-                  "flex items-center justify-between rounded-lg border border-sidebar-border bg-card/60 px-4 py-3 text-left transition-colors",
+                  "flex items-center justify-between rounded-lg border border-sidebar-border bg-white/5 px-4 py-3 text-left transition-colors",
                   busy
                     ? "cursor-not-allowed opacity-45"
                     : "hover:border-primary hover:bg-sidebar-accent",

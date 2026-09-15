@@ -82,18 +82,18 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
     if (editingId === id) setEditingId(null);
   };
 
-  const toggleSlot = (period: number) => {
+  const updateSlotClass = (period: number, classSection: string) => {
     if (!draft) return;
-    const isBusy = !draft.busy[period];
+    const normalizedClass = classSection.trim();
     setDraft({
       ...draft,
-      busy: { ...draft.busy, [period]: isBusy },
+      busy: { ...draft.busy, [period]: Boolean(normalizedClass) },
       timetable: {
         ...(draft.timetable ?? {}),
         [period]: {
           subject: draft.subject,
-          classSection: draft.timetable?.[period]?.classSection ?? "Unassigned",
-          isFree: !isBusy,
+          classSection: normalizedClass,
+          isFree: !normalizedClass,
         },
       },
     });
@@ -101,7 +101,7 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
 
   const slotClass = (busy: boolean, editing: boolean) =>
     cn(
-      "inline-flex h-7 w-full min-w-11 items-center justify-center rounded-md border-2 text-xs font-semibold transition-colors sm:w-11",
+      "inline-flex h-9 w-full min-w-14 items-center justify-center rounded-md border-2 text-xs font-semibold transition-colors sm:w-14",
       busy
         ? "border-primary bg-primary text-primary-foreground"
         : "border-secondary bg-secondary text-secondary-foreground",
@@ -116,7 +116,7 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
         <div className="min-w-0">
           <h2 className="text-base font-semibold">Teacher Schedule</h2>
           <p className="text-sm text-muted-foreground">
-            {teachers.length} teachers · tap a period chip while editing to flip Free / Busy
+            {teachers.length} teachers · enter a class for each assigned period
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -230,17 +230,21 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
                 {PERIODS.map((p) => (
                   <div key={p} className="text-center">
                     <p className="mb-1 text-[10px] uppercase tracking-wide text-primary">P{p}</p>
-                    <button
-                      type="button"
-                      disabled={!editing}
-                      onClick={() => toggleSlot(p)}
-                      className={slotClass(
-                        editing ? !!row.busy[p] : !dailySchedule(row)[p].isFree,
-                        !!editing,
-                      )}
-                    >
-                      {editing ? (row.busy[p] ? "Busy" : "Free") : dailySchedule(row)[p].isFree ? "Free" : "Busy"}
-                    </button>
+                    {editing ? (
+                      <Input
+                        value={row.busy[p] ? row.timetable?.[p]?.classSection ?? "" : ""}
+                        onChange={(event) => updateSlotClass(p, event.target.value)}
+                        className="h-9 min-w-14 px-1 text-center text-xs"
+                        placeholder="Free"
+                        aria-label={`Class assigned to period ${p}`}
+                      />
+                    ) : (
+                      <span className={slotClass(!dailySchedule(row)[p].isFree, false)}>
+                        {dailySchedule(row)[p].isFree
+                          ? "Free"
+                          : dailySchedule(row)[p].classSection || "Busy"}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -339,17 +343,19 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
                   </td>
                   {PERIODS.map((p) => (
                     <td key={p} className="px-2 py-3.5 text-center">
-                      <button
-                        type="button"
-                        disabled={!editing}
-                        onClick={() => toggleSlot(p)}
-                        className={slotClass(
-                          editing ? !!row.busy[p] : !daySchedule[p].isFree,
-                          !!editing,
-                        )}
-                      >
-                        {editing ? (row.busy[p] ? "Busy" : "Free") : daySchedule[p].isFree ? "Free" : "Busy"}
-                      </button>
+                      {editing ? (
+                        <Input
+                          value={row.busy[p] ? row.timetable?.[p]?.classSection ?? "" : ""}
+                          onChange={(event) => updateSlotClass(p, event.target.value)}
+                          className="h-9 w-20 px-1 text-center text-xs"
+                          placeholder="Free"
+                          aria-label={`Class assigned to period ${p}`}
+                        />
+                      ) : (
+                        <span className={slotClass(!daySchedule[p].isFree, false)}>
+                          {daySchedule[p].isFree ? "Free" : daySchedule[p].classSection || "Busy"}
+                        </span>
+                      )}
                     </td>
                   ))}
                   <td className="px-5 py-3.5 text-right">

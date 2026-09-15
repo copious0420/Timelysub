@@ -146,7 +146,7 @@ function Landing() {
           className="absolute left-1/2 top-1/2 -z-10 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/30 blur-3xl"
         />
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-md backdrop-saturate-[180%]">
+          <p className="glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-[10px] backdrop-saturate-[180%]">
             <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
           </p>
           <h1 className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -167,7 +167,7 @@ function Landing() {
               asChild
               size="lg"
               variant="outline"
-              className="glass-highlight w-full border-border bg-card/60 backdrop-blur-md backdrop-saturate-[180%] sm:w-auto"
+              className="glass-highlight w-full border-border bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%] sm:w-auto"
             >
               <a href="#how-it-works">See how it works</a>
             </Button>
@@ -225,7 +225,7 @@ function Landing() {
             {FEATURES.map((f) => (
               <article
                 key={f.title}
-                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[20px] backdrop-saturate-[180%]"
+                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[10px] backdrop-saturate-[180%]"
               >
                 <span className="feature-icon grid size-10 place-items-center rounded-xl">
                   <f.icon className="size-5 text-primary" />

@@ -92,7 +92,10 @@ export function TimetableImport({ teachers, onChange }: Props) {
             <p className="mt-1">
               One row per teacher with header columns <strong>Teacher</strong>,{" "}
               <strong>Subject</strong> (optional) and <strong>P1 … P8</strong>. A period cell that is
-              empty or says <em>Free</em> counts as free; any class name or code counts as busy.
+              empty or says <em>Free</em> counts as free. Use entries such as{" "}
+              <strong>XII B 1-6</strong>, <strong>XI A 1-3</strong>, or{" "}
+              <strong>VII E 1,5,6</strong>; line breaks are supported for multiple day/class
+              assignments.
             </p>
           </div>
 

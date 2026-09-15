@@ -1,34 +1,65 @@
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, type Assignment, type Category, type Teacher } from "@/lib/substitution";
+import {
+  CATEGORIES,
+  type Assignment,
+  type Category,
+  type Teacher,
+  type TimetablePeriod,
+} from "@/lib/substitution";
 import type { SavedSchedule } from "@/lib/history";
 
 const toCategory = (v: string): Category =>
   (CATEGORIES as readonly string[]).includes(v) ? (v as Category) : "TGT";
 
-export type Profile = { fullName: string; schoolName: string };
+export type Profile = {
+  fullName: string;
+  schoolName: string;
+  schoolId: string;
+  studentPasscode: string;
+};
 
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("full_name, school_name")
+    .select("full_name, school_name, school_id, student_passcode")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  return { fullName: data.full_name, schoolName: data.school_name };
+  return {
+    fullName: data.full_name,
+    schoolName: data.school_name,
+    schoolId: data.school_id,
+    studentPasscode: data.student_passcode,
+  };
 }
 
 export async function upsertProfile(userId: string, profile: Profile) {
   const { error } = await supabase
     .from("profiles")
-    .upsert({ id: userId, full_name: profile.fullName, school_name: profile.schoolName });
+    .upsert({
+      id: userId,
+      full_name: profile.fullName,
+      school_name: profile.schoolName,
+      school_id: profile.schoolId,
+      student_passcode: profile.studentPasscode,
+    });
   if (error) throw error;
+}
+
+export async function verifyStudentAccess(schoolId: string, studentPasscode: string) {
+  const { data, error } = await supabase.rpc("verify_student_access", {
+    requested_school_id: schoolId,
+    requested_passcode: studentPasscode,
+  });
+  if (error) throw error;
+  return data;
 }
 
 export async function fetchTeachers(): Promise<Teacher[]> {
   const { data, error } = await supabase
     .from("teachers")
-    .select("id, name, subject, category, busy")
+    .select("id, name, subject, category, busy, timetable, weekly_timetable")
     .order("name");
   if (error) throw error;
   return (data ?? []).map((r) => ({
@@ -37,6 +68,8 @@ export async function fetchTeachers(): Promise<Teacher[]> {
     subject: r.subject,
     category: toCategory(r.category),
     busy: (r.busy ?? {}) as Record<number, boolean>,
+    timetable: (r.timetable ?? {}) as Record<number, TimetablePeriod>,
+    weeklyTimetable: (r.weekly_timetable ?? {}) as Record<number, Record<number, TimetablePeriod>>,
   }));
 }
 
@@ -52,6 +85,8 @@ export async function syncTeachers(userId: string, teachers: Teacher[]) {
         subject: t.subject,
         category: t.category,
         busy: t.busy,
+        timetable: t.timetable ?? {},
+        weekly_timetable: t.weeklyTimetable ?? {},
       })),
     );
     if (error) throw error;
