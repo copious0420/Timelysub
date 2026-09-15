@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PERIODS, type Absence, type Teacher } from "@/lib/substitution";
+import { PERIODS, type Absence, type Period, type Teacher } from "@/lib/substitution";
 import { cn } from "@/lib/utils";
 import { dayIndexForDate, getTeacherScheduleForDay } from "@/lib/timetableParser";
 
