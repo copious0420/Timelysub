@@ -142,7 +142,7 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
           period,
           { ...timetable[period], subject },
         ]),
-      ) as Teacher["timetable"],
+      ) as NonNullable<Teacher["timetable"]>,
       weeklyTimetable: Object.fromEntries(
         PERIODS.map((period) => [
           period,
@@ -153,7 +153,7 @@ export async function parseTimetableFile(file: File): Promise<ImportResult> {
             ]),
           ),
         ]),
-      ),
+      ) as NonNullable<Teacher["weeklyTimetable"]>,
     });
   }
 
@@ -169,13 +169,16 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
     const match = byName.get(imp.name.trim().toLowerCase());
     if (match) {
       const idx = result.findIndex((t) => t.id === match.id);
+      if (idx === -1) continue;
       result[idx] = {
         ...match,
         subject: imp.subject || match.subject,
         category: imp.category || match.category,
         busy: imp.busy,
-        timetable: imp.timetable || match.timetable,
-        weeklyTimetable: imp.weeklyTimetable || match.weeklyTimetable,
+        ...(imp.timetable || match.timetable ? { timetable: imp.timetable || match.timetable } : {}),
+        ...(imp.weeklyTimetable || match.weeklyTimetable
+          ? { weeklyTimetable: imp.weeklyTimetable || match.weeklyTimetable }
+          : {}),
       };
     } else {
       result.push(imp);

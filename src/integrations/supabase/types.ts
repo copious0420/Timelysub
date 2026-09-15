@@ -116,10 +116,7 @@ export type Database = {
     }
     Functions: {
       verify_student_access: {
-        Args: {
-          requested_passcode: string
-          requested_school_id: string
-        }
+        Args: { requested_passcode: string; requested_school_id: string }
         Returns: boolean
       }
     }

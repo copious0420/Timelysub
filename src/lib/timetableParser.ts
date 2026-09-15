@@ -1,4 +1,4 @@
-import { PERIODS, type Teacher, type TimetablePeriod } from "@/lib/substitution";
+import { PERIODS, type Period, type Teacher, type TimetablePeriod } from "@/lib/substitution";
 
 export type ParsedTimetableDay = {
   day: number;
@@ -6,7 +6,7 @@ export type ParsedTimetableDay = {
   isBusy: boolean;
 };
 
-export type TeacherDaySchedule = Record<number, TimetablePeriod>;
+export type TeacherDaySchedule = Record<Period, TimetablePeriod>;
 
 const DAYS = [1, 2, 3, 4, 5, 6] as const;
 
@@ -31,12 +31,14 @@ export function parseTimetableCell(cellText: string): ParsedTimetableDay[] {
     const match = line.match(/^(.*?)\s+([1-6](?:\s*-\s*[1-6])?(?:\s*,\s*[1-6])*)$/);
     if (!match) continue;
 
-    const classSection = normalizeClassSection(match[1]);
-    const daySpec = match[2].replace(/\s/g, "");
+    const classSection = normalizeClassSection(match[1] ?? "");
+    const daySpec = (match[2] ?? "").replace(/\s/g, "");
     const days = new Set<number>();
 
     for (const part of daySpec.split(",")) {
-      const [start, end = start] = part.split("-").map(Number);
+      const [rawStart, rawEnd] = part.split("-").map(Number);
+      const start = rawStart ?? 0;
+      const end = rawEnd ?? start;
       for (let day = start; day <= end; day += 1) days.add(day);
     }
 
@@ -75,7 +77,7 @@ export function getTeacherScheduleForDay(
           },
       ];
     }),
-  );
+  ) as TeacherDaySchedule;
 }
 
 /**
@@ -92,6 +94,6 @@ export function getTeacherScheduleForDate(
           period,
           { subject: teacher.subject, classSection: "", isFree: true },
         ]),
-      )
+      ) as TeacherDaySchedule
     : getTeacherScheduleForDay(teacher, day);
 }
