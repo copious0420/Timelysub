@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Search } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -142,27 +143,19 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-  const [substitutions, setSubstitutions] = useState<SubstitutionRecord[]>([]);
+  const { data: substitutions = [], isError } = useQuery<SubstitutionRecord[]>({
+    queryKey: ["substitutions", schoolId, date],
+    queryFn: () => fetchStudentSubstitutions(schoolId, date),
+    enabled: Boolean(schoolId && date),
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 
-  useEffect(() => {
-    let active = true;
-    const refresh = async () => {
-      try {
-        const latest = await fetchStudentSubstitutions(schoolId, date);
-        if (active) setSubstitutions(latest);
-      } catch (error) {
-        console.error("Failed to load student substitutions:", error);
-      }
-    };
-    void refresh();
-    const interval = window.setInterval(() => void refresh(), 10000);
-    window.addEventListener("focus", refresh);
-    return () => {
-      active = false;
-      window.clearInterval(interval);
-      window.removeEventListener("focus", refresh);
-    };
-  }, [date, schoolId]);
+  console.log("[Student View] Fetched Substitutions:", substitutions);
+
+  if (isError) {
+    console.error("[Student View] Failed to fetch substitutions.");
+  }
 
   const schedule = useMemo(() => {
     const baseSchedule = loadSchoolSchedule(schoolId, date);

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
@@ -85,6 +86,7 @@ function todayIso() {
 
 function Index() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("generator");
   const [navOpen, setNavOpen] = useState(false);
@@ -183,11 +185,8 @@ function Index() {
 
   const persistSchedule = async (rows: typeof schedule) => {
     if (!user || !schoolId) return;
-    try {
-      await saveSubstitutions(user.id, schoolId, date, rows);
-    } catch (error) {
-      console.error("Failed to sync substitutions:", error);
-    }
+    await saveSubstitutions(user.id, schoolId, date, rows);
+    await queryClient.invalidateQueries({ queryKey: ["substitutions"] });
   };
 
   const generate = () => {
@@ -197,7 +196,9 @@ function Index() {
       dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1,
     );
     setSchedule(rows);
-    void persistSchedule(rows);
+    void persistSchedule(rows).catch((error) => {
+      console.error("Failed to sync substitutions:", error);
+    });
   };
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
@@ -218,7 +219,9 @@ function Index() {
         : row,
     );
     setSchedule(updatedRows);
-    void persistSchedule(updatedRows);
+    void persistSchedule(updatedRows).catch((error) => {
+      console.error("Failed to sync substitutions:", error);
+    });
     setOverrideIndex(null);
   };
 
@@ -228,6 +231,7 @@ function Index() {
       if (user) {
         // Save to cloud for authenticated users
         await saveDay(user.id, date, schedule);
+        await persistSchedule(schedule);
         const cloudSaved = await fetchSavedDays();
         setSaved(cloudSaved);
       } else {
