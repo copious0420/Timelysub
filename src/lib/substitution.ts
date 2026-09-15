@@ -99,7 +99,7 @@ export function generateSchedule(input: Teacher[], absences: Absence[], day?: nu
   const byId = new Map(teachers.map((t) => [t.id, t]));
   const blocked = new Set<string>();
 
-  const rows: { period: number; teacher: Teacher; vacantClass?: string }[] = [];
+  const rows: { period: number; teacher: Teacher; vacantClass?: string | undefined }[] = [];
   for (const a of absences) {
     const t = byId.get(a.teacherId);
     if (!t) continue;

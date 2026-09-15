@@ -163,7 +163,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
       baseSchedule.map((row) => [`${row.period}:${row.classSection}`, row] as const),
     );
     for (const substitution of substitutions) {
-      const key = `${substitution.period}:${substitution.className}`;
+      const key = `${substitution.period}:${substitution.className}` as const;
       const base = bySlot.get(key);
       bySlot.set(key, {
         period: substitution.period,
