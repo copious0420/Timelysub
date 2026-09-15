@@ -26,7 +26,6 @@ import { OverrideDrawer } from "@/components/OverrideDrawer";
 import { ExcelImporterModal } from "@/components/ExcelImporterModal";
 
 import {
-  DEMO_TEACHERS,
   generateSchedule,
   toCsv,
   type Absence,
@@ -92,19 +91,12 @@ function Index() {
   const [navOpen, setNavOpen] = useState(false);
   const [overrideIndex, setOverrideIndex] = useState<number | null>(null);
 
-  const [teachers, setTeachers] = useState<Teacher[]>(DEMO_TEACHERS);
-  const [absences, setAbsences] = useState<Absence[]>([
-    { teacherId: "t1", periods: [1, 2, 4] },
-    { teacherId: "t5", periods: [3, 6] },
-  ]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
   const [date, setDate] = useState(todayIso());
-  const [schedule, setSchedule] = useState(() =>
-    generateSchedule(DEMO_TEACHERS, [
-      { teacherId: "t1", periods: [1, 2, 4] },
-      { teacherId: "t5", periods: [3, 6] },
-    ]),
-  );
+  const [schedule, setSchedule] = useState<ReturnType<typeof generateSchedule>>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [teachersLoaded, setTeachersLoaded] = useState(false);
   const [schoolId, setSchoolId] = useState("");
 
   const activeAbsences = useMemo(() => {
@@ -118,6 +110,7 @@ function Index() {
     if (loading) return;
 
     const loadData = async () => {
+      setTeachersLoaded(false);
       try {
         if (user) {
           // Ensure profile exists for new OAuth users
@@ -140,18 +133,21 @@ function Index() {
 
           // Load from cloud for authenticated users
           const cloudTeachers = await fetchTeachers();
-          setTeachers(cloudTeachers.length > 0 ? cloudTeachers : DEMO_TEACHERS);
+          setTeachers(cloudTeachers);
+          setTeachersLoaded(true);
 
           const cloudSaved = await fetchSavedDays();
           setSaved(cloudSaved);
         } else {
           // Load from localStorage for unauthenticated users
+          setTeachers([]);
           setSaved(loadSaved());
+          setTeachersLoaded(true);
         }
         setDataLoaded(true);
       } catch (error) {
         console.error("Failed to load data:", error);
-        // Fallback to demo/localStorage data
+        // Keep the dashboard empty if loading saved data fails.
         setSaved(loadSaved());
         setDataLoaded(true);
       }
@@ -162,10 +158,7 @@ function Index() {
 
   // Sync teacher changes to cloud when authenticated
   useEffect(() => {
-    if (!user || !dataLoaded) return;
-
-    // Don't sync if still showing demo data
-    if (teachers === DEMO_TEACHERS) return;
+    if (!user || !dataLoaded || !teachersLoaded) return;
 
     const sync = async () => {
       try {
