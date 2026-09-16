@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export type AuthState = {
   loading: boolean;
@@ -17,6 +17,13 @@ export function useAuth(): AuthState {
 
   useEffect(() => {
     let active = true;
+
+    if (!isSupabaseConfigured) {
+      setState({ loading: false, session: null, user: null });
+      return () => {
+        active = false;
+      };
+    }
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;

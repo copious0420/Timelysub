@@ -170,6 +170,7 @@
       rgba(255, 255, 255, 0.10) 100%
     ) !important;
     backdrop-filter: blur(28px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
     border: 0.5px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 24px !important;
     box-shadow:
@@ -184,13 +185,14 @@
   [role="dialog"] .glass-regular {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.86) 0%,
-      rgba(255, 255, 255, 0.80) 45%,
-      rgba(255, 255, 255, 0.78) 70%,
-      rgba(255, 255, 255, 0.84) 100%
+      rgba(238, 248, 255, 0.96) 0%,
+      rgba(222, 240, 255, 0.93) 45%,
+      rgba(235, 247, 255, 0.94) 70%,
+      rgba(248, 252, 255, 0.96) 100%
     ) !important;
-    backdrop-filter: blur(40px) saturate(180%) !important;
-    border: 0.5px solid rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(28px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.85) !important;
     box-shadow:
       inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
       0 24px 60px rgba(15, 23, 42, 0.35) !important;
@@ -200,12 +202,12 @@
   .overlay-frost {
     background: linear-gradient(
       135deg,
-      rgba(186, 225, 255, 0.38) 0%,
-      rgba(214, 238, 255, 0.30) 50%,
-      rgba(186, 225, 255, 0.36) 100%
+      rgba(7, 15, 30, 0.62) 0%,
+      rgba(15, 35, 58, 0.56) 50%,
+      rgba(7, 15, 30, 0.62) 100%
     ) !important;
-    backdrop-filter: blur(32px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(160%) !important;
+    backdrop-filter: blur(30px) saturate(115%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(115%) !important;
   }
 
   .glass-clear {
