@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, CalendarCheck, Check, Download, Printer, Shuffle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -96,139 +97,195 @@ const STEPS = [
   { n: "03", t: "Generate & share", d: "Press Generate, then print, export or save the day." },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const viewportConfig = { once: true, margin: "-80px" };
+
 function Landing() {
+  const { scrollY } = useScroll();
+  const navbarBlur = useTransform(scrollY, [0, 60], [0, 1]);
+
   return (
     <div className="landing-page min-h-screen overflow-x-hidden">
-      {/* Nav */}
-      <header className="top-navbar sticky top-0 z-30 backdrop-blur-[10px] backdrop-saturate-[180%]">
+      {/* Navbar */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="landing-navbar sticky top-0 z-30"
+        style={{ "--navbar-blur": navbarBlur } as React.CSSProperties}
+      >
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Logo size="md" />
-            <span className="truncate text-base font-semibold tracking-tight">Timely</span>
+            <span className="truncate text-base font-semibold tracking-tight text-foreground">Timely</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              asChild
-              size="sm"
-              variant="ghost"
-              className="text-foreground hover:bg-white/50 hover:text-foreground"
-            >
+            <Button asChild size="sm" variant="ghost" className="text-foreground hover:bg-white/50 hover:text-foreground">
               <Link to="/student">Student Portal</Link>
             </Button>
             <Button
               asChild
               size="sm"
               variant="ghost"
-              className="navbar-button-secondary text-foreground hover:bg-white/50 hover:text-foreground"
+              className="landing-nav-btn text-foreground hover:bg-white/50 hover:text-foreground"
             >
-              <Link to="/auth" search={{ tab: "login" }}>
-                Log in
-              </Link>
+              <Link to="/auth" search={{ tab: "login" }}>Log in</Link>
             </Button>
-            <Button asChild size="sm" className="navbar-button-primary hover:bg-primary/90">
-              <Link to="/auth" search={{ tab: "signup" }}>
-                Sign up
-              </Link>
+            <Button asChild size="sm" className="landing-nav-btn-primary hover:bg-primary/90">
+              <Link to="/auth" search={{ tab: "signup" }}>Sign up</Link>
             </Button>
-            <Button asChild size="sm" className="navbar-button-primary hover:bg-primary/90">
-              <Link to="/app">
-                Open app <ArrowRight />
-              </Link>
+            <Button asChild size="sm" className="landing-nav-btn-primary hover:bg-primary/90">
+              <Link to="/app">Open app <ArrowRight /></Link>
             </Button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Hero */}
       <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
-        <div
-          aria-hidden="true"
-          className="absolute left-1/2 top-1/2 -z-10 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/30 blur-3xl"
-        />
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="glass-clear glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-[10px] backdrop-saturate-[180%]">
-            <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
-          </p>
-          <h1 className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            <span className="glass-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-foreground">
+              <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
+            </span>
+          </motion.div>
+
+          <motion.h1
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+          >
             Never scramble for a <span className="text-primary text-glow">substitute</span>{" "}
             <span className="text-primary text-glow">teacher</span> again.
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
+          </motion.h1>
+
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl"
+          >
             Timely reads your schedule and today's absences, then builds a fair, conflict-free
             substitution plan in one tap — ready to print, export or save.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" className="w-full sm:w-auto hover-scale">
-              <Link to="/app">
-                Launch the dashboard <ArrowRight />
-              </Link>
+          </motion.p>
+
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <Button asChild size="lg" className="landing-cta-btn w-full sm:w-auto">
+              <Link to="/app">Launch the dashboard <ArrowRight /></Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="glass-clear glass-highlight w-full border-border bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%] sm:w-auto"
+              className="glass-pill w-full sm:w-auto"
             >
               <a href="#how-it-works">See how it works</a>
             </Button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Differentiators */}
-        <div className="mx-auto mt-14 max-w-7xl">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportConfig}
+          transition={{ duration: 0.6, staggerChildren: 0.15 }}
+          className="mx-auto mt-14 max-w-7xl"
+        >
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              {
-                k: "No accounts needed",
-                v: "Open the dashboard and start scheduling right away — no sign-up, no setup delays.",
-              },
-              {
-                k: "Works in the browser",
-                v: "Everything runs locally on your device, so your staff data never leaves the school.",
-              },
-              {
-                k: "Built for the bell",
-                v: "Generate, print and export a fair cover plan in under a minute — even on the busiest mornings.",
-              },
-            ].map((item) => (
-              <div
+              { k: "No accounts needed", v: "Open the dashboard and start scheduling right away — no sign-up, no setup delays." },
+              { k: "Works in the browser", v: "Everything runs locally on your device, so your staff data never leaves the school." },
+              { k: "Built for the bell", v: "Generate, print and export a fair cover plan in under a minute — even on the busiest mornings." },
+            ].map((item, i) => (
+              <motion.div
                 key={item.k}
-                className="panel flashcard landing-feature-card !border-0 px-5 py-5 text-center"
+                variants={fadeUp}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="glass-card px-5 py-5 text-center"
               >
                 <p className="text-base font-semibold text-primary text-glow">{item.k}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{item.v}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats */}
-      <section className="px-4 sm:px-6">
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+        transition={{ duration: 0.6, staggerChildren: 0.15 }}
+        className="px-4 sm:px-6"
+      >
         <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-3">
-          {STATS.map((s) => (
-            <div key={s.k} className="panel flashcard !border-0 px-5 py-5 text-center">
+          {STATS.map((s, i) => (
+            <motion.div
+              key={s.k}
+              variants={fadeUp}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
+              className="glass-card px-5 py-5 text-center"
+            >
               <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
               <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Features */}
-      <section className="px-4 py-16 sm:px-6">
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+        transition={{ duration: 0.6, staggerChildren: 0.15 }}
+        className="px-4 py-16 sm:px-6"
+      >
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl">
+          <motion.h2
+            variants={fadeUp}
+            transition={{ duration: 0.6 }}
+            className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl"
+          >
             Everything a timetable in-charge needs
-          </h2>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mt-2 max-w-2xl text-muted-foreground"
+          >
             Four screens, zero spreadsheets. Built for the ten minutes before the first bell.
-          </p>
+          </motion.p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <article
+            {FEATURES.map((f, i) => (
+              <motion.article
                 key={f.title}
-                className="panel feature-card !border-0 rounded-xl px-5 py-5 backdrop-blur-[10px] backdrop-saturate-[180%]"
+                variants={fadeUp}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="glass-card rounded-xl px-5 py-5"
               >
                 <span className="feature-icon grid size-10 place-items-center rounded-xl">
                   <f.icon className="size-5 text-primary" />
@@ -238,61 +295,87 @@ function Landing() {
                 <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
                   {f.points.map((p) => (
                     <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground lg:text-base">
-                      <span
-                        aria-hidden
-                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-secondary"
-                      />
+                      <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-secondary" />
                       <span className="min-w-0">{p}</span>
                     </li>
                   ))}
                 </ul>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* How it works */}
-      <section id="how-it-works" className="px-4 py-16 sm:px-6">
+      <motion.section
+        id="how-it-works"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+        transition={{ duration: 0.6, staggerChildren: 0.15 }}
+        className="px-4 py-16 sm:px-6"
+      >
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl">
+          <motion.h2
+            variants={fadeUp}
+            transition={{ duration: 0.6 }}
+            className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl"
+          >
             How it works
-          </h2>
+          </motion.h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
-            {STEPS.map((s) => (
-              <li key={s.n} className="panel flashcard !border-0 px-5 py-6">
+            {STEPS.map((s, i) => (
+              <motion.li
+                key={s.n}
+                variants={fadeUp}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="glass-card px-5 py-6"
+              >
                 <p className="text-3xl font-semibold text-secondary/30">{s.n}</p>
                 <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
-              </li>
+              </motion.li>
             ))}
           </ol>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA */}
-      <section className="px-4 pb-20 sm:px-6">
-        <div className="panel landing-cta-glass mx-auto max-w-7xl px-6 py-12 text-center">
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+        transition={{ duration: 0.6 }}
+        className="px-4 pb-20 sm:px-6"
+      >
+        <div className="glass-card mx-auto max-w-7xl px-6 py-12 text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl">
             Ready for tomorrow morning?
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
             Set up your schedule, log today's absentees, and generate a fair cover plan in seconds.
           </p>
-          <Button asChild size="lg" className="mt-7 hover-scale">
-            <Link to="/app">
-              Open Timely dashboard <ArrowRight />
-            </Link>
+          <Button asChild size="lg" className="landing-cta-btn mt-7">
+            <Link to="/app">Open Timely dashboard <ArrowRight /></Link>
           </Button>
         </div>
-      </section>
+      </motion.section>
 
-      <footer className="border-t border-border px-4 py-10 sm:px-6">
+      {/* Footer */}
+      <motion.footer
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportConfig}
+        transition={{ duration: 0.6 }}
+        className="border-t border-border px-4 py-10 sm:px-6"
+      >
         <div className="mx-auto grid max-w-7xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
           <div>
             <p className="flex items-center gap-2 font-semibold text-foreground">
-              <Logo size="sm" />
-              Timely
+              <Logo size="sm" /> Timely
             </p>
             <p className="mt-2">Smarter cover, every day.</p>
           </div>
@@ -313,7 +396,7 @@ function Landing() {
         <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
           Timely Substitution App — Automated teacher substitution scheduling for schools.
         </p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
