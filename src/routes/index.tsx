@@ -116,7 +116,7 @@ function Landing() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="landing-navbar sticky top-0 z-30"
-        style={{ "--navbar-blur": navbarBlur } as React.CSSProperties}
+        style={{ "--navbar-blur": navbarBlur } as never}
       >
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
