@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { upsertProfile } from "@/lib/cloud";
 
@@ -51,6 +51,10 @@ function AuthPage() {
   const [studentPasscode, setStudentPasscode] = useState("");
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError("Accounts are unavailable right now. You can continue without an account.");
+      return;
+    }
     void supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/app", replace: true });
     });
