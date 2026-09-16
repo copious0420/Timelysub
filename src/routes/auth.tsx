@@ -51,6 +51,10 @@ function AuthPage() {
   const [studentPasscode, setStudentPasscode] = useState("");
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError("Accounts are unavailable right now. You can continue without an account.");
+      return;
+    }
     void supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/app", replace: true });
     });
