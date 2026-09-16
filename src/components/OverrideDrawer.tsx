@@ -51,7 +51,7 @@ export function OverrideDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="mx-auto max-h-[85vh] w-full max-w-xl border-white/10 bg-white/5 text-foreground">
+      <DrawerContent className="glass-regular mx-auto max-h-[85vh] w-full max-w-xl border-white/10 bg-white/5 text-foreground">
         <DrawerHeader className="text-left">
           <DrawerTitle className="flex items-center gap-2 text-foreground">
             <UserRoundCheck className="size-5 text-primary" />

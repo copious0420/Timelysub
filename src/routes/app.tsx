@@ -347,7 +347,7 @@ function Index() {
       </motion.aside>
 
       {/* Mobile top navbar */}
-      <div className="no-print sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
+      <div className="glass-clear no-print sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger asChild>
             <button
@@ -359,7 +359,7 @@ function Index() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="glass-highlight w-64 border-sidebar-border bg-white/5 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%]"
+            className="glass-regular glass-highlight w-64 border-sidebar-border bg-white/5 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%]"
           >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">

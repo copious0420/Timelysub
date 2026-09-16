@@ -203,7 +203,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
           </div>
         </header>
 
-        <section className="mb-6 rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
+        <section className="glass-regular mb-6 rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
               Date
@@ -257,7 +257,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
           </div>
 
           {isLoading || schedule.length === 0 ? (
-            <div className="rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-slate-600 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
+            <div className="glass-regular rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-slate-600 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
               No substitution
             </div>
           ) : (
@@ -273,7 +273,7 @@ function ScheduleCard({ row }: { row: StudentScheduleRow }) {
   const hasSubstitute = Boolean(row.substituteId);
 
   return (
-    <article className="rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
+    <article className="glass-regular rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <span className="shrink-0 rounded-xl bg-blue-100 px-3 py-2 text-sm font-bold text-blue-900">

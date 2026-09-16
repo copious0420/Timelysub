@@ -146,7 +146,7 @@ function Landing() {
           className="absolute left-1/2 top-1/2 -z-10 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/30 blur-3xl"
         />
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-[10px] backdrop-saturate-[180%]">
+          <p className="glass-clear glass-highlight inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-[10px] backdrop-saturate-[180%]">
             <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
           </p>
           <h1 className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -167,7 +167,7 @@ function Landing() {
               asChild
               size="lg"
               variant="outline"
-              className="glass-highlight w-full border-border bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%] sm:w-auto"
+              className="glass-clear glass-highlight w-full border-border bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%] sm:w-auto"
             >
               <a href="#how-it-works">See how it works</a>
             </Button>
@@ -191,7 +191,10 @@ function Landing() {
                 v: "Generate, print and export a fair cover plan in under a minute — even on the busiest mornings.",
               },
             ].map((item) => (
-              <div key={item.k} className="panel flashcard px-5 py-5 text-center">
+              <div
+                key={item.k}
+                className="panel flashcard landing-feature-card !border-0 px-5 py-5 text-center"
+              >
                 <p className="text-base font-semibold text-primary text-glow">{item.k}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{item.v}</p>
               </div>
@@ -204,7 +207,7 @@ function Landing() {
       <section className="px-4 sm:px-6">
         <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-3">
           {STATS.map((s) => (
-            <div key={s.k} className="panel flashcard px-5 py-5 text-center">
+            <div key={s.k} className="panel flashcard !border-0 px-5 py-5 text-center">
               <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
               <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
             </div>
@@ -225,7 +228,7 @@ function Landing() {
             {FEATURES.map((f) => (
               <article
                 key={f.title}
-                className="panel feature-card rounded-xl px-5 py-5 backdrop-blur-[10px] backdrop-saturate-[180%]"
+                className="panel feature-card !border-0 rounded-xl px-5 py-5 backdrop-blur-[10px] backdrop-saturate-[180%]"
               >
                 <span className="feature-icon grid size-10 place-items-center rounded-xl">
                   <f.icon className="size-5 text-primary" />
@@ -257,7 +260,7 @@ function Landing() {
           </h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((s) => (
-              <li key={s.n} className="panel flashcard px-5 py-6">
+              <li key={s.n} className="panel flashcard !border-0 px-5 py-6">
                 <p className="text-3xl font-semibold text-secondary/30">{s.n}</p>
                 <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>

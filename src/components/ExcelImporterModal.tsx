@@ -197,7 +197,7 @@ export function ExcelImporterModal({ onImport }: Props) {
           if (!nextOpen) reset();
         }}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/50 bg-white/5 p-5 text-slate-900 shadow-2xl backdrop-blur-[12px] backdrop-saturate-[180%] sm:max-w-4xl sm:p-6">
+        <DialogContent className="glass-regular max-h-[90vh] overflow-y-auto rounded-2xl border border-white/50 bg-white/5 p-5 text-slate-900 shadow-2xl sm:max-w-4xl sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-900">
               <FileSpreadsheet className="size-5 text-blue-700" />
@@ -255,7 +255,7 @@ export function ExcelImporterModal({ onImport }: Props) {
               <p className="text-sm font-semibold text-emerald-800">
                 Parsed {parsed.length} valid teacher timetables ready to import
               </p>
-              <div className="overflow-x-auto rounded-xl border border-white/50 bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%]">
+              <div className="glass-regular overflow-x-auto rounded-xl border border-white/50 bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%]">
                 <table className="w-full min-w-[680px] text-sm">
                   <thead className="bg-blue-50/80 text-left text-xs uppercase tracking-wide text-slate-600">
                     <tr>

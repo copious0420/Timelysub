@@ -121,7 +121,44 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen">
-        <div className="animated-bg" aria-hidden="true">
+        <div className="animated-bg" aria-hidden="true" style={{ backgroundColor: "#BDEDFD" }}>
+          <style>{`
+            @keyframes blob1-drift {
+              0%, 100% { transform: translate(0, 0); }
+              20% { transform: translate(18vw, 12vh); }
+              40% { transform: translate(34vw, -4vh); }
+              60% { transform: translate(22vw, 22vh); }
+              80% { transform: translate(-8vw, 14vh); }
+            }
+
+            @keyframes blob2-drift {
+              0%, 100% { transform: translate(0, 0); }
+              20% { transform: translate(-16vw, -12vh); }
+              40% { transform: translate(-30vw, 8vh); }
+              60% { transform: translate(-18vw, 26vh); }
+              80% { transform: translate(8vw, 18vh); }
+            }
+
+            @keyframes blob3-drift {
+              0%, 100% { transform: translate(0, 0); }
+              20% { transform: translate(12vw, -18vh); }
+              40% { transform: translate(-10vw, -28vh); }
+              60% { transform: translate(-26vw, -8vh); }
+              80% { transform: translate(-4vw, 16vh); }
+            }
+
+            .animated-bg .blob-1 {
+              animation: blob1-drift 10s ease-in-out infinite;
+            }
+
+            .animated-bg .blob-2 {
+              animation: blob2-drift 11.5s ease-in-out -7s infinite;
+            }
+
+            .animated-bg .blob-3 {
+              animation: blob3-drift 9s ease-in-out -14s infinite;
+            }
+          `}</style>
           <div className="gradient-blob blob-1" />
           <div className="gradient-blob blob-2" />
           <div className="gradient-blob blob-3" />

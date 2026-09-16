@@ -115,15 +115,21 @@
 }
 
 @utility panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.19) 0%,
+    rgba(255, 255, 255, 0.09) 30%,
+    rgba(255, 255, 255, 0.06) 70%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 24px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    0 8px 32px rgba(30, 58, 138, 0.08);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 40px rgba(0, 0, 0, 0.3);
   color: var(--color-foreground);
 }
 
@@ -134,48 +140,99 @@
 }
 
 @utility data-panel {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.19) 0%,
+    rgba(255, 255, 255, 0.09) 30%,
+    rgba(255, 255, 255, 0.06) 70%,
+    rgba(255, 255, 255, 0.13) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 24px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    0 8px 32px rgba(30, 58, 138, 0.1);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 40px rgba(0, 0, 0, 0.3);
   color: var(--color-foreground);
   padding: 24px;
 }
 
 @layer components {
-  .panel {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(12px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    color: var(--color-foreground);
+  .glass-regular,
+  .landing-cta-glass {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.19) 0%,
+      rgba(255, 255, 255, 0.09) 30%,
+      rgba(255, 255, 255, 0.06) 70%,
+      rgba(255, 255, 255, 0.13) 100%
+    ) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+      0 20px 40px rgba(0, 0, 0, 0.3) !important;
   }
 
-  .panel.data-panel {
-    background: rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(10px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  .glass-clear {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.094) 0%,
+      rgba(255, 255, 255, 0.047) 30%,
+      rgba(255, 255, 255, 0.031) 70%,
+      rgba(255, 255, 255, 0.078) 100%
+    ) !important;
+    backdrop-filter: blur(18px) saturate(115%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      0 12px 24px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .panel {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.19) 0%,
+      rgba(255, 255, 255, 0.09) 30%,
+      rgba(255, 255, 255, 0.06) 70%,
+      rgba(255, 255, 255, 0.13) 100%
+    ) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+      0 20px 40px rgba(0, 0, 0, 0.3) !important;
+    color: var(--color-foreground);
   }
 
   .app-sidebar {
     background: linear-gradient(
-      180deg,
-      rgba(30, 58, 138, 0.03),
-      rgba(96, 165, 250, 0.05)
+      135deg,
+      rgba(255, 255, 255, 0.19) 0%,
+      rgba(255, 255, 255, 0.09) 30%,
+      rgba(255, 255, 255, 0.06) 70%,
+      rgba(255, 255, 255, 0.13) 100%
     ) !important;
-    backdrop-filter: blur(12px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 24px !important;
     color: var(--color-foreground);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+      0 20px 40px rgba(0, 0, 0, 0.3) !important;
   }
 
   .sidebar-active-pill {
@@ -198,49 +255,41 @@
   }
 
   .landing-page .feature-card {
-    background: rgba(255, 255, 255, 0.04) !important;
-    backdrop-filter: blur(10px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 16px !important;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.094) 0%,
+      rgba(255, 255, 255, 0.047) 30%,
+      rgba(255, 255, 255, 0.031) 70%,
+      rgba(255, 255, 255, 0.078) 100%
+    ) !important;
+    backdrop-filter: blur(18px) saturate(115%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
+    border: none !important;
+    border-radius: 24px !important;
     color: var(--color-foreground);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 32px rgba(30, 58, 138, 0.12),
-      0 0 20px rgba(96, 165, 250, 0.3) !important;
+      0 12px 24px rgba(0, 0, 0, 0.2) !important;
   }
 
   .landing-page .feature-card:hover {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 32px rgba(30, 58, 138, 0.16),
-      0 0 36px rgba(96, 165, 250, 0.55) !important;
+      0 12px 24px rgba(0, 0, 0, 0.2) !important;
     transform: translateY(-2px);
   }
 
-  .landing-cta-glass {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(12px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 16px !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 32px rgba(30, 58, 138, 0.12);
-    color: var(--color-foreground);
+  .landing-page .landing-feature-card {
+    border: none !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
   }
 
-  .top-navbar {
-    background: rgba(255, 255, 255, 0.03) !important;
-    backdrop-filter: blur(8px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
-    border: none !important;
+  .landing-page .landing-feature-card:hover {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1) !important;
+      0 0 16px rgba(96, 165, 250, 0.45),
+      0 0 32px rgba(96, 165, 250, 0.2) !important;
+  }
+
+  .glass-clear,
+  .top-navbar {
     color: var(--color-foreground);
   }
 
@@ -263,7 +312,24 @@
   .glass-sheet {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
     color: var(--color-foreground);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-regular,
+  .glass-clear,
+  .panel,
+  .app-sidebar,
+  .sidebar-active-pill,
+  .landing-page .feature-card,
+  .landing-cta-glass,
+  .top-navbar,
+  .glass-sheet {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 
@@ -334,25 +400,29 @@
 }
 
 @utility feature-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.094) 0%,
+    rgba(255, 255, 255, 0.047) 30%,
+    rgba(255, 255, 255, 0.031) 70%,
+    rgba(255, 255, 255, 0.078) 100%
+  );
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 24px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
     inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    0 8px 32px rgba(30, 58, 138, 0.12),
-    0 0 20px rgba(96, 165, 250, 0.3);
+    0 12px 24px rgba(0, 0, 0, 0.2);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   color: var(--color-foreground);
 
   &:hover {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
       inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 32px rgba(30, 58, 138, 0.16),
-      0 0 36px rgba(96, 165, 250, 0.55);
+      0 12px 24px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
   }
 }
