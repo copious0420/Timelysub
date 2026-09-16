@@ -170,13 +170,30 @@
       rgba(255, 255, 255, 0.10) 100%
     ) !important;
     backdrop-filter: blur(28px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
     border: 0.5px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 24px !important;
     box-shadow:
       inset 0 0.5px 0 rgba(255, 255, 255, 0.30),
       inset 0 -0.5px 0 rgba(255, 255, 255, 0.06),
       0 16px 40px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  /* Modal surfaces need a solid enough base for text to stay readable */
+  [role="dialog"].glass-regular,
+  [role="alertdialog"].glass-regular,
+  [role="dialog"] .glass-regular {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.86) 0%,
+      rgba(255, 255, 255, 0.80) 45%,
+      rgba(255, 255, 255, 0.78) 70%,
+      rgba(255, 255, 255, 0.84) 100%
+    ) !important;
+    backdrop-filter: blur(40px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
+      0 24px 60px rgba(15, 23, 42, 0.35) !important;
   }
 
   .glass-clear {
@@ -188,14 +205,13 @@
       rgba(255, 255, 255, 0.078) 100%
     ) !important;
     backdrop-filter: blur(18px) saturate(115%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
     border: 0.5px solid rgba(255, 255, 255, 0.22) !important;
     border-radius: 24px !important;
     box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.25),
       0 12px 24px rgba(0, 0, 0, 0.2) !important;
   }
+
 
   .panel {
     background: linear-gradient(
