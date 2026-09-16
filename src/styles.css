@@ -196,6 +196,18 @@
       0 24px 60px rgba(15, 23, 42, 0.35) !important;
   }
 
+  /* Frosted overlay behind popups — heavy blur, light airy tint */
+  .overlay-frost {
+    background: linear-gradient(
+      135deg,
+      rgba(186, 225, 255, 0.38) 0%,
+      rgba(214, 238, 255, 0.30) 50%,
+      rgba(186, 225, 255, 0.36) 100%
+    ) !important;
+    backdrop-filter: blur(32px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(160%) !important;
+  }
+
   .glass-clear {
     background: linear-gradient(
       135deg,
