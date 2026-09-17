@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { CustomCursor } from "@/components/CustomCursor";
+
 
 function NotFoundComponent() {
   return (
@@ -149,22 +149,22 @@ function RootComponent() {
             }
 
             .animated-bg .blob-1 {
-              animation: blob1-drift 30s ease-in-out infinite;
+              animation: blob1-drift 12s ease-in-out infinite;
             }
 
             .animated-bg .blob-2 {
-              animation: blob2-drift 35s ease-in-out -12s infinite;
+              animation: blob2-drift 14s ease-in-out -5s infinite;
             }
 
             .animated-bg .blob-3 {
-              animation: blob3-drift 28s ease-in-out -18s infinite;
+              animation: blob3-drift 11s ease-in-out -7s infinite;
             }
           `}</style>
           <div className="gradient-blob blob-1" />
           <div className="gradient-blob blob-2" />
           <div className="gradient-blob blob-3" />
         </div>
-        <CustomCursor />
+        
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
       </div>

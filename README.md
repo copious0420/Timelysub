@@ -18,6 +18,15 @@ UI/UX: Modern, clean, dashboard layout with a sidebar for navigation. Use neutra
 
 This project was built with [Lovable](https://lovable.dev).
 
+## Using the existing backend with a Lovable frontend
+
+This repository uses the existing Supabase project as its backend. The frontend expects these environment variables:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+When moving UI code from another Lovable project, keep the files under `src/integrations/supabase/`, `src/lib/cloud.ts`, `src/lib/substitution.ts`, and the `supabase/migrations/` directory from this repository. Those files preserve the current authentication flow, database types, row-level security assumptions, teacher roster, saved schedules, and substitution records. Adapt the new screens to those helpers instead of creating a second Supabase project or changing the existing database schema.
+
 ## Build with Lovable
 
 Continue developing this project in the [Lovable editor](https://lovable.dev/projects/18c2a928-59d2-4fce-8ae2-590ab7a5224c).

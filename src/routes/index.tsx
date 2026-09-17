@@ -1,23 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, CalendarCheck, Check, Download, Printer, Shuffle, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  ChevronDown,
+  Clock3,
+  Coffee,
+  Scale,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Timely Substitution App — Smart Teacher Cover in Seconds" },
+      { title: "Timely — Fair Teacher Substitution Plans in 90 Seconds" },
       {
         name: "description",
         content:
-          "Timely turns your teacher schedule and daily absences into a fair substitution schedule instantly — print it, export it, and keep a history of every day.",
+          "Generate fair, conflict-free teacher substitution plans in 90 seconds. Timely is simple, print-ready, and built for busy school mornings.",
       },
-      { property: "og:title", content: "Timely Substitution App" },
+      { property: "og:title", content: "Timely — Substitute Plans Without the Morning Scramble" },
       {
         property: "og:description",
-        content:
-          "Automated substitution scheduling for schools: schedule management, absentee tracking and instant cover plans.",
+        content: "A fast, fair and simple way for school admins to arrange teacher substitutions.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -26,377 +33,265 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: Users,
-    title: "Living teacher schedule",
-    body: "Every teacher, their department and their week at a glance — edit inline, no spreadsheet round-trips.",
-    points: [
-      "Add, rename or remove staff instantly",
-      "Toggle Free/Busy for Periods 1–8",
-      "Import a full timetable from Excel, Google Sheets or CSV",
-    ],
-  },
-  {
-    icon: CalendarCheck,
-    title: "Daily absentee tracker",
-    body: "Pick the date, tick who is away, and mark only the periods that actually need cover.",
-    points: [
-      "Date-scoped absence log",
-      "Per-period selection, not whole days",
-      "Busy periods pre-selected for you",
-    ],
-  },
-  {
-    icon: Shuffle,
-    title: "Fair auto-matching",
-    body: "The generator only ever assigns a genuinely free teacher, then keeps the workload even.",
-    points: [
-      "Same subject/department first",
-      "Then lowest substitution count today",
-      "Conflicts flagged when nobody is free",
-    ],
-  },
-  {
-    icon: Printer,
-    title: "Print-ready schedules",
-    body: "A staffroom noticeboard table that prints exactly as it looks, in clean black on white.",
-    points: ["One-tap browser print", "Save as PDF from the print dialog", "No layout surprises"],
-  },
-  {
-    icon: Download,
-    title: "CSV export",
-    body: "Take the day's plan anywhere — attendance systems, email, or your own archive.",
-    points: [
-      "Period, absentee, subject, substitute",
-      "Opens in Excel or Sheets",
-      "One-click download",
-    ],
-  },
-  {
-    icon: Check,
-    title: "Saved days",
-    body: "Generated plans are stored on your device so yesterday is never lost.",
-    points: [
-      "Save any generated day",
-      "Reopen or re-export later",
-      "Delete when it's no longer needed",
-    ],
-  },
-];
-
-const STATS = [
-  { k: "8", v: "periods tracked per teacher" },
-  { k: "2-step", v: "priority matching logic" },
-  { k: "0", v: "spreadsheets required" },
-];
-
-const STEPS = [
-  { n: "01", t: "Set up the schedule", d: "Add teachers, subjects and their free/busy periods." },
-  { n: "02", t: "Log the absences", d: "Choose the date and the periods each absentee misses." },
-  { n: "03", t: "Generate & share", d: "Press Generate, then print, export or save the day." },
-];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
+const reveal = {
+  hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
 };
 
-const viewportConfig = { once: true, margin: "-80px" };
+const viewport = { once: true, amount: 0.18 };
+
+const problems = [
+  {
+    icon: Clock3,
+    title: "Morning chaos",
+    copy: "One late message can turn the time before assembly into a rush of calls, lists and last-minute changes.",
+  },
+  {
+    icon: Scale,
+    title: "Fairness concerns",
+    copy: "Without a clear record, the same available teachers can be chosen again and again.",
+  },
+  {
+    icon: Coffee,
+    title: "Teacher burnout",
+    copy: "Uneven substitutions take away planning periods and put extra pressure on already busy staff.",
+  },
+];
+
+const benefits = [
+  {
+    icon: Clock3,
+    label: "Speed",
+    stat: "90 seconds",
+    copy: "Turn today's absences into a print-ready plan before the first bell.",
+  },
+  {
+    icon: Scale,
+    label: "Fairness",
+    stat: "Clear choices",
+    copy: "Timely checks who is free and spreads substitutions more evenly.",
+  },
+  {
+    icon: Sparkles,
+    label: "Simple",
+    stat: "No account needed",
+    copy: "Open the tool and make a plan. No training or lengthy setup required.",
+  },
+];
+
+const steps = [
+  { number: "01", title: "Input absences", copy: "Select the teachers and periods that need cover." },
+  { number: "02", title: "Generate plan", copy: "Timely finds free teachers and balances the work." },
+  { number: "03", title: "Done", copy: "Review, adjust if needed, then print or share the plan." },
+];
+
+const faqs = [
+  {
+    question: "Will teachers use it?",
+    answer:
+      "Teachers do not need to learn another system. The admin creates a clear plan that can be printed or shared in the usual way.",
+  },
+  {
+    question: "Is it secure?",
+    answer:
+      "You can create a plan without an account. If you choose to sign up, your saved school information stays linked to your account.",
+  },
+  {
+    question: "What if I make a mistake?",
+    answer:
+      "You can change an absence or substitute before printing. Timely lets you review the full plan first.",
+  },
+];
 
 function Landing() {
-  const { scrollY } = useScroll();
-  const navbarBlur = useTransform(scrollY, [0, 60], [0, 1]);
-
   return (
-    <div className="landing-page min-h-screen overflow-x-hidden">
-      {/* Navbar */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="landing-navbar sticky top-0 z-30"
-        style={{ "--navbar-blur": navbarBlur } as never}
-      >
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2">
+    <main className="timely-landing">
+      <header className="landing-navbar sticky top-0 z-40">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link to="/" className="flex items-center gap-2 text-foreground" aria-label="Timely home">
             <Logo size="md" />
-            <span className="truncate text-base font-semibold tracking-tight text-foreground">Timely</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm" variant="ghost" className="text-foreground hover:bg-white/50 hover:text-foreground">
-              <Link to="/student">Student Portal</Link>
+            <span className="text-lg font-bold">Timely</span>
+          </Link>
+          <nav className="flex items-center gap-2" aria-label="Main navigation">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link to="/student">Student portal</Link>
             </Button>
-            <Button
-              asChild
-              size="sm"
-              variant="ghost"
-              className="landing-nav-btn text-foreground hover:bg-white/50 hover:text-foreground"
-            >
+            <Button asChild variant="ghost" size="sm">
               <Link to="/auth" search={{ tab: "login" }}>Log in</Link>
             </Button>
-            <Button asChild size="sm" className="landing-nav-btn-primary hover:bg-primary/90">
+            <Button asChild size="sm" className="landing-nav-btn-primary">
               <Link to="/auth" search={{ tab: "signup" }}>Sign up</Link>
             </Button>
-            <Button asChild size="sm" className="landing-nav-btn-primary hover:bg-primary/90">
-              <Link to="/app">Open app <ArrowRight /></Link>
-            </Button>
-          </div>
+          </nav>
         </div>
-      </motion.header>
+      </header>
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden px-4 py-16 sm:px-6 sm:py-24">
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.6, delay: 0.15 }}
-          >
-            <span className="glass-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-foreground">
-              <Check className="size-3.5 text-primary" /> Automated cover scheduling for schools
-            </span>
-          </motion.div>
-
-          <motion.h1
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
-          >
-            Never scramble for a <span className="text-primary text-glow">substitute</span>{" "}
-            <span className="text-primary text-glow">teacher</span> again.
-          </motion.h1>
-
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.6, delay: 0.45 }}
-            className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl"
-          >
-            Timely reads your schedule and today's absences, then builds a fair, conflict-free
-            substitution plan in one tap — ready to print, export or save.
-          </motion.p>
-
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
-          >
-            <Button asChild size="lg" className="landing-cta-btn w-full sm:w-auto">
-              <Link to="/app">Launch the dashboard <ArrowRight /></Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="glass-pill w-full sm:w-auto"
+      <section className="hero-section px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-4xl text-center">
+            <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.5 }}>
+              <span className="landing-eyebrow"><Users className="size-4" /> Built for busy school mornings</span>
+            </motion.div>
+            <motion.h1
+              initial="hidden"
+              animate="visible"
+              variants={reveal}
+              transition={{ duration: 0.55, delay: 0.08 }}
+              className="mt-5 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
             >
-              <a href="#how-it-works">See how it works</a>
-            </Button>
-          </motion.div>
-        </div>
-
-        {/* Differentiators */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportConfig}
-          transition={{ duration: 0.6, staggerChildren: 0.15 }}
-          className="mx-auto mt-14 max-w-7xl"
-        >
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { k: "No accounts needed", v: "Open the dashboard and start scheduling right away — no sign-up, no setup delays." },
-              { k: "Works in the browser", v: "Everything runs locally on your device, so your staff data never leaves the school." },
-              { k: "Built for the bell", v: "Generate, print and export a fair cover plan in under a minute — even on the busiest mornings." },
-            ].map((item, i) => (
-              <motion.div
-                key={item.k}
-                variants={fadeUp}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="glass-card px-5 py-5 text-center"
-              >
-                <p className="text-base font-semibold text-primary text-glow">{item.k}</p>
-                <p className="mt-2 text-sm text-muted-foreground">{item.v}</p>
-              </motion.div>
-            ))}
+              Never scramble for a substitute teacher again
+            </motion.h1>
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              variants={reveal}
+              transition={{ duration: 0.55, delay: 0.16 }}
+              className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-xl"
+            >
+              Generate fair, conflict-free substitution plans in 90 seconds — ready to print, no setup needed.
+            </motion.p>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={reveal}
+              transition={{ duration: 0.55, delay: 0.24 }}
+              className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:justify-center"
+            >
+              <Button asChild size="lg" className="landing-cta-btn cta-pulse w-full sm:w-auto">
+                <Link to="/app">Launch Dashboard <ArrowRight /></Link>
+              </Button>
+              <Button asChild size="lg" variant="ghost" className="landing-light-cta w-full sm:w-auto">
+                <a href="#how-it-works">See How It Works</a>
+              </Button>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Stats */}
       <motion.section
-        variants={fadeUp}
+        id="why-it-matters"
         initial="hidden"
         whileInView="visible"
-        viewport={viewportConfig}
-        transition={{ duration: 0.6, staggerChildren: 0.15 }}
-        className="px-4 sm:px-6"
+        viewport={viewport}
+        variants={reveal}
+        className="landing-section landing-section-soft"
       >
-        <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-3">
-          {STATS.map((s, i) => (
-            <motion.div
-              key={s.k}
-              variants={fadeUp}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="glass-card px-5 py-5 text-center"
-            >
-              <p className="text-2xl font-semibold text-primary text-glow">{s.k}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* Features */}
-      <motion.section
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportConfig}
-        transition={{ duration: 0.6, staggerChildren: 0.15 }}
-        className="px-4 py-16 sm:px-6"
-      >
-        <div className="mx-auto max-w-7xl">
-          <motion.h2
-            variants={fadeUp}
-            transition={{ duration: 0.6 }}
-            className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl"
-          >
-            Everything a timetable in-charge needs
-          </motion.h2>
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-2 max-w-2xl text-muted-foreground"
-          >
-            Four screens, zero spreadsheets. Built for the ten minutes before the first bell.
-          </motion.p>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <motion.article
-                key={f.title}
-                variants={fadeUp}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="glass-card rounded-xl px-5 py-5"
-              >
-                <span className="feature-icon grid size-10 place-items-center rounded-xl">
-                  <f.icon className="size-5 text-primary" />
-                </span>
-                <h3 className="mt-4 text-base font-semibold lg:text-lg">{f.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground lg:text-base">{f.body}</p>
-                <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
-                  {f.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground lg:text-base">
-                      <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-secondary" />
-                      <span className="min-w-0">{p}</span>
-                    </li>
-                  ))}
-                </ul>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="section-heading">
+            <span>Why this matters</span>
+            <h2>A calmer start for the whole school</h2>
+            <p>When someone is absent, the admin team carries the pressure. Timely helps you act quickly without losing fairness.</p>
+          </div>
+          <div className="mt-10 grid gap-8 md:grid-cols-3">
+            {problems.map((problem, index) => (
+              <motion.article key={problem.title} variants={reveal} transition={{ delay: index * 0.08 }} className="problem-item">
+                <span className="problem-icon"><problem.icon className="size-5" /></span>
+                <h3>{problem.title}</h3>
+                <p>{problem.copy}</p>
               </motion.article>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* How it works */}
-      <motion.section
-        id="how-it-works"
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportConfig}
-        transition={{ duration: 0.6, staggerChildren: 0.15 }}
-        className="px-4 py-16 sm:px-6"
-      >
-        <div className="mx-auto max-w-7xl">
-          <motion.h2
-            variants={fadeUp}
-            transition={{ duration: 0.6 }}
-            className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl"
-          >
-            How it works
-          </motion.h2>
-          <ol className="mt-10 grid gap-4 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <motion.li
-                key={s.n}
-                variants={fadeUp}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="glass-card px-5 py-6"
+      <section className="landing-section">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+            <span>Fast, fair, simple</span>
+            <h2>Less admin. More confidence.</h2>
+          </motion.div>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {benefits.map((benefit, index) => (
+              <motion.article
+                key={benefit.label}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                variants={reveal}
+                transition={{ delay: index * 0.08 }}
+                className="landing-glass-card"
               >
-                <p className="text-3xl font-semibold text-secondary/30">{s.n}</p>
-                <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+                <span className="benefit-icon"><benefit.icon className="size-5" /></span>
+                <p className="benefit-label">{benefit.label}</p>
+                <h3>{benefit.stat}</h3>
+                <p>{benefit.copy}</p>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="landing-section landing-section-soft scroll-mt-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+            <span>How it works</span>
+            <h2>From absences to a fair plan in three steps</h2>
+          </motion.div>
+          <ol className="steps-list mt-12">
+            {steps.map((step, index) => (
+              <motion.li
+                key={step.number}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                variants={reveal}
+                transition={{ delay: index * 0.1 }}
+                className="step-item"
+              >
+                <span className="step-number">{step.number}</span>
+                <div><h3>{step.title}</h3><p>{step.copy}</p></div>
+                {index < steps.length - 1 && <ArrowRight className="step-arrow" aria-hidden="true" />}
               </motion.li>
             ))}
           </ol>
         </div>
-      </motion.section>
+      </section>
 
-      {/* CTA */}
-      <motion.section
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportConfig}
-        transition={{ duration: 0.6 }}
-        className="px-4 pb-20 sm:px-6"
-      >
-        <div className="glass-card mx-auto max-w-7xl px-6 py-12 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight text-glow sm:text-3xl lg:text-4xl">
-            Ready for tomorrow morning?
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            Set up your schedule, log today's absentees, and generate a fair cover plan in seconds.
-          </p>
-          <Button asChild size="lg" className="landing-cta-btn mt-7">
-            <Link to="/app">Open Timely dashboard <ArrowRight /></Link>
-          </Button>
+      <motion.section initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="landing-section">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <figure className="testimonial-card">
+            <div className="quote-mark" aria-hidden="true">“</div>
+            <blockquote>Saves us 30 minutes. Fairness logic means no teacher gets burned out.</blockquote>
+          </figure>
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <motion.footer
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportConfig}
-        transition={{ duration: 0.6 }}
-        className="border-t border-border px-4 py-10 sm:px-6"
-      >
-        <div className="mx-auto grid max-w-7xl gap-8 text-sm text-muted-foreground sm:grid-cols-3">
-          <div>
-            <p className="flex items-center gap-2 font-semibold text-foreground">
-              <Logo size="sm" /> Timely
-            </p>
-            <p className="mt-2">Smarter cover, every day.</p>
-          </div>
-          <div>
-            <p className="font-semibold text-foreground">Developed by</p>
-            <p className="mt-2">Team Aeronics</p>
-          </div>
-          <div>
-            <p className="font-semibold text-foreground">Support</p>
-            <a href="mailto:developerstimely@gmail.com" className="mt-2 block hover:text-foreground">
-              developerstimely@gmail.com
-            </a>
-            <Link to="/student" className="mt-2 block font-medium text-primary hover:underline">
-              Student Portal
-            </Link>
+      <section className="landing-section landing-section-soft">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+            <span>FAQ</span>
+            <h2>Questions school admins ask</h2>
+          </motion.div>
+          <div className="mt-10 space-y-3">
+            {faqs.map((faq, index) => (
+              <motion.details
+                key={faq.question}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                variants={reveal}
+                transition={{ delay: index * 0.06 }}
+                className="faq-item"
+              >
+                <summary><span>{faq.question}</span><ChevronDown className="size-5" /></summary>
+                <p>{faq.answer}</p>
+              </motion.details>
+            ))}
           </div>
         </div>
-        <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
-          Timely Substitution App — Automated teacher substitution scheduling for schools.
-        </p>
-      </motion.footer>
-    </div>
+      </section>
+
+      <footer className="landing-footer">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-9 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <Link to="/" className="flex items-center gap-2 text-foreground"><Logo size="sm" /><span className="font-bold">Timely</span></Link>
+          <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:gap-6">
+            <Link to="/student">Student portal</Link>
+            <Link to="/auth" search={{ tab: "login" }}>Log in</Link>
+            <Link to="/auth" search={{ tab: "signup" }}>Sign up</Link>
+            <a href="mailto:developerstimely@gmail.com">developerstimely@gmail.com</a>
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 }
