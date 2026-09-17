@@ -190,8 +190,8 @@ export function mergeTeachers(existing: Teacher[], imported: Teacher[]): Teacher
 export function downloadTimetableTemplate() {
   const header = ["Teacher", "Subject", "Category", ...PERIODS.map((p) => `P${p}`)];
   const rows = [
-    ["Anita Sharma", "Mathematics", "PGT", "XII B 1-6", "XI A 1-3", "Free", "X B 2,4", "Free", "XII B+G 1-6", "Free", "Free"],
-    ["Rahul Verma", "Physics", "TGT", "Free", "XI A 1-3", "XII B 2,5", "Free", "Free", "XI C 1-6", "Free", "Free"],
+    ["Teacher name 1", "Mathematics", "PGT", "XII B 1-6", "XI A 1-3", "Free", "X B 2,4", "Free", "XII B+G 1-6", "Free", "Free"],
+    ["Teacher name 2", "Physics", "TGT", "Free", "XI A 1-3", "XII B 2,5", "Free", "Free", "XI C 1-6", "Free", "Free"],
   ];
   const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
   const wb = XLSX.utils.book_new();
