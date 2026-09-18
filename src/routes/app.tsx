@@ -98,6 +98,7 @@ function Index() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [teachersLoaded, setTeachersLoaded] = useState(false);
   const [schoolId, setSchoolId] = useState("");
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const activeAbsences = useMemo(() => {
     return absences.filter((absence) => absence.periods.length > 0);
@@ -138,10 +139,15 @@ function Index() {
 
           const cloudSaved = await fetchSavedDays();
           setSaved(cloudSaved);
+          const savedForDate = cloudSaved.find((entry) => entry.date === date);
+          if (savedForDate) setSchedule(savedForDate.rows);
         } else {
           // Load from localStorage for unauthenticated users
           setTeachers([]);
-          setSaved(loadSaved());
+          const localSaved = loadSaved();
+          setSaved(localSaved);
+          const savedForDate = localSaved.find((entry) => entry.date === date);
+          if (savedForDate) setSchedule(savedForDate.rows);
           setTeachersLoaded(true);
         }
         setDataLoaded(true);
@@ -177,21 +183,43 @@ function Index() {
   );
 
   const persistSchedule = async (rows: typeof schedule) => {
-    if (!user || !schoolId) return;
+    if (!user) {
+      setSaved(saveSchedule(date, rows));
+      return;
+    }
+    if (!schoolId) {
+      throw new Error("Your School ID is missing. Open Settings, save it, and generate the schedule again.");
+    }
+    await saveDay(user.id, date, rows);
     await saveSubstitutions(user.id, schoolId, date, rows);
+    setSaved(await fetchSavedDays());
     await queryClient.invalidateQueries({ queryKey: ["substitutions"] });
   };
 
-  const generate = () => {
+  useEffect(() => {
+    if (!dataLoaded) return;
+    const savedForDate = saved.find((entry) => entry.date === date);
+    setSchedule(savedForDate?.rows ?? []);
+  }, [dataLoaded, date, saved]);
+
+  const generate = async () => {
+    setSyncError(null);
     const rows = generateSchedule(
       teachers,
       activeAbsences,
       dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1,
     );
     setSchedule(rows);
-    void persistSchedule(rows).catch((error) => {
+    try {
+      await persistSchedule(rows);
+    } catch (error) {
       console.error("Failed to sync substitutions:", error);
-    });
+      setSyncError(
+        error instanceof Error
+          ? `Schedule generated, but it could not be saved: ${error.message}`
+          : "Schedule generated, but it could not be saved. Please try Save day again.",
+      );
+    }
   };
 
   const unassigned = schedule.filter((r) => !r.substituteId).length;
@@ -214,6 +242,11 @@ function Index() {
     setSchedule(updatedRows);
     void persistSchedule(updatedRows).catch((error) => {
       console.error("Failed to sync substitutions:", error);
+      setSyncError(
+        error instanceof Error
+          ? `Override updated, but it could not be saved: ${error.message}`
+          : "Override updated, but it could not be saved.",
+      );
     });
     setOverrideIndex(null);
   };
@@ -225,16 +258,18 @@ function Index() {
         // Save to cloud for authenticated users
         await saveDay(user.id, date, schedule);
         await persistSchedule(schedule);
-        const cloudSaved = await fetchSavedDays();
-        setSaved(cloudSaved);
+        setSyncError(null);
       } else {
         // Save to localStorage for unauthenticated users
         setSaved(saveSchedule(date, schedule));
       }
     } catch (error) {
       console.error("Failed to save schedule:", error);
-      // Fallback to localStorage
-      setSaved(saveSchedule(date, schedule));
+      setSyncError(
+        error instanceof Error
+          ? `Schedule could not be saved: ${error.message}`
+          : "Schedule could not be saved. Please try again.",
+      );
     }
   };
 
@@ -539,6 +574,12 @@ function Index() {
                   )}
                 </div>
               </header>
+
+              {syncError && (
+                <p role="alert" className="border-b border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive sm:px-5">
+                  {syncError}
+                </p>
+              )}
 
               {schedule.length === 0 ? (
                 <p className="px-5 py-10 text-center text-sm text-muted-foreground">

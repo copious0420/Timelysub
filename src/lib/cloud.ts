@@ -179,7 +179,9 @@ export async function saveSubstitutions(
   }));
   if (records.length === 0) return;
 
-  const { error } = await supabase.from("substitutions").insert(records);
+  const { error } = await supabase.from("substitutions").upsert(records, {
+    onConflict: "school_id,date,period,class_name",
+  });
   if (error) throw error;
 }
 
