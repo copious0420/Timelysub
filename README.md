@@ -20,7 +20,7 @@ This project was built with [Lovable](https://lovable.dev).
 
 ## Using the existing backend with a Lovable frontend
 
-This repository uses the existing Supabase project as its backend. The frontend expects these environment variables:
+This repository uses Supabase project `szzopeokulxboadthqkc` as its backend. The frontend expects these environment variables:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
@@ -28,6 +28,27 @@ This repository uses the existing Supabase project as its backend. The frontend 
 When moving UI code from another Lovable project, keep the files under `src/integrations/supabase/`, `src/lib/cloud.ts`, `src/lib/substitution.ts`, and the `supabase/migrations/` directory from this repository. Those files preserve the current authentication flow, database types, row-level security assumptions, teacher roster, saved schedules, and substitution records. Adapt the new screens to those helpers instead of creating a second Supabase project or changing the existing database schema.
 
 The student noticeboard uses the `supabase/functions/student-substitutions` Edge Function. Deploy it with the Supabase CLI and ensure the platform provides `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the function. The service-role key must never be exposed to the browser. Also enable **Authentication → Password Security → Leaked Password Protection** in the Supabase Dashboard.
+
+### Create the backend in Supabase
+
+The repository contains the complete database schema in `supabase/migrations/`. Run these commands from the repository folder after signing in to the Supabase CLI:
+
+```sh
+npx supabase login
+npx supabase link --project-ref szzopeokulxboadthqkc
+npx supabase db push
+npx supabase functions deploy student-substitutions
+```
+
+The `db push` command creates the `profiles`, `teachers`, `saved_schedules`, and `substitutions` tables, their RLS policies, and the required functions. The migrations are ordered and safe for a new project.
+
+If the Edge Function reports that `SUPABASE_SERVICE_ROLE_KEY` is missing, add that secret in the Supabase Dashboard under **Project Settings → Edge Functions → Secrets**, or set it from a local terminal:
+
+```sh
+npx supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+Never place the service-role key in `.env.local`, Vercel `VITE_*` variables, source files, or Git.
 
 Google sign-in uses Supabase's native OAuth flow. In the Supabase Dashboard, enable Google under **Authentication → Sign In / Providers**, then add the deployed app URL followed by `/auth` to **Authentication → URL Configuration → Redirect URLs**. For local development, add `http://localhost:3000/auth` as well if that is the URL shown by Vite.
 

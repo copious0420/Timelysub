@@ -1,8 +1,8 @@
 ALTER TABLE public.profiles
-  ADD COLUMN school_id TEXT NOT NULL DEFAULT '',
-  ADD COLUMN student_passcode TEXT NOT NULL DEFAULT '';
+  ADD COLUMN IF NOT EXISTS school_id TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS student_passcode TEXT NOT NULL DEFAULT '';
 
-CREATE UNIQUE INDEX profiles_school_id_unique
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_school_id_unique
   ON public.profiles (school_id)
   WHERE school_id <> '';
 
