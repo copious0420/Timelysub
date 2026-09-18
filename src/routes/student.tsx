@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchStudentSubstitutions, verifyStudentAccess, type SubstitutionRecord } from "@/lib/cloud";
 
-const STUDENT_ACCESS_KEY = "timely.studentAccess";
 type StudentScheduleRow = {
   period: number;
   classSection: string;
@@ -37,19 +36,26 @@ function todayIso() {
 }
 
 function StudentNoticeboard() {
-  const [verifiedSchoolId, setVerifiedSchoolId] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return window.localStorage.getItem(STUDENT_ACCESS_KEY);
-  });
+  const [access, setAccess] = useState<{ schoolId: string; passcode: string } | null>(null);
 
-  if (!verifiedSchoolId) {
-    return <StudentAccessGate onVerified={setVerifiedSchoolId} />;
+  if (!access) {
+    return <StudentAccessGate onVerified={setAccess} />;
   }
 
-  return <StudentSchedule schoolId={verifiedSchoolId} />;
+  return (
+    <StudentSchedule
+      schoolId={access.schoolId}
+      passcode={access.passcode}
+      onChangeSchool={() => setAccess(null)}
+    />
+  );
 }
 
-function StudentAccessGate({ onVerified }: { onVerified: (schoolId: string) => void }) {
+function StudentAccessGate({
+  onVerified,
+}: {
+  onVerified: (access: { schoolId: string; passcode: string }) => void;
+}) {
   const [schoolId, setSchoolId] = useState("");
   const [passcode, setPasscode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -66,8 +72,7 @@ function StudentAccessGate({ onVerified }: { onVerified: (schoolId: string) => v
         setError("That School ID and Student Passcode do not match.");
         return;
       }
-      window.localStorage.setItem(STUDENT_ACCESS_KEY, normalizedSchoolId);
-      onVerified(normalizedSchoolId);
+      onVerified({ schoolId: normalizedSchoolId, passcode: passcode.trim() });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not verify access. Please try again.");
     } finally {
@@ -122,13 +127,21 @@ function StudentAccessGate({ onVerified }: { onVerified: (schoolId: string) => v
   );
 }
 
-function StudentSchedule({ schoolId }: { schoolId: string }) {
+function StudentSchedule({
+  schoolId,
+  passcode,
+  onChangeSchool,
+}: {
+  schoolId: string;
+  passcode: string;
+  onChangeSchool: () => void;
+}) {
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const { data: substitutions = [], isError, isLoading } = useQuery<SubstitutionRecord[]>({
     queryKey: ["substitutions", schoolId, date],
-    queryFn: () => fetchStudentSubstitutions(schoolId, date),
+    queryFn: () => fetchStudentSubstitutions(schoolId, passcode, date),
     enabled: Boolean(schoolId && date),
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
@@ -189,10 +202,7 @@ function StudentSchedule({ schoolId }: { schoolId: string }) {
           <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
             <button
               type="button"
-              onClick={() => {
-                window.localStorage.removeItem(STUDENT_ACCESS_KEY);
-                window.location.reload();
-              }}
+              onClick={onChangeSchool}
               className="text-blue-800 underline-offset-4 hover:underline"
             >
               Change school

@@ -27,6 +27,10 @@ This repository uses the existing Supabase project as its backend. The frontend 
 
 When moving UI code from another Lovable project, keep the files under `src/integrations/supabase/`, `src/lib/cloud.ts`, `src/lib/substitution.ts`, and the `supabase/migrations/` directory from this repository. Those files preserve the current authentication flow, database types, row-level security assumptions, teacher roster, saved schedules, and substitution records. Adapt the new screens to those helpers instead of creating a second Supabase project or changing the existing database schema.
 
+The student noticeboard uses the `supabase/functions/student-substitutions` Edge Function. Deploy it with the Supabase CLI and ensure the platform provides `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the function. The service-role key must never be exposed to the browser. Also enable **Authentication → Password Security → Leaked Password Protection** in the Supabase Dashboard.
+
+Google sign-in uses Supabase's native OAuth flow. In the Supabase Dashboard, enable Google under **Authentication → Sign In / Providers**, then add the deployed app URL followed by `/auth` to **Authentication → URL Configuration → Redirect URLs**. For local development, add `http://localhost:3000/auth` as well if that is the URL shown by Vite.
+
 ## Build with Lovable
 
 Continue developing this project in the [Lovable editor](https://lovable.dev/projects/18c2a928-59d2-4fce-8ae2-590ab7a5224c).

@@ -182,14 +182,18 @@ export async function saveSubstitutions(
 
 export async function fetchStudentSubstitutions(
   schoolId: string,
+  passcode: string,
   date: string,
 ): Promise<SubstitutionRecord[]> {
-  const { data, error } = await supabase.rpc("fetch_student_substitutions", {
-    requested_school_id: schoolId.trim().toUpperCase(),
-    requested_date: date,
+  const { data, error } = await supabase.functions.invoke("student-substitutions", {
+    body: {
+      schoolId: schoolId.trim().toUpperCase(),
+      passcode,
+      date,
+    },
   });
   if (error) throw error;
-  return (data ?? []).map((row) => ({
+  return ((data?.substitutions ?? []) as Database["public"]["Tables"]["substitutions"]["Row"][]).map((row) => ({
     schoolId: row.school_id,
     date: row.date,
     period: row.period,

@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase-config";
-import { lovable } from "@/integrations/lovable";
 import { upsertProfile } from "@/lib/cloud";
 
 export const Route = createFileRoute("/auth")({
@@ -115,15 +114,13 @@ function AuthPage() {
   const google = async () => {
     setError(null);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth`,
+      const { error: err } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        },
       });
-      if (result.error) throw result.error;
-      if (result.redirected) return;
-      // In the preview iframe the session is set directly; in a full browser
-      // OAuth will redirect back to this page and the useEffect above forwards
-      // an existing session to /app.
-      navigate({ to: "/app", replace: true });
+      if (err) throw err;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Google sign-in failed. Please try again.");
     }
