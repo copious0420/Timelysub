@@ -54,12 +54,15 @@ export async function upsertProfile(userId: string, profile: Profile) {
 }
 
 export async function verifyStudentAccess(schoolId: string, studentPasscode: string) {
-  const { data, error } = await supabase.rpc("verify_student_access", {
-    requested_school_id: schoolId,
-    requested_passcode: studentPasscode,
+  const { error } = await supabase.functions.invoke("student-substitutions", {
+    body: {
+      schoolId: schoolId.trim().toUpperCase(),
+      passcode: studentPasscode.trim(),
+      date: new Date().toISOString().slice(0, 10),
+    },
   });
   if (error) throw error;
-  return data;
+  return true;
 }
 
 export async function fetchTeachers(): Promise<Teacher[]> {

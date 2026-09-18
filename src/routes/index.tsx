@@ -113,7 +113,7 @@ function Landing() {
             <span className="text-lg font-bold">Timely</span>
           </Link>
           <nav className="flex items-center gap-2" aria-label="Main navigation">
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Button asChild variant="ghost" size="sm" className="px-2 text-xs sm:px-3 sm:text-sm">
               <Link to="/student">Student portal</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
