@@ -256,7 +256,6 @@ function Index() {
     try {
       if (user) {
         // Save to cloud for authenticated users
-        await saveDay(user.id, date, schedule);
         await persistSchedule(schedule);
         setSyncError(null);
       } else {
