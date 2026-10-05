@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import {
   CATEGORIES,
   type Assignment,
@@ -10,6 +11,14 @@ import type { SavedSchedule } from "@/lib/history";
 
 const toCategory = (v: string): Category =>
   (CATEGORIES as readonly string[]).includes(v) ? (v as Category) : "TGT";
+
+function localIsoDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export type Profile = {
   fullName: string;
@@ -58,7 +67,7 @@ export async function verifyStudentAccess(schoolId: string, studentPasscode: str
     body: {
       schoolId: schoolId.trim().toUpperCase(),
       passcode: studentPasscode.trim(),
-      date: new Date().toISOString().slice(0, 10),
+      date: localIsoDate(),
     },
   });
   if (error) throw error;

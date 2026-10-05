@@ -52,6 +52,7 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
       { title: "Dashboard — Timely Substitution App" },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       {
@@ -80,7 +81,21 @@ const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
 ];
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(date: string, weekday: "long" | "short" = "long") {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00Z`));
 }
 
 function Index() {
@@ -175,7 +190,7 @@ function Index() {
     };
 
     sync();
-  }, [teachers, user, dataLoaded]);
+  }, [teachers, user, dataLoaded, teachersLoaded]);
 
   const CurrentActiveAbsences = useMemo(
     () => absences.filter((a) => a.periods.length > 0),
@@ -462,12 +477,7 @@ function Index() {
             </h1>
 
             <p className="text-sm text-muted-foreground">
-              {new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {formatDateLabel(date)}
             </p>
           </div>
         </header>
@@ -720,12 +730,7 @@ function Index() {
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium">
-                        {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {formatDateLabel(s.date, "short")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {s.rows.length} assignments · saved {new Date(s.savedAt).toLocaleString()}

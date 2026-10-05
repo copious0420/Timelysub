@@ -15,20 +15,23 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Timely — Fair Teacher Substitution Plans in 90 Seconds" },
+      { title: "TimelySub — Fair Teacher Substitution Plans in 90 Seconds" },
       {
         name: "description",
         content:
-          "Generate fair, conflict-free teacher substitution plans in 90 seconds. Timely is simple, print-ready, and built for busy school mornings.",
+          "TimelySub helps schools generate fair, conflict-free teacher substitution plans in 90 seconds. Simple, print-ready cover schedules for busy school mornings.",
       },
-      { property: "og:title", content: "Timely — Substitute Plans Without the Morning Scramble" },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
+      { property: "og:title", content: "TimelySub — Substitute Plans Without the Morning Scramble" },
       {
         property: "og:description",
-        content: "A fast, fair and simple way for school admins to arrange teacher substitutions.",
+        content: "A fast, fair and simple way for school admins to arrange teacher substitutions with TimelySub.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://timelysub.vercel.app/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://timelysub.vercel.app/" }],
   }),
   component: Landing,
 });
@@ -106,6 +109,27 @@ const faqs = [
 function Landing() {
   return (
     <main className="timely-landing">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "TimelySub",
+            alternateName: "Timely",
+            url: "https://timelysub.vercel.app/",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            description:
+              "Fair, conflict-free teacher substitution planning for schools.",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+            },
+          }),
+        }}
+      />
       <header className="landing-navbar sticky top-0 z-40">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-foreground" aria-label="Timely home">

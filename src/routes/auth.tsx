@@ -17,6 +17,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Timely Substitution App" },
+      { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
         content:

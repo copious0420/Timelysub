@@ -22,6 +22,7 @@ export const Route = createFileRoute("/student")({
   head: () => ({
     meta: [
       { title: "Student Noticeboard — Timely" },
+      { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
         content: "Read-only daily substitution schedule for students.",
@@ -32,7 +33,11 @@ export const Route = createFileRoute("/student")({
 });
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function StudentNoticeboard() {
@@ -139,19 +144,13 @@ function StudentSchedule({
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-  const { data: substitutions = [], isError, isLoading } = useQuery<SubstitutionRecord[]>({
+  const { data: substitutions = [], isLoading } = useQuery<SubstitutionRecord[]>({
     queryKey: ["substitutions", schoolId, date],
     queryFn: () => fetchStudentSubstitutions(schoolId, passcode, date),
     enabled: Boolean(schoolId && date),
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
   });
-
-  console.log("[Student View] Fetched Substitutions:", substitutions);
-
-  if (isError) {
-    console.error("[Student View] Failed to fetch substitutions.");
-  }
 
   const schedule = useMemo(
     () =>

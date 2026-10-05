@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,7 +16,7 @@ type Props = {
 
 export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChange }: Props) {
   const get = (id: string) => absences.find((a) => a.teacherId === id);
-  const scheduleDate = new Date(`${date}T00:00:00`);
+  const scheduleDate = useMemo(() => new Date(`${date}T00:00:00`), [date]);
   const [selectedDay, setSelectedDay] = useState<number>(dayIndexForDate(scheduleDate) ?? 1);
 
   useEffect(() => {
