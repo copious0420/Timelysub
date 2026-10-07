@@ -6,8 +6,11 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig({
+const config = defineConfig({
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     build: {
       // TanStack Start's client and SSR bundles include large route and xlsx chunks.
       chunkSizeWarningLimit: 1000,
@@ -30,3 +33,20 @@ export default defineConfig({
     server: { entry: "server" },
   },
 });
+
+export default async (env: Parameters<typeof config>[0]) => {
+  const resolvedConfig = await config(env);
+
+  if (resolvedConfig.plugins) {
+    resolvedConfig.plugins = resolvedConfig.plugins.filter(
+      (plugin) =>
+        Array.isArray(plugin) ||
+        !plugin ||
+        typeof plugin !== "object" ||
+        !("name" in plugin) ||
+        plugin.name !== "vite-tsconfig-paths",
+    );
+  }
+
+  return resolvedConfig;
+};
