@@ -8,6 +8,10 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   vite: {
+    build: {
+      // TanStack Start's client and SSR bundles include large route and xlsx chunks.
+      chunkSizeWarningLimit: 1000,
+    },
     // These are public browser credentials. Keep them available when an
     // external host (such as Vercel) builds without Lovable's injected env.
     define: {
