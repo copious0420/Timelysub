@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ChevronDown,
   Clock3,
   Coffee,
+  Copy,
   Scale,
   Sparkles,
   Users,
@@ -90,25 +92,134 @@ const steps = [
 
 const faqs = [
   {
-    question: "Will teachers use it?",
+    question: "Do teachers need to create accounts?",
     answer:
-      "Teachers do not need to learn another system. The admin creates a clear plan that can be printed or shared in the usual way.",
+      "No. Only the admin logs in. Teachers and students never need to touch the app — they just receive the printed or shared plan.",
   },
   {
-    question: "Is it secure?",
+    question: "Is our school's data secure?",
     answer:
-      "You can create a plan without an account. If you choose to sign up, your saved school information stays linked to your account.",
+      "Yes. Timely runs in your browser and your data is stored securely in the cloud, tied to your school account only. No other school can access your data.",
   },
   {
-    question: "What if I make a mistake?",
+    question: "What if I want to override a substitution?",
     answer:
-      "You can change an absence or substitute before printing. Timely lets you review the full plan first.",
+      "Every assignment can be manually overridden with one click using the Override drawer in the dashboard. You're always in control.",
+  },
+  {
+    question: "Is Timely free for government schools?",
+    answer: "Yes. Timely is free for government schools. No per-teacher fees, no seat charges, no hidden costs.",
+  },
+  {
+    question: "How does the fairness algorithm work?",
+    answer: "Timely assigns substitutes using a 4-level priority: same subject first, then eligible category (PGT covers TGT/PRT), then the teacher with the lowest substitution load today, then alphabetical as a tiebreaker. No manual guesswork.",
+  },
+  {
+    question: "Can students see their substitution plan?",
+    answer: "Yes. There's a public student portal protected by a school password set by the admin. Students can check their plan without creating any account.",
   },
 ];
 
+function useCursor() {
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const desktopPointer = window.matchMedia("(pointer: fine)");
+    if (!desktopPointer.matches) return;
+
+    document.body.classList.add("landing-cursor-active");
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let ringX = 0;
+    let ringY = 0;
+    let frame = 0;
+
+    const move = (event: MouseEvent) => {
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+      if (dotRef.current) dotRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    };
+    const animate = () => {
+      ringX += (mouseX - ringX) * 0.1;
+      ringY += (mouseY - ringY) * 0.1;
+      if (ringRef.current) ringRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+      frame = requestAnimationFrame(animate);
+    };
+
+    document.addEventListener("mousemove", move);
+    frame = requestAnimationFrame(animate);
+    return () => {
+      document.removeEventListener("mousemove", move);
+      cancelAnimationFrame(frame);
+      document.body.classList.remove("landing-cursor-active");
+    };
+  }, []);
+
+  return { dotRef, ringRef };
+}
+
+function CustomCursor() {
+  const { dotRef, ringRef } = useCursor();
+  return (
+    <>
+      <div ref={dotRef} className="timely-cursor-dot" aria-hidden="true" />
+      <div ref={ringRef} className="timely-cursor-ring" aria-hidden="true" />
+    </>
+  );
+}
+
+function SupportOptions() {
+  const [open, setOpen] = useState<"feature" | "support" | null>(null);
+  const [copied, setCopied] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) setOpen(null);
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
+
+  const copyEmail = async () => {
+    await navigator.clipboard.writeText("developerstimely@gmail.com");
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div ref={containerRef} className="support-options">
+      {(["feature", "support"] as const).map((type) => {
+        const isOpen = open === type;
+        const label = type === "feature" ? "💬 Suggest a Feature" : "🛠 Get Support";
+        return (
+          <motion.div key={type} layout className={isOpen ? "glass support-option support-option-open" : "support-option"}>
+            <button type="button" className="support-pill" onClick={() => setOpen(isOpen ? null : type)} aria-expanded={isOpen}>
+              {label}
+            </button>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="support-card-content">
+                  <span>Email us at developerstimely@gmail.com</span>
+                  <button type="button" onClick={copyEmail} className="support-copy" aria-label="Copy support email"><Copy className="size-4" /></button>
+                  <AnimatePresence>{copied && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="copied-note">Copied!</motion.span>}</AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Landing() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   return (
     <main className="timely-landing">
+      <CustomCursor />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -277,6 +388,7 @@ function Landing() {
             <div className="quote-mark" aria-hidden="true">“</div>
             <blockquote>Saves us 30 minutes. Fairness logic means no teacher gets burned out.</blockquote>
           </figure>
+          <SupportOptions />
         </div>
       </motion.section>
 
@@ -287,20 +399,23 @@ function Landing() {
             <h2>Questions school admins ask</h2>
           </motion.div>
           <div className="mt-10 space-y-3">
-            {faqs.map((faq, index) => (
-              <motion.details
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index;
+              return (
+              <motion.article
                 key={faq.question}
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewport}
                 variants={reveal}
                 transition={{ delay: index * 0.06 }}
-                className="faq-item"
+                className="glass faq-item"
               >
-                <summary><span>{faq.question}</span><ChevronDown className="size-5" /></summary>
-                <p>{faq.answer}</p>
-              </motion.details>
-            ))}
+                <button type="button" className="faq-question" onClick={() => setOpenFaq(isOpen ? null : index)} aria-expanded={isOpen}><span>{faq.question}</span><ChevronDown className="size-5" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }} /></button>
+                <AnimatePresence initial={false}>{isOpen && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="faq-answer"><p>{faq.answer}</p></motion.div>}</AnimatePresence>
+              </motion.article>
+              );
+            })}
           </div>
         </div>
       </section>
