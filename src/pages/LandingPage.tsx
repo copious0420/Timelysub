@@ -80,6 +80,7 @@ const PAGE_CSS = `
   .tl-badge, .tl-marquee-track, .tl-panel { animation: none; }
   .tl-px { animation: none; opacity: 0.5; }
 }
+html.tl-dark, html.tl-dark body { background: #000000 !important; color-scheme: dark; }
 body.tl-cursor, body.tl-cursor * { cursor: none !important; }
 `;
 
@@ -1064,6 +1065,11 @@ function Footer() {
 
 export function LandingPage() {
   const reduced = useReducedMotion() ?? false;
+
+  useEffect(() => {
+    document.documentElement.classList.add("tl-dark");
+    return () => document.documentElement.classList.remove("tl-dark");
+  }, []);
 
   return (
     <main
