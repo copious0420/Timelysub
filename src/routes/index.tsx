@@ -1,3 +1,4 @@
+import { LandingPage } from "@/pages/LandingPage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "https://timelysub.vercel.app/" }],
   }),
-  component: Landing,
+  component: LandingPage,
 });
 
 const reveal = {
