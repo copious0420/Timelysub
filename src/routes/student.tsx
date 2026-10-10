@@ -183,7 +183,7 @@ function StudentSchedule({
   );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100 px-4 py-6 text-slate-900 sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-black px-4 py-6 text-white sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl">
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
@@ -191,10 +191,10 @@ function StudentSchedule({
             <div>
               <p className="text-lg font-semibold tracking-tight">Timely — Student Noticeboard</p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 font-medium text-blue-900 backdrop-blur-md">
+                <span className="rounded-full border border-white/50 bg-white/10 px-2.5 py-1 font-medium text-white backdrop-blur-md">
                   Read-Only View
                 </span>
-                <span className="text-slate-600">School ID: {schoolId}</span>
+                <span className="text-white/60">School ID: {schoolId}</span>
               </div>
             </div>
           </div>
@@ -202,11 +202,11 @@ function StudentSchedule({
             <button
               type="button"
               onClick={onChangeSchool}
-              className="text-blue-800 underline-offset-4 hover:underline"
+              className="text-accent-sky underline-offset-4 hover:underline"
             >
               Change school
             </button>
-            <Link to="/" className="text-blue-800 underline-offset-4 hover:underline">
+            <Link to="/" className="text-accent-sky underline-offset-4 hover:underline">
               Back to Timely
             </Link>
           </div>
@@ -214,7 +214,7 @@ function StudentSchedule({
 
         <section className="glass-regular mb-6 rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-white/80">
               Date
               <span className="relative">
                 <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-700" />
@@ -226,7 +226,7 @@ function StudentSchedule({
                 />
               </span>
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-white/80">
               Class / Section
               <select
                 value={classFilter}
@@ -241,7 +241,7 @@ function StudentSchedule({
                 ))}
               </select>
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-white/80">
               Search schedule
               <span className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-700" />
@@ -259,14 +259,14 @@ function StudentSchedule({
 
         <section aria-live="polite" className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900">Today&apos;s substitutions</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="text-xl font-semibold tracking-tight text-white">Today&apos;s substitutions</h1>
+            <p className="text-sm text-white/60">
               {filteredSchedule.length} of {schedule.length} periods
             </p>
           </div>
 
           {isLoading || schedule.length === 0 ? (
-            <div className="glass-regular rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-slate-600 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
+            <div className="glass-regular rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-white/60 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
               No substitution
             </div>
           ) : (
@@ -289,14 +289,14 @@ function ScheduleCard({ row }: { row: StudentScheduleRow }) {
             P{row.period}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-slate-900">
+            <p className="truncate text-base font-semibold text-white">
               P{row.period} · {row.classSection}
             </p>
-            <p className="mt-1 text-sm text-slate-600">Regular teacher: {row.absentTeacherName}</p>
+            <p className="mt-1 text-sm text-white/60">Regular teacher: {row.absentTeacherName}</p>
           </div>
         </div>
         <div className="min-w-0 sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-white/50">
             {hasSubstitute ? `Substituted: ${row.substituteName}` : "Substitute teacher"}
           </p>
           <span
