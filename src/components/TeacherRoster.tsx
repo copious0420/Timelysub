@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,9 @@ import { PERIODS, CATEGORIES, type Teacher } from "@/lib/substitution";
 import { TimetableImport } from "@/components/TimetableImport";
 import { cn } from "@/lib/utils";
 import { inferTeacherCategoryFromClasses } from "@/lib/inferCategory";
-import { getTeacherScheduleForDate } from "@/lib/timetableParser";
+import { dayIndexForDate, getTeacherScheduleForDay } from "@/lib/timetableParser";
+
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
 type Props = {
   teachers: Teacher[];
@@ -19,6 +21,13 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
   const [draft, setDraft] = useState<Teacher | null>(null);
   const [categoryOverridden, setCategoryOverridden] = useState(false);
   const [newTeacherIds, setNewTeacherIds] = useState<Set<string>>(() => new Set());
+  const [selectedDay, setSelectedDay] = useState<number>(
+    () => dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1,
+  );
+
+  useEffect(() => {
+    setSelectedDay(dayIndexForDate(new Date(`${date}T00:00:00`)) ?? 1);
+  }, [date]);
 
   const startEdit = (t: Teacher) => {
     setEditingId(t.id);
@@ -107,8 +116,7 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
         : "border-secondary bg-secondary text-secondary-foreground",
       editing ? "cursor-pointer hover:opacity-80" : "cursor-default",
     );
-  const scheduleDate = new Date(`${date}T00:00:00`);
-  const dailySchedule = (teacher: Teacher) => getTeacherScheduleForDate(teacher, scheduleDate);
+  const dailySchedule = (teacher: Teacher) => getTeacherScheduleForDay(teacher, selectedDay);
 
   return (
     <section className="panel overflow-hidden">
@@ -118,6 +126,18 @@ export function TeacherRoster({ teachers, onChange, date }: Props) {
           <p className="text-sm text-muted-foreground">
             {teachers.length} teachers · enter a class for each assigned period
           </p>
+        </div>
+        <div className="col-span-2 flex flex-wrap gap-1 sm:order-last sm:col-span-1" role="group" aria-label="Select day">
+          {DAY_LABELS.map((label, i) => (
+            <Button
+              key={label}
+              size="sm"
+              variant={selectedDay === i + 1 ? "default" : "outline"}
+              onClick={() => setSelectedDay(i + 1)}
+            >
+              Day {i + 1} · {label}
+            </Button>
+          ))}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <TimetableImport teachers={teachers} onChange={onChange} />
