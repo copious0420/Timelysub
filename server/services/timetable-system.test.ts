@@ -8,7 +8,7 @@ import {
   validateTeacherLoad,
   validateCombinedSectionAssignment,
 } from "./timetableSolverService";
-import { solve, validateTimetable, type CoreInput } from "./timetableEngine";
+import { longestRunWith, solve, validateTimetable, type CoreInput } from "./timetableEngine";
 import {
   buildFallbackSubstitutionReason,
   getQualificationThresholdForGrade,
@@ -180,5 +180,30 @@ describe("database-backed timetable engine rules", () => {
     const result = solve(input);
     expect(result.ok).toBe(false);
     expect(result.errors.join(" ")).toContain("classes 11 and 12 can only be taught by a PGT");
+  });
+});
+
+describe("consecutive-period cap and lunch lock", () => {
+  it("never schedules a teacher for more than 3 periods in a row, and lunch breaks a run", () => {
+    const busy = (periods: number[]) => (p: number) => periods.includes(p);
+    expect(longestRunWith(busy([1, 2, 3]), 4, 1)).toBe(4);
+    expect(longestRunWith(busy([1, 2, 3, 4]), 5, 1)).toBe(1);
+    expect(longestRunWith(busy([5, 6]), 7, 1)).toBe(3);
+  });
+
+  it("solves a heavy teacher without 4+ consecutive periods and never puts a double across lunch", () => {
+    const input: CoreInput = {
+      classes: [{ id: "c1", grade: 9, label: "9-A" }, { id: "c2", grade: 9, label: "9-B" }],
+      teachers: [{ id: "t1", name: "Heavy", cat: "TGT", subjectIds: ["lab-c1", "lab-c2"], maxPerDay: 6, maxPerWeek: 30 }],
+      subjects: ["c1", "c2"].map((classId) => ({ id: `lab-${classId}`, name: "Physics", cat: "TGT" as const, weekly: 10, minPerDay: 0, maxPerDay: 2, priority: 5, doublePeriod: true, grades: [], streams: [], classIds: [classId] })),
+      assignments: ["c1", "c2"].map((classId) => ({ classId, subjectId: `lab-${classId}`, teacherId: "t1" })),
+    };
+    const result = solve(input, { seed: 3 });
+    expect(result.ok).toBe(true);
+    expect(validateTimetable(input, result.slots)).toEqual([]);
+    for (const day of [0, 1, 2, 3, 4, 5]) {
+      const periods = result.slots.filter((slot) => slot.day === day).map((slot) => slot.period).sort((a, b) => a - b);
+      for (const [first, second] of [[4, 5]]) expect(periods.includes(first) && periods.includes(second) && result.slots.some((slot) => slot.day === day && slot.period === first && result.slots.some((other) => other.day === day && other.period === second && other.classId === slot.classId && other.subjectId === slot.subjectId))).toBe(false);
+    }
   });
 });

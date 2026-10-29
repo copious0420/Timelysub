@@ -5,6 +5,17 @@ export const DAYS_PER_WEEK = 6;
 export const PERIODS_PER_DAY = 8;
 export const LUNCH_AFTER_PERIOD = 4;
 export const SLOTS_PER_WEEK = DAYS_PER_WEEK * PERIODS_PER_DAY;
+export const MAX_CONSECUTIVE_PERIODS = 3;
+
+/** Longest teaching run (lunch recess breaks a run) if `size` periods are added at `period`, given the day's busy periods (1-based). */
+export function longestRunWith(busy: (period: number) => boolean, period: number, size: number): number {
+  const lo = period <= LUNCH_AFTER_PERIOD ? 1 : LUNCH_AFTER_PERIOD + 1;
+  const hi = period <= LUNCH_AFTER_PERIOD ? LUNCH_AFTER_PERIOD : PERIODS_PER_DAY;
+  let start = period, end = period + size - 1;
+  while (start - 1 >= lo && busy(start - 1)) start--;
+  while (end + 1 <= hi && busy(end + 1)) end++;
+  return end - start + 1;
+}
 
 export interface CoreTeacher { id: string; name: string; cat: Cat; subjectIds: string[]; maxPerDay: number; maxPerWeek: number }
 export interface CoreClass { id: string; grade: number; label: string; stream?: string }
@@ -189,8 +200,11 @@ export function solve(input: CoreInput, opts: SolveOptions = {}): SolveResult {
             if (busyClass[slot] || busyTeacher[(pair.ti * DAYS_PER_WEEK + day) * PERIODS_PER_DAY + period - 1 + offset]) free = false;
           }
           if (!free) continue;
+          const teacherBase = (pair.ti * DAYS_PER_WEEK + day) * PERIODS_PER_DAY;
+          if (longestRunWith(p => !!busyTeacher[teacherBase + p - 1], period, size) > MAX_CONSECUTIVE_PERIODS) continue;
           let score = teacherDayLoad[pair.ti * DAYS_PER_WEEK + day] * 2 + have * 5 + (period - 1) * subject.priority * 0.35 + random();
           if (reduce > 0) score -= 40;
+          if (subject.doublePeriod && period + size - 1 === PERIODS_PER_DAY) score += 25;
           const before = period > 1 ? grid[(pair.ci * DAYS_PER_WEEK + day) * PERIODS_PER_DAY + period - 2] : -1;
           const after = period + size <= PERIODS_PER_DAY ? grid[(pair.ci * DAYS_PER_WEEK + day) * PERIODS_PER_DAY + period - 1 + size] : -1;
           if (before === pair.si || after === pair.si) score += 4;
@@ -271,6 +285,13 @@ export function validateTimetable(input: CoreInput, slots: CoreSlot[]): string[]
   }
   teacherDay.forEach((count, key) => { const [teacherId, day] = key.split("|"); const teacher = teachers.get(teacherId)!; if (count > teacher.maxPerDay) errors.push(`${teacher.name} has ${count} periods on day ${Number(day) + 1} (limit ${teacher.maxPerDay}).`); });
   teacherWeek.forEach((count, id) => { const teacher = teachers.get(id)!; if (count > teacher.maxPerWeek) errors.push(`${teacher.name} has ${count} periods this week (limit ${teacher.maxPerWeek}).`); });
+  teacherDay.forEach((_, key) => {
+    const [teacherId, day] = key.split("|");
+    for (let period = 1; period <= PERIODS_PER_DAY; period++) {
+      const busy = (p: number) => teacherOccupied.has(`${teacherId}|${day}|${p}`);
+      if (busy(period) && (!busy(period - 1) || period === LUNCH_AFTER_PERIOD + 1) && longestRunWith(busy, period, 1) > MAX_CONSECUTIVE_PERIODS) errors.push(`${teachers.get(teacherId)!.name} teaches more than ${MAX_CONSECUTIVE_PERIODS} consecutive periods on day ${Number(day) + 1}.`);
+    }
+  });
   for (const schoolClass of input.classes) for (const subject of input.subjects) {
     if (!subjectApplies(subject, schoolClass)) continue;
     const key = `${schoolClass.id}|${subject.id}`;

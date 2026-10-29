@@ -2,11 +2,13 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 import { env } from "../config/env";
+import { User } from "../models/User";
 
 export type AuthenticatedUser = {
   userId: string;
-  schoolId?: string;
+  schoolId: string;
   role?: string;
+  status?: string;
 };
 
 declare global {
@@ -31,7 +33,7 @@ function getTokenFromRequest(req: Request): string | null {
   return null;
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = getTokenFromRequest(req);
 
   if (!token) {
@@ -41,8 +43,21 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   try {
     const decoded = jwt.verify(token, env.jwtSecret) as AuthenticatedUser;
+    if (!decoded.userId || !decoded.schoolId) {
+      res.status(401).json({ message: "Authentication token is missing school context." });
+      return;
+    }
+    const account = await User.findOne({ _id: decoded.userId, schoolId: decoded.schoolId }).select("status").lean();
+    if (!account) {
+      res.status(401).json({ message: "Account is unavailable." });
+      return;
+    }
+    if (account.status !== "ACTIVE") {
+      res.status(403).json({ message: account.status === "PENDING" ? "Waiting for approval from your school." : "This account is not active." });
+      return;
+    }
     req.user = decoded;
-    req.schoolId = decoded.schoolId ?? undefined;
+    req.schoolId = decoded.schoolId;
     next();
   } catch (_error) {
     res.status(401).json({ message: "Invalid or expired token." });

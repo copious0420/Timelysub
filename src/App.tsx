@@ -2,19 +2,30 @@
   ArrowRight,
   CalendarClock,
   CheckCircle2,
+  Eye,
+  EyeOff,
   GraduationCap,
   Inbox,
   LockKeyhole,
+  Loader2,
   Printer,
   ShieldCheck,
   Shuffle,
   Sparkles,
   WifiOff,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Fragment, lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { isPathAllowedForRole, type AppRole } from "./lib/access";
+import { appRoleFromUser, getCurrentUser, login as loginWithDatabase, registerSchoolAccount, registerForRole, searchSchools, getPublicClasses, verifyOtp, type PublicSchool, type PublicClassSection } from "./lib/auth-api";
+
+import { LandingPage } from "./components/public/landing-page";
+import { AdminDashboardContent } from "./components/admin/admin-dashboard";
+import { SchedulePortalPage } from "./components/public/schedule-portal";
+
+const DesignSystemPage = lazy(() => import("./routes/design").then((module) => ({ default: module.DesignSystemPage })));
+const AdminTimetableScreen = lazy(() => import("./components/timetable/admin-timetable-page").then((module) => ({ default: module.AdminTimetablePage })));
 
 type FeatureCard = {
   title: string;
@@ -36,12 +47,6 @@ const featureCards: FeatureCard[] = [
   { title: "Print & share", copy: "Share a clean schedule or export the day in a format ready for front office use.", icon: "printer" },
   { title: "Offline ready", copy: "The latest school plan stays available even when the internet is briefly unstable.", icon: "offline" },
 ];
-
-const credentials: Record<AppRole, { email: string; password: string }> = {
-  admin: { email: "admin@edusync.school", password: "admin123" },
-  teacher: { email: "teacher@edusync.school", password: "teacher123" },
-  student: { email: "student@edusync.school", password: "student123" },
-};
 
 const adminCoverage = [
   { teacher: "Mr. Aarav Mehta", dept: "Science", periods: "P3, P5", cover: "Ms. Diya Kapoor", status: "Covered" },
@@ -66,349 +71,262 @@ const typedHeadlinePhrases = [
 
 function TypewriterHeadline() {
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [text, setText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const currentPhrase = typedHeadlinePhrases[phraseIndex];
+    const interval = window.setInterval(() => {
+      setPhraseIndex((previous) => (previous + 1) % typedHeadlinePhrases.length);
+    }, 2800);
+    return () => window.clearInterval(interval);
+  }, []);
 
-    if (!isDeleting && text === currentPhrase) {
-      const holdTimeout = window.setTimeout(() => setIsDeleting(true), 1400);
-      return () => window.clearTimeout(holdTimeout);
-    }
-
-    if (isDeleting && text === "") {
-      const switchTimeout = window.setTimeout(() => {
-        setIsDeleting(false);
-        setPhraseIndex((prev) => (prev + 1) % typedHeadlinePhrases.length);
-      }, 180);
-      return () => window.clearTimeout(switchTimeout);
-    }
-
-    const tickTimeout = window.setTimeout(() => {
-      if (isDeleting) {
-        setText(currentPhrase.slice(0, Math.max(0, text.length - 1)));
-      } else {
-        setText(currentPhrase.slice(0, text.length + 1));
-      }
-    }, isDeleting ? 55 : 90);
-
-    return () => window.clearTimeout(tickTimeout);
-  }, [text, isDeleting, phraseIndex]);
-
-  return <span className="typewriter-text">{text}</span>;
-}
-
-function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F2F6F9] text-slate-900">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#442DC5] to-[#7C3AED] text-sm font-bold text-white shadow-lg shadow-indigo-300/40">E</div>
-            <div className="text-sm font-semibold tracking-[0.24em] text-slate-900">EDUSYNC</div>
-          </div>
-          <nav className="hidden items-center gap-8 text-sm text-slate-600 md:flex">
-            <a href="#features" className="transition hover:text-slate-900">Features</a>
-            <a href="#how-it-works" className="transition hover:text-slate-900">How it works</a>
-            <a href="#portal" className="transition hover:text-slate-900">School portal</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link to="/login" className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:-translate-y-0.5">Log in</Link>
-            <Link to="/schedule" className="rounded-xl bg-gradient-to-r from-[#442DC5] to-[#5B49DA] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-300/40">View timetable</Link>
-          </div>
-        </div>
-      </header>
-
-      <main>
-        <section className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 pb-20 pt-16 md:grid-cols-2 md:pt-20">
-          <div className="absolute left-[-80px] top-16 h-72 w-72 rounded-full bg-violet-200/30 blur-3xl" />
-          <div className="absolute bottom-8 right-0 h-64 w-64 rounded-full bg-sky-200/30 blur-3xl" />
-
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-[#442DC5] shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" /> School operations, built for the first bell
-            </div>
-            <h1 className="mt-6 text-5xl font-black leading-[0.98] tracking-[-0.04em] text-[#121824] md:text-6xl">
-              <TypewriterHeadline />
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-slate-600">
-              Build a clash-free timetable and assign live cover before the school day begins.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link to="/login" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#442DC5] to-[#5B49DA] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-300/40">
-                Log in <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link to="/schedule" className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300">View school timetable</Link>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 35, rotate: 2 }}
-            animate={{ opacity: 1, x: 0, rotate: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="hero-panel rounded-[28px] border border-slate-200 bg-white/80 p-5 shadow-[0_22px_80px_rgba(68,45,197,0.12)] backdrop-blur-sm"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">10-A timetable</div>
-                <div className="mt-2 text-xl font-bold text-slate-900">Monday</div>
-              </div>
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Coverage ready</span>
-            </div>
-            <div className="grid grid-cols-4 gap-2 text-xs text-slate-600">
-              {classSchedule.map((slot) => (
-                <motion.div
-                  key={slot.period}
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                  className={`rounded-xl border p-2 ${slot.highlight ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50"}`}
-                >
-                  <div className="font-bold">{slot.period}</div>
-                  <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-500">{slot.time}</div>
-                  <div className="mt-2 font-semibold">{slot.subject}</div>
-                  <div className="mt-1 text-[10px]">{slot.teacher}</div>
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-              Coverage assigned: Ms. Diya Kapoor for Science
-            </div>
-          </motion.div>
-        </section>
-
-        <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.6 }} className="border-y border-slate-200 bg-white">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-6 md:grid-cols-3">
-            {publicStats.map((stat) => (
-              <div key={stat.label} className="text-center md:text-left">
-                <div className="text-3xl font-black text-[#121824]">{stat.value}</div>
-                <div className="mt-2 text-sm text-slate-600">{stat.detail}</div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section id="features" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mb-10 text-center">
-            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#442DC5]">Features</div>
-            <h2 className="mt-3 text-3xl font-bold text-[#121824]">From timetable generation to live coverage</h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {featureCards.map((feature, index) => {
-              const iconMap = {
-                calendar: CalendarClock,
-                shuffle: Shuffle,
-                inbox: Inbox,
-                graduate: GraduationCap,
-                printer: Printer,
-                offline: WifiOff,
-              } as const;
-              const Icon = iconMap[feature.icon];
-
-              return (
-                <motion.article
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.45, delay: index * 0.08 }}
-                  whileHover={{ y: -6 }}
-                  className="reveal-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                >
-                  <div className="mb-4 inline-flex rounded-xl bg-[#EEF0FF] p-2 text-[#442DC5]"><Icon className="h-5 w-5" /></div>
-                  <h3 className="text-lg font-semibold text-[#121824]">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{feature.copy}</p>
-                </motion.article>
-              );
-            })}
-          </div>
-        </motion.section>
-
-        <motion.section id="how-it-works" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="bg-[#0F1628] py-20 text-white">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-10 text-center">
-              <div className="text-[11px] font-black uppercase tracking-[0.24em] text-indigo-300">How it works</div>
-              <h2 className="mt-3 text-3xl font-bold">The routine becomes simple and transparent</h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {[
-                { step: "01", title: "Admin marks absence", text: "Log a teacher absence and capture all affected periods in one action." },
-                { step: "02", title: "EduSync finds a cover", text: "The engine checks subject match, class fit and daily load before assigning cover." },
-                { step: "03", title: "Teachers and students see it live", text: "Updated plans appear the moment the substitution is confirmed." },
-              ].map((item, index) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.45, delay: index * 0.08 }}
-                  className="rounded-2xl border border-slate-700 bg-slate-800/80 p-5 shadow-lg shadow-slate-950/10"
-                >
-                  <div className="mb-3 text-sm font-semibold text-indigo-300">Step {item.step}</div>
-                  <h3 className="text-xl font-semibold">{item.title}</h3>
-                  <p className="mt-3 text-sm text-slate-300">{item.text}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.section>
-
-        <motion.section id="portal" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mb-10 text-center">
-            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#442DC5]">Roles</div>
-            <h2 className="mt-3 text-3xl font-bold text-[#121824]">Built for every stakeholder</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              { icon: ShieldCheck, title: "Admin", text: "Generate timetables, manage absences, review requests and monitor live coverage." },
-              { icon: CheckCircle2, title: "Teacher", text: "See your timetable, acknowledge assigned coverage and request support as needed." },
-              { icon: GraduationCap, title: "Student", text: "View the class schedule, live substitution alerts and announcements." },
-            ].map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 22 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.45, delay: index * 0.08 }}
-                  whileHover={{ y: -6 }}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-                >
-                  <div className="mb-3 inline-flex rounded-xl bg-[#EEF0FF] p-3 text-[#442DC5]"><Icon className="h-6 w-6" /></div>
-                  <h3 className="text-xl font-semibold text-[#121824]">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.section>
-      </main>
-    </div>
-  );
-}
-
-function SchedulePage() {
-  return (
-    <div className="min-h-screen bg-[#F2F6F9] p-6">
-      <div className="mx-auto max-w-5xl rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Schedule portal</div>
-            <h1 className="mt-2 text-3xl font-bold text-[#121824]">Weekly timetable</h1>
-          </div>
-          <Link to="/" className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">Back to home</Link>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {[
-            { day: "Monday", subject: "English", teacher: "Asha Verma", room: "Room 6A" },
-            { day: "Tuesday", subject: "Science", teacher: "Nisha Shah", room: "Physics Lab" },
-            { day: "Wednesday", subject: "Maths", teacher: "Ravi Kumar", room: "Room 7B" },
-            { day: "Thursday", subject: "Computer", teacher: "Mohan Roy", room: "IT Lab" },
-            { day: "Friday", subject: "Physics", teacher: "Amit Das", room: "Physics Lab" },
-            { day: "Saturday", subject: "Art", teacher: "Kavya Das", room: "Arts Room" },
-          ].map((slot) => (
-            <div key={slot.day} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{slot.day}</div>
-              <div className="mt-2 text-lg font-bold text-[#121824]">{slot.subject}</div>
-              <div className="mt-2 text-sm text-slate-600">{slot.teacher}</div>
-              <div className="mt-1 text-xs text-slate-500">{slot.room}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <span className="inline-grid min-h-[1.5em] min-w-[14ch] items-center overflow-hidden align-middle">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={typedHeadlinePhrases[phraseIndex]}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          className="col-start-1 row-start-1"
+        >
+          {typedHeadlinePhrases[phraseIndex]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
 function LoginPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<AppRole>("admin");
-  const [email, setEmail] = useState(credentials.admin.email);
-  const [password, setPassword] = useState(credentials.admin.password);
+  const [fullName, setFullName] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [schoolQuery, setSchoolQuery] = useState("");
+  const [schoolId, setSchoolId] = useState("");
+  const [schools, setSchools] = useState<PublicSchool[]>([]);
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const roleLabel = role === "student" ? "Admission number" : "Email";
+  useEffect(() => {
+    if (role !== "student" || schoolQuery.trim().length < 2) {
+      setSchools([]);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      void searchSchools(schoolQuery.trim()).then(setSchools).catch(() => setSchools([]));
+    }, 250);
+    return () => window.clearTimeout(timeout);
+  }, [role, schoolQuery]);
+
+  const demo = {
+    admin: import.meta.env.VITE_DEMO_ADMIN_EMAIL as string | undefined,
+    teacher: import.meta.env.VITE_DEMO_TEACHER_EMAIL as string | undefined,
+    student: import.meta.env.VITE_DEMO_STUDENT_ID as string | undefined,
+  }[role];
+  const demoPassword = import.meta.env.VITE_DEMO_PASSWORD as string | undefined;
+  const roleLabel = role === "student" ? "Admission number" : "Email address";
 
   const handleRoleChange = (nextRole: AppRole) => {
     setRole(nextRole);
     setError(null);
-    setEmail(credentials[nextRole].email);
-    setPassword(credentials[nextRole].password);
+    setIdentifier("");
+    setPassword("");
+    setSchoolId("");
   };
 
-  const handleSubmit = () => {
-    const expected = credentials[role];
-    if (!email.trim()) {
-      setError("Please enter your email or admission number.");
-      return;
-    }
-    if (!password.trim()) {
-      setError("Please enter your password.");
-      return;
-    }
-    if (email !== expected.email || password !== expected.password) {
-      setError("Incorrect credentials for this role. Check the selected tab and try again.");
-      return;
-    }
-
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    setTimeout(() => {
+    try {
+      const user = await loginWithDatabase({ identifier: identifier.trim(), password, role, ...(role === "student" ? { schoolId } : {}) });
+      if (appRoleFromUser(user) !== role) throw new Error("This account does not match the selected role.");
       const destination = role === "admin" ? "/admin/dashboard" : role === "teacher" ? "/teacher/dashboard" : "/student";
       navigate(destination, { replace: true });
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to sign in. Please try again.");
+    } finally {
       setIsSubmitting(false);
-    }, 250);
+    }
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-[#F2F6F9] p-6">
-      <div className="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-7 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+    <div className="grid min-h-screen place-items-center bg-[radial-gradient(60%_50%_at_20%_10%,rgba(99,102,241,0.14),transparent),radial-gradient(50%_50%_at_90%_90%,rgba(14,165,233,0.10),transparent)] bg-slate-50 p-6">
+      <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-7 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#442DC5]">EduSync</div>
-            <h1 className="mt-2 text-2xl font-bold text-[#121824]">Welcome back</h1>
+            <div className="text-xs font-semibold uppercase tracking-wider text-indigo-600">EduSync</div>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
           </div>
-          <div className="rounded-full bg-[#EEF0FF] p-2 text-[#442DC5]"><LockKeyhole className="h-4 w-4" /></div>
+          <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600"><LockKeyhole className="h-4 w-4" /></div>
         </div>
 
-        <div className="mb-5 grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+        <div role="tablist" aria-label="Sign in as" className="mb-5 grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1">
           {(["admin", "teacher", "student"] as AppRole[]).map((tab) => (
-            <button key={tab} onClick={() => handleRoleChange(tab)} className={`rounded-lg px-3 py-2 text-sm font-medium capitalize transition ${role === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>
-              {tab}
+            <button key={tab} type="button" role="tab" aria-selected={role === tab} onClick={() => handleRoleChange(tab)} className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${role === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}>
+              {tab === "admin" ? "Administrator" : tab === "teacher" ? "Teacher" : "Student"}
             </button>
           ))}
         </div>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={(event) => void handleSubmit(event)}>
+          {role === "student" ? <label className="block text-sm font-medium text-slate-700">School
+            <input required autoComplete="organization" value={schoolQuery} onChange={(event) => { setSchoolQuery(event.target.value); setSchoolId(""); }} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20" placeholder="Search school, city, or state" />
+            {schools.length > 0 ? <div className="mt-1 max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white">{schools.map((school) => <button type="button" key={school._id} onClick={() => { setSchoolId(school._id); setSchoolQuery(`${school.name} · ${school.city}`); setSchools([]); }} className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50">{school.name}<span className="ml-2 text-xs text-slate-500">{school.city}, {school.state}</span></button>)}</div> : null}
+          </label> : null}
           <label className="block text-sm font-medium text-slate-700">
             {roleLabel}
-            <input value={email} onChange={(event) => setEmail(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-900 outline-none transition focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder={role === "student" ? "Admission number" : "Email"} />
+            <input autoComplete={role === "student" ? "username" : "email"} required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20" placeholder={role === "student" ? "e.g. A1042" : "name@school.edu"} />
           </label>
           <label className="block text-sm font-medium text-slate-700">
             Password
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-900 outline-none transition focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder="Password" />
+            <span className="relative mt-1 block">
+              <input autoComplete="current-password" required type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 pr-12 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20" placeholder="Enter your password" />
+              <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 grid w-11 place-items-center text-slate-500 hover:text-slate-900">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
           </label>
 
-          {error ? <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
+          {error ? <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
 
-          <div className="flex items-center justify-between text-sm text-slate-600">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="h-4 w-4 accent-[#442DC5]" defaultChecked />
-              Remember me
-            </label>
-            <span className="font-medium text-slate-600">Reset access through the school admin</span>
-          </div>
-
-          <button disabled={isSubmitting} onClick={handleSubmit} className="w-full rounded-xl bg-[#442DC5] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-[#3925b4] disabled:cursor-not-allowed disabled:opacity-75">
-            {isSubmitting ? "Signing in..." : `Sign in as ${role}`}
+          <button type="submit" disabled={isSubmitting || (role === "student" && !schoolId)} className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-75">
+            {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</> : `Sign in`}
           </button>
 
+          {demo && demoPassword ? <button type="button" onClick={() => { setIdentifier(demo); setPassword(demoPassword); }} className="w-full rounded-md border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Demo Quick Fill</button> : null}
+          <p className="text-center text-xs text-slate-500">Ask your school admin to reset your password.</p>
+          <p className="text-center text-sm text-slate-600">Setting up a school? <Link to="/register" className="font-semibold text-indigo-600 hover:underline">Register it here</Link></p>
           <Link to="/" className="block text-center text-sm font-medium text-slate-600 underline-offset-4 hover:underline">Back to home</Link>
-        </div>
+        </form>
       </div>
+    </div>
+  );
+}
+
+function RegisterSchoolPage() {
+  const navigate = useNavigate();
+  const [kind, setKind] = useState<"school" | "teacher" | "student">("school");
+  const [step, setStep] = useState<"details" | "otp">("details");
+  const [name, setName] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [schoolQuery, setSchoolQuery] = useState("");
+  const [schoolId, setSchoolId] = useState("");
+  const [schools, setSchools] = useState<PublicSchool[]>([]);
+  const [classes, setClasses] = useState<PublicClassSection[]>([]);
+  const [classSectionId, setClassSectionId] = useState("");
+  const [category, setCategory] = useState<"TGT" | "PGT" | "PRT">("TGT");
+  const [admissionNumber, setAdmissionNumber] = useState("");
+  const [board, setBoard] = useState("CBSE");
+  const [stateName, setStateName] = useState("");
+  const [city, setCity] = useState("");
+  const [schoolEmail, setSchoolEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [academicYear, setAcademicYear] = useState("2026-27");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [schoolCode, setSchoolCode] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (schoolQuery.trim().length < 2) { setSchools([]); return; }
+    const timeout = window.setTimeout(() => void searchSchools(schoolQuery.trim()).then(setSchools).catch(() => setSchools([])), 250);
+    return () => window.clearTimeout(timeout);
+  }, [schoolQuery]);
+
+  useEffect(() => {
+    if (!schoolId || kind !== "student") { setClasses([]); return; }
+    void getPublicClasses(schoolId).then(setClasses).catch(() => setClasses([]));
+  }, [schoolId, kind]);
+
+  const selectKind = (value: "school" | "teacher" | "student") => {
+    setKind(value);
+    setStep("details");
+    setError(null);
+    setNotice(null);
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setNotice(null);
+    setIsSubmitting(true);
+    try {
+      if (step === "otp") {
+        const result = await verifyOtp(email.trim(), otp);
+        setSchoolCode(result.schoolCode ?? "");
+        navigate("/admin/setup", { replace: true, state: { schoolCode: result.schoolCode } });
+        return;
+      }
+      if (kind === "school") {
+        await registerForRole("school", { name: schoolName.trim(), board, state: stateName.trim(), city: city.trim(), schoolEmail: schoolEmail.trim(), phone: phone.trim(), adminName: name.trim(), adminEmail: email.trim(), password, academicYear: academicYear.trim(), classRange: [6, 12], website: "" });
+        setStep("otp");
+        setNotice("Enter the 6-digit code sent to your administrator email. In development, check the API console.");
+      } else if (kind === "teacher") {
+        await registerForRole("teacher", { schoolId, name: name.trim(), email: email.trim(), password, category, subjects: [] });
+        setStep("otp");
+        setNotice("Enter the 6-digit code sent to your email. In development, check the API console.");
+      } else {
+        await registerForRole("student", { schoolId, classSectionId, name: name.trim(), admissionNumber: admissionNumber.trim(), password });
+        setNotice("Registration received. Waiting for approval from your school.");
+      }
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to complete registration.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const fieldClass = "mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-100";
+  return (
+    <div className="grid min-h-screen place-items-center bg-[#F2F6F9] p-5">
+      <section className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase text-[#442DC5]">EduSync registration</p>
+          <h1 className="mt-2 text-2xl font-bold text-[#121824]">Create an account</h1>
+        </div>
+        <div className="mb-6 grid grid-cols-3 gap-2" role="tablist" aria-label="Registration type">
+          {([ ["school", "Register my school"], ["teacher", "I am a teacher"], ["student", "I am a student"] ] as const).map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={kind === value} onClick={() => selectKind(value)} className={`rounded-lg border px-2 py-2 text-sm font-semibold ${kind === value ? "border-[#442DC5] bg-indigo-50 text-[#442DC5]" : "border-slate-200 text-slate-600"}`}>{label}</button>)}
+        </div>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={(event) => void handleSubmit(event)}>
+          {step === "otp" ? <>
+            <label className="text-sm font-medium text-slate-700 sm:col-span-2">6-digit verification code<input required pattern="[0-9]{6}" inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value)} className={fieldClass} /></label>
+            <p className="text-xs text-slate-500 sm:col-span-2">The code expires after 10 minutes.</p>
+          </> : <>
+            {kind !== "school" ? <div className="relative sm:col-span-2"><label className="text-sm font-medium text-slate-700">School<input required value={schoolQuery} onChange={(event) => { setSchoolQuery(event.target.value); setSchoolId(""); }} className={fieldClass} placeholder="Search by school, city, or state" /></label>{schools.length ? <div className="absolute z-10 mt-1 max-h-44 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">{schools.map((school) => <button type="button" key={school._id} onClick={() => { setSchoolId(school._id); setSchoolQuery(`${school.name} · ${school.city}`); setSchools([]); }} className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50">{school.name}<span className="ml-2 text-xs text-slate-500">{school.city}, {school.state}</span></button>)}</div> : null}<p className="mt-1 text-xs text-slate-500">School not listed? Ask your school to register first.</p></div> : null}
+            {kind !== "school" ? <label className="text-sm font-medium text-slate-700">Your name<input required minLength={2} value={name} onChange={(event) => setName(event.target.value)} className={fieldClass} /></label> : <>
+              <label className="text-sm font-medium text-slate-700 sm:col-span-2">School name<input required minLength={2} value={schoolName} onChange={(event) => setSchoolName(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700">Board<select value={board} onChange={(event) => setBoard(event.target.value)} className={fieldClass}><option>CBSE</option><option>ICSE</option><option>State</option><option>Other</option></select></label>
+              <label className="text-sm font-medium text-slate-700">Academic year<input required value={academicYear} onChange={(event) => setAcademicYear(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700">State<input required value={stateName} onChange={(event) => setStateName(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700">City or district<input required value={city} onChange={(event) => setCity(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700">School email<input required type="email" value={schoolEmail} onChange={(event) => setSchoolEmail(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700">School phone<input value={phone} onChange={(event) => setPhone(event.target.value)} className={fieldClass} /></label>
+              <label className="text-sm font-medium text-slate-700 sm:col-span-2">Principal or admin name<input required minLength={2} value={name} onChange={(event) => setName(event.target.value)} className={fieldClass} /></label>
+            </>}
+            {kind === "student" ? <>
+              <label className="text-sm font-medium text-slate-700">Class and section<select required value={classSectionId} onChange={(event) => setClassSectionId(event.target.value)} className={fieldClass}><option value="">Choose class</option>{classes.map((entry) => <option key={entry._id} value={entry._id}>{entry.grade}-{entry.section}</option>)}</select></label>
+              <label className="text-sm font-medium text-slate-700">Admission number<input required value={admissionNumber} onChange={(event) => setAdmissionNumber(event.target.value.toUpperCase())} className={fieldClass} /></label>
+            </> : null}
+            {kind === "teacher" ? <label className="text-sm font-medium text-slate-700">Category<select value={category} onChange={(event) => setCategory(event.target.value as "TGT" | "PGT" | "PRT")} className={fieldClass}><option>TGT</option><option>PGT</option><option>PRT</option></select></label> : null}
+            {kind !== "student" ? <label className="text-sm font-medium text-slate-700">Email<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className={fieldClass} /></label> : null}
+            {kind === "student" ? <input type="hidden" value="" /> : null}
+            <label className="text-sm font-medium text-slate-700">Password<input required minLength={8} type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className={fieldClass} /></label>
+            {kind === "student" ? <input type="email" aria-label="Email honeypot" tabIndex={-1} autoComplete="off" className="hidden" /> : null}
+          </>}
+          {error ? <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 sm:col-span-2">{error}</p> : null}
+          {notice ? <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 sm:col-span-2">{notice}{schoolCode ? ` School code: ${schoolCode}` : ""}</p> : null}
+          <button type="submit" disabled={isSubmitting || (kind !== "school" && step === "details" && !schoolId)} className="flex items-center justify-center gap-2 rounded-lg bg-[#442DC5] px-4 py-3 text-sm font-semibold text-white hover:bg-[#3925b4] disabled:opacity-70 sm:col-span-2">{isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</> : step === "otp" ? "Verify code" : kind === "school" || kind === "teacher" ? "Continue to email verification" : "Create student account"}</button>
+          <p className="text-center text-sm text-slate-600 sm:col-span-2">Already registered? <Link to="/login" className="font-semibold text-[#442DC5] hover:underline">Sign in</Link></p>
+        </form>
+      </section>
     </div>
   );
 }
@@ -420,6 +338,7 @@ function RoleDashboard({ role, title, subtitle, children }: { role: AppRole; tit
       { label: "Timetable", to: "/admin/timetable" },
       { label: "Substitutions", to: "/admin/substitutions" },
       { label: "Requests", to: "/admin/requests" },
+      { label: "User accounts", to: "/admin/accounts" },
     ],
     teacher: [
       { label: "Dashboard", to: "/teacher/dashboard" },
@@ -433,46 +352,33 @@ function RoleDashboard({ role, title, subtitle, children }: { role: AppRole; tit
     ],
   }[role];
 
+  const location = useLocation();
   return (
-    <div className="min-h-screen bg-[#F2F6F9] p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between rounded-[24px] border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <div>
-            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-500">EduSync {role}</div>
-            <h1 className="mt-2 text-2xl font-bold text-[#121824]">{title}</h1>
-          </div>
-          <div className="flex items-center gap-3 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
-            <CheckCircle2 className="h-4 w-4" />
-            Live and synced
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto grid max-w-7xl gap-6 p-4 lg:grid-cols-[208px_1fr] lg:p-6">
+        <aside className="no-print h-fit rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm lg:sticky lg:top-6">
+          <Link to="/" className="mb-3 flex items-center gap-2.5 px-2 py-1">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-indigo-600 text-sm font-bold text-white">E</span>
+            <span><span className="block text-sm font-semibold leading-tight text-slate-900">EduSync</span><span className="block text-[11px] capitalize text-slate-500">{role} portal</span></span>
+          </Link>
+          <nav className="flex gap-1 overflow-x-auto lg:flex-col">
+            {navItems.map((item) => {
+              const active = location.pathname === item.to;
+              return <Link key={item.to} to={item.to} className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium transition ${active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>{item.label}</Link>;
+            })}
+          </nav>
+        </aside>
 
-        <div className="mb-6 grid gap-6 xl:grid-cols-[220px_1fr]">
-          <aside className="rounded-[24px] border border-slate-200 bg-slate-950 p-4 text-slate-200">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#442DC5] text-sm font-bold text-white">E</div>
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">School</div>
-                <div className="font-medium text-white">{role === "admin" ? "Admin" : role === "teacher" ? "Teacher" : "Student"} portal</div>
-              </div>
+        <main className="min-w-0">
+          <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+              <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
             </div>
-
-            <nav className="space-y-2">
-              {navItems.map((item) => (
-                <Link key={item.to} to={item.to} className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </aside>
-
-          <div>
-            <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="text-sm text-slate-600">{subtitle}</div>
-            </div>
-            {children}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"><CheckCircle2 className="h-3.5 w-3.5" />Live and synced</span>
           </div>
-        </div>
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -480,87 +386,8 @@ function RoleDashboard({ role, title, subtitle, children }: { role: AppRole; tit
 
 function AdminDashboardPage() {
   return (
-    <RoleDashboard role="admin" title="School operations dashboard" subtitle="Review coverage, notices and the most important action items for the day.">
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_0.8fr]">
-        <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#121824]">Live coverage table</h2>
-            <button className="rounded-xl bg-[#442DC5] px-3 py-2 text-xs font-semibold text-white">Run substitution solver</button>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600">
-                <tr>
-                  <th className="px-3 py-2.5 font-semibold">Teacher</th>
-                  <th className="px-3 py-2.5 font-semibold">Department</th>
-                  <th className="px-3 py-2.5 font-semibold">Periods</th>
-                  <th className="px-3 py-2.5 font-semibold">Coverage</th>
-                  <th className="px-3 py-2.5 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {adminCoverage.map((row) => (
-                  <tr key={row.teacher} className="border-t border-slate-200">
-                    <td className="px-3 py-3 font-medium text-slate-800">{row.teacher}</td>
-                    <td className="px-3 py-3 text-slate-600">{row.dept}</td>
-                    <td className="px-3 py-3 text-slate-600">{row.periods}</td>
-                    <td className="px-3 py-3 text-slate-600">{row.cover}</td>
-                    <td className="px-3 py-3"><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === "Covered" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{row.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold text-[#121824]">Noticeboard</h2>
-          <div className="mt-4 space-y-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Pending</div>
-              <div className="mt-2 text-sm font-medium text-slate-800">Ms. Riya Sen requires a final assigned cover for P6.</div>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Leave request</div>
-              <div className="mt-2 text-sm font-medium text-slate-800">Mr. Rohan Iyer has requested leave for Friday morning.</div>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Review</div>
-              <div className="mt-2 text-sm font-medium text-slate-800">A minor facilities complaint is already flagged for review.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </RoleDashboard>
-  );
-}
-
-function AdminTimetablePage() {
-  return (
-    <RoleDashboard role="admin" title="Timetable workspace" subtitle="View allocation and verify coverage before publishing the day.">
-      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Class</div>
-            <h2 className="mt-2 text-2xl font-bold text-[#121824]">Class 10-A</h2>
-          </div>
-          <button className="rounded-xl bg-[#442DC5] px-4 py-2 text-sm font-semibold text-white">Auto-generate timetable</button>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {classSchedule.map((slot) => (
-            <div key={slot.period} className={`rounded-2xl border p-4 ${slot.highlight ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50"}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{slot.period}</span>
-                {slot.highlight ? <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-700">Cover</span> : null}
-              </div>
-              <div className="mt-3 text-[11px] text-slate-500">{slot.time}</div>
-              <div className="mt-2 text-lg font-bold text-[#121824]">{slot.subject}</div>
-              <div className="mt-2 text-sm text-slate-600">{slot.teacher}</div>
-              <div className="mt-1 text-xs text-slate-500">{slot.room}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+    <RoleDashboard role="admin" title="Command dashboard" subtitle="Today's faculty, absences and substitution coverage at a glance.">
+      <AdminDashboardContent />
     </RoleDashboard>
   );
 }
@@ -623,6 +450,74 @@ function AdminRequestsPage() {
           </div>
         </div>
       </div>
+    </RoleDashboard>
+  );
+}
+
+function AdminAccountsPage() {
+  const [role, setRole] = useState<"TEACHER" | "STUDENT">("TEACHER");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [admissionNumber, setAdmissionNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await registerSchoolAccount({
+        role,
+        email: email.trim(),
+        password,
+        admissionNumber: role === "STUDENT" ? admissionNumber.trim() : undefined,
+        profile: { name: name.trim() },
+      });
+      setMessage(`${role === "TEACHER" ? "Teacher" : "Student"} account created. They can now sign in with their credentials.`);
+      setName("");
+      setEmail("");
+      setAdmissionNumber("");
+      setPassword("");
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to create this account.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <RoleDashboard role="admin" title="User accounts" subtitle="Create sign-in accounts for staff and students in this school.">
+      <section className="max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={(event) => void submit(event)}>
+          <label className="text-sm font-medium text-slate-700">Account type
+            <select value={role} onChange={(event) => setRole(event.target.value as "TEACHER" | "STUDENT")} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200">
+              <option value="TEACHER">Teacher</option>
+              <option value="STUDENT">Student</option>
+            </select>
+          </label>
+          <label className="text-sm font-medium text-slate-700">Full name
+            <input required minLength={2} value={name} onChange={(event) => setName(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder="Full name" />
+          </label>
+          <label className="text-sm font-medium text-slate-700">Email
+            <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder="name@school.edu" />
+          </label>
+          {role === "STUDENT" ? <label className="text-sm font-medium text-slate-700">Admission number
+            <input required value={admissionNumber} onChange={(event) => setAdmissionNumber(event.target.value.toUpperCase())} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 uppercase outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder="e.g. A1042" />
+          </label> : null}
+          <label className="text-sm font-medium text-slate-700 sm:col-span-2">Temporary password
+            <input required minLength={8} type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-[#442DC5] focus:ring-4 focus:ring-indigo-200" placeholder="At least 8 characters" />
+          </label>
+          {error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 sm:col-span-2">{error}</p> : null}
+          {message ? <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 sm:col-span-2">{message}</p> : null}
+          <button disabled={saving} className="rounded-xl bg-[#442DC5] px-4 py-3 text-sm font-semibold text-white hover:bg-[#3925b4] disabled:opacity-70 sm:col-span-2">
+            {saving ? "Creating account..." : `Create ${role === "TEACHER" ? "teacher" : "student"} account`}
+          </button>
+        </form>
+      </section>
     </RoleDashboard>
   );
 }
@@ -723,9 +618,28 @@ function ForbiddenPage() {
   );
 }
 
-function ProtectedRoute({ role, children }: { role: AppRole; children: React.ReactNode }) {
+function ProtectedRoute({ children }: { role: AppRole; children: React.ReactNode }) {
   const location = useLocation();
-  if (!isPathAllowedForRole(location.pathname, role)) return <Navigate to="/403" replace />;
+  const [status, setStatus] = useState<"loading" | "ready" | "signed-out">("loading");
+  const [actualRole, setActualRole] = useState<AppRole | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getCurrentUser().then((user) => {
+      if (!active) return;
+      setActualRole(user ? appRoleFromUser(user) : null);
+      setStatus(user ? "ready" : "signed-out");
+    }).catch(() => {
+      if (!active) return;
+      setActualRole(null);
+      setStatus("signed-out");
+    });
+    return () => { active = false; };
+  }, []);
+
+  if (status === "loading") return <div className="grid min-h-screen place-items-center bg-[#F2F6F9] text-sm text-slate-500">Checking your session...</div>;
+  if (status === "signed-out" || !actualRole) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  if (!isPathAllowedForRole(location.pathname, actualRole)) return <Navigate to="/403" replace />;
   return <>{children}</>;
 }
 
@@ -734,13 +648,16 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/design" element={<Suspense fallback={<main className="min-h-screen bg-[#f7f8fa]" />}><DesignSystemPage /></Suspense>} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/schedule" element={<SchedulePage />} />
+        <Route path="/register" element={<RegisterSchoolPage />} />
+        <Route path="/schedule" element={<SchedulePortalPage />} />
 
         <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
-        <Route path="/admin/timetable" element={<ProtectedRoute role="admin"><AdminTimetablePage /></ProtectedRoute>} />
+        <Route path="/admin/timetable" element={<ProtectedRoute role="admin"><Suspense fallback={<main className="min-h-screen bg-[#f5f6f8]" />}><AdminTimetableScreen /></Suspense></ProtectedRoute>} />
         <Route path="/admin/substitutions" element={<ProtectedRoute role="admin"><AdminSubstitutionsPage /></ProtectedRoute>} />
         <Route path="/admin/requests" element={<ProtectedRoute role="admin"><AdminRequestsPage /></ProtectedRoute>} />
+        <Route path="/admin/accounts" element={<ProtectedRoute role="admin"><AdminAccountsPage /></ProtectedRoute>} />
 
         <Route path="/teacher/dashboard" element={<ProtectedRoute role="teacher"><TeacherDashboardPage /></ProtectedRoute>} />
         <Route path="/teacher/routine" element={<ProtectedRoute role="teacher"><TeacherRoutinePage /></ProtectedRoute>} />

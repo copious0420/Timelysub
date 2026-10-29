@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -20,11 +20,111 @@
   * { @apply border-slate-200; }
   html { scroll-behavior: smooth; }
   body {
-    @apply min-w-[320px] bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(124,58,237,0.12),_transparent_28%),linear-gradient(180deg,#f8fbff_0%,#eff6ff_100%)] font-sans text-slate-800 antialiased;
-    background-attachment: fixed;
+    @apply min-w-[320px] bg-slate-50 font-sans text-slate-800 antialiased;
   }
+  .dark body { @apply bg-slate-950 text-slate-100; }
   button, input, select { font: inherit; }
   button { @apply transition-all duration-200 ease-out; }
+}
+
+@layer components {
+  .timetable-cell-enter {
+    animation: timetable-cell-arrive 200ms ease-out both;
+  }
+
+  @keyframes timetable-cell-arrive {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .timetable-cell-enter {
+      animation: none !important;
+    }
+  }
+
+  .design-page [class*="text-[9px]"],
+  .design-page [class*="text-[10px]"],
+  .design-page [class*="text-[11px]"] {
+    font-size: 12px !important;
+  }
+
+  .design-page [class*="font-mono"][class*="uppercase"][class*="text-[11px]"] {
+    font-size: 11px !important;
+  }
+
+  .design-page [class*="text-[#8a91a0]"],
+  .design-page [class*="text-[#8991a0]"],
+  .design-page [class*="text-[#9299a6]"],
+  .design-page [class*="text-[#939aa7]"],
+  .design-page [class*="text-[#969daa]"],
+  .design-page [class*="text-[#9aa1af]"],
+  .design-page [class*="text-[#9ba1ad]"],
+  .design-page [class*="text-[#a0a6b2]"],
+  .design-page [class*="text-[#a2a8b3]"] {
+    color: #596273 !important;
+  }
+
+  .design-page.design-dark {
+    background: #171923 !important;
+    color: #f3f4f8 !important;
+    color-scheme: dark;
+  }
+
+  .design-dark [class*="bg-white"],
+  .design-dark [class*="bg-[#f7f8fa]"],
+  .design-dark [class*="bg-[#fbfbfc]"],
+  .design-dark [class*="bg-[#f4f5f8]"],
+  .design-dark [class*="bg-[#f1f3f7]"],
+  .design-dark [class*="bg-[#eff0f4]"],
+  .design-dark [class*="bg-[#fafaff]"],
+  .design-dark [class*="bg-[#f7f7fa]"] {
+    background-color: #20232d !important;
+  }
+
+  .design-dark [class*="border-[#e"],
+  .design-dark [class*="border-[#dfe"],
+  .design-dark [class*="border-[#ece"],
+  .design-dark [class*="border-[#eff"] {
+    border-color: #343848 !important;
+  }
+
+  .design-dark [class*="text-[#171923]"],
+  .design-dark [class*="text-[#252a38]"],
+  .design-dark [class*="text-[#292d3a]"],
+  .design-dark [class*="text-[#343847]"],
+  .design-dark [class*="text-[#414858]"],
+  .design-dark [class*="text-[#454c5b]"],
+  .design-dark [class*="text-[#4a5160]"],
+  .design-dark [class*="text-[#4d5564]"],
+  .design-dark [class*="text-[#51596a]"],
+  .design-dark [class*="text-[#555d6d]"],
+  .design-dark [class*="text-[#596273]"],
+  .design-dark [class*="text-[#60697a]"],
+  .design-dark [class*="text-[#697386]"],
+  .design-dark [class*="text-[#6e7685]"],
+  .design-dark [class*="text-[#7161c7]"],
+  .design-dark [class*="text-[#7b8290]"],
+  .design-dark [class*="text-[#7c8492]"],
+  .design-dark [class*="text-[#7e8695]"],
+  .design-dark [class*="text-[#838b99]"],
+  .design-dark [class*="text-[#858d9b]"],
+  .design-dark [class*="text-[#8790a0]"],
+  .design-dark [class*="text-[#8a91a0]"],
+  .design-dark [class*="text-[#8991a0]"],
+  .design-dark [class*="text-[#9299a6]"],
+  .design-dark [class*="text-[#939aa7]"],
+  .design-dark [class*="text-[#969daa]"],
+  .design-dark [class*="text-[#9aa1af]"],
+  .design-dark [class*="text-[#9ba1ad]"],
+  .design-dark [class*="text-[#a0a6b2]"],
+  .design-dark [class*="text-[#a2a8b3]"] {
+    color: #c3c8d3 !important;
+  }
+
+  .design-dark [class*="border-[#"] {
+    border-color: #343848;
+  }
 }
 
 @layer components {
@@ -73,16 +173,9 @@
   50% { transform: translateY(-6px); }
 }
 
-@keyframes cursor-blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
-}
-
 .typewriter-text {
   display: inline-block;
   min-height: 1.2em;
-  border-right: 2px solid rgba(68, 45, 197, 0.8);
-  animation: cursor-blink 0.75s step-end infinite;
 }
 
 .float-soft {
@@ -94,4 +187,18 @@
   .print-only { display: block !important; }
   body { background: white; }
   .panel { box-shadow: none; border-color: #cbd5e1; }
+}
+
+
+/* Staffroom noticeboard export: strip chrome, leave a bordered A4 matrix with a branded header. */
+.print-header { display: none; }
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  body { background: #fff !important; color: #000 !important; }
+  aside, nav, header.sticky, button, select, input, .no-print { display: none !important; }
+  .print-header { display: flex !important; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; }
+  .print-area { box-shadow: none !important; border: 0 !important; background: #fff !important; }
+  .print-area table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .print-area th, .print-area td { border: 1px solid #334155 !important; padding: 4px 6px !important; color: #000 !important; background: #fff !important; }
+  .print-area tr, .print-area td { break-inside: avoid; }
 }

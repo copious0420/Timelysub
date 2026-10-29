@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StudentRouteImport } from './routes/student'
+import { Route as DesignRouteImport } from './routes/design'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const StudentRoute = StudentRouteImport.update({
   path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DesignRoute = DesignRouteImport.update({
+  id: '/design',
+  path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
+  '/design': typeof DesignRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
+  '/design': typeof DesignRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
+  '/design': typeof DesignRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/auth' | '/settings' | '/student'
+  fullPaths: '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/auth' | '/settings' | '/student'
-  id: '__root__' | '/' | '/app' | '/auth' | '/settings' | '/student'
+  to: '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
+  id: '__root__' | '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +86,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SettingsRoute: typeof SettingsRoute
   StudentRoute: typeof StudentRoute
+  DesignRoute: typeof DesignRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/design': {
+      id: '/design'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +142,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SettingsRoute: SettingsRoute,
   StudentRoute: StudentRoute,
+  DesignRoute: DesignRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

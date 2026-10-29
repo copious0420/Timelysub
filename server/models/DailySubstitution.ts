@@ -1,7 +1,7 @@
 import type { Document, InferSchemaType } from "mongoose";
 import mongoose, { Schema } from "mongoose";
 
-export const DAILY_SUBSTITUTION_STATUS = ["ASSIGNED", "UNASSIGNED"] as const;
+export const DAILY_SUBSTITUTION_STATUS = ["DRAFT", "PUBLISHED", "ASSIGNED", "UNASSIGNED"] as const;
 
 const dailySubstitutionSchema = new Schema(
   {
@@ -12,12 +12,16 @@ const dailySubstitutionSchema = new Schema(
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
     absentTeacherId: { type: Schema.Types.ObjectId, ref: "Teacher", required: true },
     substituteTeacherId: { type: Schema.Types.ObjectId, ref: "Teacher", default: null },
-    status: { type: String, enum: DAILY_SUBSTITUTION_STATUS, default: "UNASSIGNED" },
+    status: { type: String, enum: DAILY_SUBSTITUTION_STATUS, default: "DRAFT" },
     matchTier: { type: Number, default: 0 },
     reason: { type: String, default: "" },
+    acknowledgedAt: { type: Date, default: null },
+    isManualOverride: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
+
+dailySubstitutionSchema.index({ schoolId: 1, date: 1, classSectionId: 1, periodNumber: 1 }, { unique: true });
 
 export type IDailySubstitution = InferSchemaType<typeof dailySubstitutionSchema> & {
   _id: mongoose.Types.ObjectId;

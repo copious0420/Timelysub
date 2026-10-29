@@ -1,14 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  ChevronDown,
-  Clock3,
-  Coffee,
-  Scale,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, Clock3, Coffee, Scale, Sparkles, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 
@@ -33,75 +26,106 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const reveal = {
+const revealFromLeft = {
+  hidden: { opacity: 0, x: -52, y: 0 },
+  visible: { opacity: 1, x: 0, y: 0 },
+};
+
+const revealFromRight = {
+  hidden: { opacity: 0, x: 52, y: 0 },
+  visible: { opacity: 1, x: 0, y: 0 },
+};
+
+const revealUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
 };
 
-const viewport = { once: true, amount: 0.18 };
+const viewport = { once: true, amount: 0.2 };
+
+const featureCards = [
+  {
+    icon: Clock3,
+    title: "Auto-generated cover",
+    copy: "Build fair substitutions before the first bell with live teacher availability.",
+  },
+  {
+    icon: Scale,
+    title: "Fairness tracked",
+    copy: "Prioritize the right teacher without overloading the same staff repeatedly.",
+  },
+  {
+    icon: Sparkles,
+    title: "Fast school updates",
+    copy: "Keep every class, teacher, and student view aligned in one clear workflow.",
+  },
+];
 
 const problems = [
   {
     icon: Clock3,
     title: "Morning chaos",
-    copy: "One late message can turn the time before assembly into a rush of calls, lists and last-minute changes.",
+    copy: "One late absence can trigger a scramble of calls, lists and rushed decisions in minutes.",
   },
   {
     icon: Scale,
     title: "Fairness concerns",
-    copy: "Without a clear record, the same available teachers can be chosen again and again.",
+    copy: "When rules are unclear, the same teachers keep getting the most difficult cover.",
   },
   {
     icon: Coffee,
     title: "Teacher burnout",
-    copy: "Uneven substitutions take away planning periods and put extra pressure on already busy staff.",
-  },
-];
-
-const benefits = [
-  {
-    icon: Clock3,
-    label: "Speed",
-    stat: "90 seconds",
-    copy: "Turn today's absences into a print-ready plan before the first bell.",
-  },
-  {
-    icon: Scale,
-    label: "Fairness",
-    stat: "Clear choices",
-    copy: "Timely checks who is free and spreads substitutions more evenly.",
-  },
-  {
-    icon: Sparkles,
-    label: "Simple",
-    stat: "No account needed",
-    copy: "Open the tool and make a plan. No training or lengthy setup required.",
+    copy: "Last-minute substitutions pile pressure onto already stretched teaching staff.",
   },
 ];
 
 const steps = [
-  { number: "01", title: "Input absences", copy: "Select the teachers and periods that need cover." },
-  { number: "02", title: "Generate plan", copy: "Timely finds free teachers and balances the work." },
-  { number: "03", title: "Done", copy: "Review, adjust if needed, then print or share the plan." },
+  { number: "01", title: "Input absences", copy: "Mark who is absent and which periods need cover." },
+  { number: "02", title: "Generate plan", copy: "Timely balances subject fit, teacher load, and class coverage." },
+  { number: "03", title: "Share and print", copy: "Review, approve, and distribute a clean schedule in seconds." },
 ];
 
 const faqs = [
-  {
-    question: "Will teachers use it?",
-    answer:
-      "Teachers do not need to learn another system. The admin creates a clear plan that can be printed or shared in the usual way.",
-  },
-  {
-    question: "Is it secure?",
-    answer:
-      "You can create a plan without an account. If you choose to sign up, your saved school information stays linked to your account.",
-  },
-  {
-    question: "What if I make a mistake?",
-    answer:
-      "You can change an absence or substitute before printing. Timely lets you review the full plan first.",
-  },
+  { question: "Will teachers use it?", answer: "Teachers only need to see the final, clear plan — no extra system to learn." },
+  { question: "Is it secure?", answer: "School data is stored in a controlled workflow with role-aware access and saved school profiles." },
+  { question: "What if I make a mistake?", answer: "You can adjust absences or swap teachers before printing, and the plan updates immediately." },
 ];
+
+function TypewriterText() {
+  const words = ["teacher coverage", "class plans", "school operations"];
+  const [text, setText] = useState("");
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const currentWord = words[wordIndex];
+
+  useEffect(() => {
+    const speed = isDeleting ? 45 : 90;
+
+    const timeout = window.setTimeout(() => {
+      if (!isDeleting) {
+        const nextText = currentWord.slice(0, text.length + 1);
+        setText(nextText);
+
+        if (nextText === currentWord) {
+          setIsDeleting(true);
+        }
+      } else {
+        const nextText = currentWord.slice(0, text.length - 1);
+        setText(nextText);
+
+        if (nextText === "") {
+          setIsDeleting(false);
+          setWordIndex((wordIndex + 1) % words.length);
+        }
+      }
+    }, speed);
+
+    return () => window.clearTimeout(timeout);
+  }, [currentWord, isDeleting, text, wordIndex]);
+
+  return <span className="typewriter-text">{text}</span>;
+}
 
 function Landing() {
   return (
@@ -128,41 +152,87 @@ function Landing() {
 
       <section className="hero-section px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-4xl text-center">
-            <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.5 }}>
-              <span className="landing-eyebrow"><Users className="size-4" /> Built for busy school mornings</span>
-            </motion.div>
-            <motion.h1
-              initial="hidden"
-              animate="visible"
-              variants={reveal}
-              transition={{ duration: 0.55, delay: 0.08 }}
-              className="mt-5 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
-            >
-              Never scramble for a substitute teacher again
-            </motion.h1>
-            <motion.p
-              initial="hidden"
-              animate="visible"
-              variants={reveal}
-              transition={{ duration: 0.55, delay: 0.16 }}
-              className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-xl"
-            >
-              Generate fair, conflict-free substitution plans in 90 seconds — ready to print, no setup needed.
-            </motion.p>
+          <div className="landing-hero">
             <motion.div
               initial="hidden"
               animate="visible"
-              variants={reveal}
-              transition={{ duration: 0.55, delay: 0.24 }}
-              className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:justify-center"
+              variants={revealFromLeft}
+              transition={{ duration: 0.6 }}
+              className="hero-copy"
             >
-              <Button asChild size="lg" className="landing-cta-btn cta-pulse w-full sm:w-auto">
-                <Link to="/app">Launch Dashboard <ArrowRight /></Link>
-              </Button>
-              <Button asChild size="lg" variant="ghost" className="landing-light-cta w-full sm:w-auto">
-                <a href="#how-it-works">See How It Works</a>
-              </Button>
+              <span className="landing-eyebrow">
+                <Users className="size-4" /> Built for busy school mornings
+              </span>
+              <h1>
+                Make every <span className="hero-highlight">class</span> feel planned.
+              </h1>
+              <div className="typewriter-wrap">
+                <span className="typewriter-label">Live</span>
+                <TypewriterText />
+              </div>
+              <p className="hero-subtext">
+                From sudden absences to last-period swaps, Timely turns chaos into a clean, fair, and shareable timetable plan.
+              </p>
+              <div className="hero-actions">
+                <Button asChild size="lg" className="landing-cta-btn cta-pulse">
+                  <Link to="/app">
+                    Launch dashboard <ArrowRight />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="ghost" className="landing-light-cta">
+                  <a href="#how-it-works">See how it works</a>
+                </Button>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={revealFromRight}
+              transition={{ duration: 0.7, delay: 0.08 }}
+              className="hero-visual"
+            >
+              <div className="mini-timetable">
+                <div className="mini-header">
+                  <span>Today</span>
+                  <span>8 periods</span>
+                </div>
+                <div className="mini-grid">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index} className={`period-pill ${index === 3 ? "is-active" : ""}`}>
+                      {index + 1}
+                    </div>
+                  ))}
+                </div>
+                <div className="mini-stats">
+                  <div className="mini-stat">
+                    <span>Coverage</span>
+                    <strong>96%</strong>
+                  </div>
+                  <div className="mini-stat accent">
+                    <span>Teachers</span>
+                    <strong>12 ready</strong>
+                  </div>
+                </div>
+                <div className="mini-table">
+                  {[
+                    ["8:30", "English", "Asha"],
+                    ["9:20", "Maths", "Ravi"],
+                    ["10:15", "Science", "Nisha"],
+                    ["11:10", "Break", "—"],
+                    ["11:30", "Biology", "Leena"],
+                    ["12:20", "Computer", "Mohan"],
+                    ["1:10", "History", "Aditya"],
+                    ["2:00", "Physics", "Arun"],
+                  ].map(([time, subject, teacher], rowIndex) => (
+                    <div key={time} className={`mini-row ${rowIndex % 2 === 0 ? "even" : "odd"}`}>
+                      <span>{time}</span>
+                      <strong>{subject}</strong>
+                      <em>{teacher}</em>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -173,18 +243,26 @@ function Landing() {
         initial="hidden"
         whileInView="visible"
         viewport={viewport}
-        variants={reveal}
+        variants={revealUp}
         className="landing-section landing-section-soft"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="section-heading">
             <span>Why this matters</span>
             <h2>A calmer start for the whole school</h2>
-            <p>When someone is absent, the admin team carries the pressure. Timely helps you act quickly without losing fairness.</p>
+            <p>When someone is absent, the admin team carries the pressure. Timely helps you act fast without losing fairness.</p>
           </div>
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {problems.map((problem, index) => (
-              <motion.article key={problem.title} variants={reveal} transition={{ delay: index * 0.08 }} className="problem-item">
+              <motion.article
+                key={problem.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                variants={index % 2 === 0 ? revealFromLeft : revealFromRight}
+                transition={{ delay: index * 0.08 }}
+                className="problem-item"
+              >
                 <span className="problem-icon"><problem.icon className="size-5" /></span>
                 <h3>{problem.title}</h3>
                 <p>{problem.copy}</p>
@@ -196,25 +274,25 @@ function Landing() {
 
       <section className="landing-section">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={revealUp} className="section-heading">
             <span>Fast, fair, simple</span>
             <h2>Less admin. More confidence.</h2>
           </motion.div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {benefits.map((benefit, index) => (
+            {featureCards.map((feature, index) => (
               <motion.article
-                key={benefit.label}
+                key={feature.title}
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewport}
-                variants={reveal}
+                variants={index % 2 === 0 ? revealFromLeft : revealFromRight}
                 transition={{ delay: index * 0.08 }}
                 className="landing-glass-card"
               >
-                <span className="benefit-icon"><benefit.icon className="size-5" /></span>
-                <p className="benefit-label">{benefit.label}</p>
-                <h3>{benefit.stat}</h3>
-                <p>{benefit.copy}</p>
+                <span className="benefit-icon"><feature.icon className="size-5" /></span>
+                <p className="benefit-label">Feature</p>
+                <h3>{feature.title}</h3>
+                <p>{feature.copy}</p>
               </motion.article>
             ))}
           </div>
@@ -223,7 +301,7 @@ function Landing() {
 
       <section id="how-it-works" className="landing-section landing-section-soft scroll-mt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={revealUp} className="section-heading">
             <span>How it works</span>
             <h2>From absences to a fair plan in three steps</h2>
           </motion.div>
@@ -234,12 +312,15 @@ function Landing() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewport}
-                variants={reveal}
+                variants={index % 2 === 0 ? revealFromLeft : revealFromRight}
                 transition={{ delay: index * 0.1 }}
                 className="step-item"
               >
                 <span className="step-number">{step.number}</span>
-                <div><h3>{step.title}</h3><p>{step.copy}</p></div>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.copy}</p>
+                </div>
                 {index < steps.length - 1 && <ArrowRight className="step-arrow" aria-hidden="true" />}
               </motion.li>
             ))}
@@ -247,18 +328,18 @@ function Landing() {
         </div>
       </section>
 
-      <motion.section initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="landing-section">
+      <motion.section initial="hidden" whileInView="visible" viewport={viewport} variants={revealUp} className="landing-section">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <figure className="testimonial-card">
             <div className="quote-mark" aria-hidden="true">“</div>
-            <blockquote>Saves us 30 minutes. Fairness logic means no teacher gets burned out.</blockquote>
+            <blockquote>Everything is easier when the school knows who is free, who is qualified, and what the plan should be.</blockquote>
           </figure>
         </div>
       </motion.section>
 
       <section className="landing-section landing-section-soft">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={reveal} className="section-heading">
+          <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={revealUp} className="section-heading">
             <span>FAQ</span>
             <h2>Questions school admins ask</h2>
           </motion.div>
@@ -269,7 +350,7 @@ function Landing() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewport}
-                variants={reveal}
+                variants={index % 2 === 0 ? revealFromLeft : revealFromRight}
                 transition={{ delay: index * 0.06 }}
                 className="faq-item"
               >

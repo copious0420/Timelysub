@@ -11,6 +11,9 @@ import { env } from "./config/env";
 import { authRoutes } from "./routes/auth.routes";
 import { academicRoutes } from "./routes/academic.routes";
 import { timetableRoutes } from "./routes/timetable.routes";
+import { calendarRoutes } from "./routes/calendar.routes";
+import { operationsRoutes } from "./routes/operations.routes";
+import { complaintsRoutes } from "./routes/complaints.routes";
 
 const app = express();
 
@@ -39,6 +42,9 @@ app.get("/health", (_req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1", academicRoutes);
 app.use("/api/v1/timetable", timetableRoutes);
+app.use("/api/v1/calendar", calendarRoutes);
+app.use("/api/v1", operationsRoutes);
+app.use("/api/v1/complaints", complaintsRoutes);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

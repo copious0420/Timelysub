@@ -8,6 +8,7 @@ const teacherSchema = new Schema(
     schoolId: { type: Schema.Types.ObjectId, ref: "School", required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", default: null },
     name: { type: String, required: true, trim: true },
+    email: { type: String, lowercase: true, trim: true, default: undefined },
     qualificationCategory: { type: String, enum: TEACHER_QUALIFICATION_CATEGORIES, required: true },
     primarySubjects: [{ type: Schema.Types.ObjectId, ref: "Subject" }],
     maxPeriodsPerDay: { type: Number, default: 6, min: 1, max: 10 },
@@ -17,6 +18,7 @@ const teacherSchema = new Schema(
 );
 
 teacherSchema.index({ schoolId: 1, name: 1 });
+teacherSchema.index({ schoolId: 1, email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
 
 export type ITeacher = InferSchemaType<typeof teacherSchema> & {
   _id: mongoose.Types.ObjectId;

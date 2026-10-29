@@ -7,7 +7,7 @@ export async function connectDatabase() {
     return mongoose.connection;
   }
 
-  await mongoose.connect(env.mongoUri);
+  await mongoose.connect(env.mongoUri, { dbName: "timely" });
   return mongoose.connection;
 }
 
