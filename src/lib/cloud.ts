@@ -198,7 +198,17 @@ export async function fetchStudentSubstitutions(
     },
   });
   if (error) throw error;
-  return ((data?.substitutions ?? []) as Database["public"]["Tables"]["substitutions"]["Row"][]).map((row) => ({
+  return ((data?.substitutions ?? []) as Array<{
+    school_id: string;
+    date: string;
+    period: number;
+    class_name: string;
+    original_teacher_id: string;
+    original_teacher_name: string;
+    substitute_teacher_id: string | null;
+    substitute_teacher_name: string;
+    status: string;
+  }>).map((row) => ({
     schoolId: row.school_id,
     date: row.date,
     period: row.period,
