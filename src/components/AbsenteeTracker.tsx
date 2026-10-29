@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,12 +16,12 @@ type Props = {
 
 export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChange }: Props) {
   const get = (id: string) => absences.find((a) => a.teacherId === id);
-  const scheduleDate = new Date(`${date}T00:00:00`);
+  const scheduleDate = useMemo(() => new Date(`${date}T00:00:00`), [date]);
   const [selectedDay, setSelectedDay] = useState<number>(dayIndexForDate(scheduleDate) ?? 1);
 
   useEffect(() => {
     setSelectedDay(dayIndexForDate(scheduleDate) ?? 1);
-  }, [date]);
+  }, [scheduleDate]);
 
   const toggleTeacher = (t: Teacher) => {
     if (get(t.id)) {
@@ -135,6 +135,8 @@ export function AbsenteeTracker({ teachers, absences, date, onDateChange, onChan
                     <button
                       key={p}
                       type="button"
+                      data-availability={assigned ? "busy" : "free"}
+                      data-selected={selected ? "true" : "false"}
                       disabled={!absence}
                       onClick={() => togglePeriod(t.id, p)}
                       title={

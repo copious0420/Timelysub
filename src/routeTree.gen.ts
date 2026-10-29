@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as LpPreviewRouteImport } from './routes/lp-preview'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as DesignRouteImport } from './routes/design'
@@ -29,6 +30,11 @@ const AppRoute = AppRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpPreviewRoute = LpPreviewRouteImport.update({
+  id: '/lp-preview',
+  path: '/lp-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/lp-preview': typeof LpPreviewRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/design': typeof DesignRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/lp-preview': typeof LpPreviewRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/design': typeof DesignRoute
@@ -68,22 +76,32 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/lp-preview': typeof LpPreviewRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/design': typeof DesignRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
+  fullPaths: '/' | '/app' | '/auth' | '/lp-preview' | '/settings' | '/student' | '/design'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
-  id: '__root__' | '/' | '/app' | '/auth' | '/settings' | '/student' | '/design'
+  to: '/' | '/app' | '/auth' | '/lp-preview' | '/settings' | '/student' | '/design'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/lp-preview'
+    | '/settings'
+    | '/student'
+    | '/design'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
+  LpPreviewRoute: typeof LpPreviewRoute
   SettingsRoute: typeof SettingsRoute
   StudentRoute: typeof StudentRoute
   DesignRoute: typeof DesignRoute
@@ -110,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp-preview': {
+      id: '/lp-preview'
+      path: '/lp-preview'
+      fullPath: '/lp-preview'
+      preLoaderRoute: typeof LpPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -140,6 +165,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
+  LpPreviewRoute: LpPreviewRoute,
   SettingsRoute: SettingsRoute,
   StudentRoute: StudentRoute,
   DesignRoute: DesignRoute,

@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.substitutions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT substitutions_status_check CHECK (status IN ('assigned', 'overridden')),
   CONSTRAINT substitutions_school_date_period_class_key
-    UNIQUE (school_id, date, period, class_name)
+    UNIQUE (school_id, date, period, class_name, original_teacher_id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS profiles_school_id_unique

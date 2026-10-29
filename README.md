@@ -26,7 +26,7 @@ Create a `.env` file in the repo root if you want to customize the API. A templa
 
 ```bash
 PORT=4000
-MONGODB_URI=mongodb://127.0.0.1:27017/timely
+MONGO_URI=mongodb://127.0.0.1:27017/timely
 JWT_SECRET=change-this-strong-secret-at-least-32-characters
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173

@@ -30,11 +30,13 @@ const normalize = (value: unknown) =>
   String(value ?? "")
     .trim()
     .toLowerCase()
-    .replace(/[\/_-]+/g, " ")
+    .replace(/[/_-]+/g, " ")
     .replace(/\s+/g, " ");
 
 const categoryFrom = (value: unknown): Category | null => {
-  const category = String(value ?? "").trim().toUpperCase();
+  const category = String(value ?? "")
+    .trim()
+    .toUpperCase();
   return (CATEGORIES as readonly string[]).includes(category) ? (category as Category) : null;
 };
 
@@ -73,7 +75,8 @@ function parseRows(rows: unknown[][]): ParsedTeacher[] {
     const busy: Record<number, boolean> = {};
     const timetable: Record<number, TimetablePeriod> = {};
     const weeklyTimetable: Record<number, Record<number, TimetablePeriod>> = {};
-    const classSection = String((classIndex >= 0 ? row[classIndex] : "") ?? "").trim() || "Unassigned";
+    const classSection =
+      String((classIndex >= 0 ? row[classIndex] : "") ?? "").trim() || "Unassigned";
     const classesTaught = classSection === "Unassigned" ? [] : [classSection];
     PERIODS.forEach((period) => {
       const periodIndex = headers.findIndex((header) => {
@@ -197,14 +200,15 @@ export function ExcelImporterModal({ onImport }: Props) {
           if (!nextOpen) reset();
         }}
       >
-        <DialogContent className="glass-regular max-h-[90vh] overflow-y-auto rounded-2xl border border-white/50 bg-white/5 p-5 text-slate-900 shadow-2xl sm:max-w-4xl sm:p-6">
+        <DialogContent className="glass-regular max-h-[90vh] overflow-y-auto rounded-2xl border border-primary/15 p-5 text-primary shadow-2xl sm:max-w-4xl sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <FileSpreadsheet className="size-5 text-blue-700" />
+            <DialogTitle className="flex items-center gap-2 text-primary">
+              <FileSpreadsheet className="size-5 text-primary" />
               Import master timetable
             </DialogTitle>
             <DialogDescription>
-              Upload a CSV or Excel file with teacher, subject, category, and Period 1–8 availability columns.
+              Upload a CSV or Excel file with teacher, subject, category, and Period 1–8
+              availability columns.
             </DialogDescription>
           </DialogHeader>
 
@@ -227,14 +231,16 @@ export function ExcelImporterModal({ onImport }: Props) {
             }}
             className={`cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition ${
               dragging
-                ? "border-blue-500 bg-blue-100/70"
-                : "border-blue-200 bg-white/5 hover:border-blue-400 hover:bg-blue-50/70"
+                ? "border-primary bg-accent/70"
+                : "border-primary/20 hover:border-primary hover:bg-accent/50"
             }`}
           >
-            <Upload className="mx-auto size-8 text-blue-700" />
-            <p className="mt-3 font-semibold text-slate-900">Drop your timetable here</p>
-            <p className="mt-1 text-sm text-slate-600">or click to browse .xlsx, .xls, or .csv files</p>
-            {fileName && <p className="mt-3 text-sm font-medium text-blue-800">{fileName}</p>}
+            <Upload className="mx-auto size-8 text-primary" />
+            <p className="mt-3 font-semibold text-primary">Drop your timetable here</p>
+            <p className="mt-1 text-sm text-foreground/70">
+              or click to browse .xlsx, .xls, or .csv files
+            </p>
+            {fileName && <p className="mt-3 text-sm font-medium text-primary">{fileName}</p>}
             <input
               ref={inputRef}
               type="file"
@@ -245,7 +251,10 @@ export function ExcelImporterModal({ onImport }: Props) {
           </div>
 
           {error && (
-            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <p
+              role="alert"
+              className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+            >
               {error}
             </p>
           )}
@@ -255,9 +264,9 @@ export function ExcelImporterModal({ onImport }: Props) {
               <p className="text-sm font-semibold text-emerald-800">
                 Parsed {parsed.length} valid teacher timetables ready to import
               </p>
-              <div className="glass-regular overflow-x-auto rounded-xl border border-white/50 bg-white/5 backdrop-blur-[10px] backdrop-saturate-[180%]">
+              <div className="glass-regular overflow-x-auto rounded-xl border border-primary/15 backdrop-blur-[10px] backdrop-saturate-[180%]">
                 <table className="w-full min-w-[680px] text-sm">
-                  <thead className="bg-blue-50/80 text-left text-xs uppercase tracking-wide text-slate-600">
+                  <thead className="bg-accent/50 text-left text-xs uppercase tracking-wide text-foreground/70">
                     <tr>
                       <th className="px-3 py-2">Teacher</th>
                       <th className="px-3 py-2">Department / Subject</th>
@@ -265,13 +274,13 @@ export function ExcelImporterModal({ onImport }: Props) {
                       <th className="px-3 py-2">Periods</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-blue-100">
+                  <tbody className="divide-y divide-primary/10">
                     {parsed.map((teacher) => (
                       <tr key={teacher.id}>
                         <td className="px-3 py-2 font-medium">{teacher.name}</td>
                         <td className="px-3 py-2">{teacher.subject}</td>
                         <td className="px-3 py-2">
-                          <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-900">
+                          <span className="rounded-full bg-accent px-2 py-1 text-xs font-semibold text-primary">
                             {teacher.category}
                           </span>
                         </td>
@@ -281,9 +290,10 @@ export function ExcelImporterModal({ onImport }: Props) {
                               <span
                                 key={period}
                                 title={`P${period}: ${teacher.busy[period] ? "Busy" : "Free"}`}
+                                data-availability={teacher.busy[period] ? "busy" : "free"}
                                 className={`rounded px-1 py-1 text-center text-[10px] font-semibold ${
                                   teacher.busy[period]
-                                    ? "bg-slate-200 text-slate-600"
+                                    ? "bg-muted text-foreground/70"
                                     : "bg-emerald-100 text-emerald-800"
                                 }`}
                               >

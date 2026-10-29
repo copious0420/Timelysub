@@ -1,13 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Search } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchStudentSubstitutions, verifyStudentAccess, type SubstitutionRecord } from "@/lib/cloud";
+import {
+  fetchStudentSubstitutions,
+  verifyStudentAccess,
+  type SubstitutionRecord,
+} from "@/lib/cloud";
 
 type StudentScheduleRow = {
   period: number;
@@ -22,6 +26,7 @@ export const Route = createFileRoute("/student")({
   head: () => ({
     meta: [
       { title: "Student Noticeboard — Timely" },
+      { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
         content: "Read-only daily substitution schedule for students.",
@@ -32,7 +37,11 @@ export const Route = createFileRoute("/student")({
 });
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function StudentNoticeboard() {
@@ -81,11 +90,16 @@ function StudentAccessGate({
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <section className="panel w-full max-w-md px-5 py-6">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <Logo size="md" />
-          <span className="text-lg font-semibold tracking-tight">Timely</span>
+    <main className="student-portal flex min-h-screen items-center justify-center px-4 py-10">
+      <section className="student-access-card panel w-full max-w-md px-5 py-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <Link to="/" className="flex items-center gap-2">
+            <Logo size="md" className="student-brand-logo" />
+            <span className="text-lg font-semibold tracking-tight">Timely</span>
+          </Link>
+          <Link to="/" className="student-home-button">
+            Back to homepage
+          </Link>
         </div>
         <h1 className="text-xl font-semibold tracking-tight">Student Schedule Access</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -114,7 +128,10 @@ function StudentAccessGate({
             />
           </div>
           {error && (
-            <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            <p
+              role="alert"
+              className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+            >
               {error}
             </p>
           )}
@@ -139,19 +156,21 @@ function StudentSchedule({
   const [date, setDate] = useState(todayIso);
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-  const { data: substitutions = [], isError, isLoading } = useQuery<SubstitutionRecord[]>({
+  const [headerCompact, setHeaderCompact] = useState(false);
+
+  useEffect(() => {
+    const updateHeader = () => setHeaderCompact(window.scrollY > 36);
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    return () => window.removeEventListener("scroll", updateHeader);
+  }, []);
+  const { data: substitutions = [], isLoading } = useQuery<SubstitutionRecord[]>({
     queryKey: ["substitutions", schoolId, date],
     queryFn: () => fetchStudentSubstitutions(schoolId, passcode, date),
     enabled: Boolean(schoolId && date),
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
   });
-
-  console.log("[Student View] Fetched Substitutions:", substitutions);
-
-  if (isError) {
-    console.error("[Student View] Failed to fetch substitutions.");
-  }
 
   const schedule = useMemo(
     () =>
@@ -170,12 +189,13 @@ function StudentSchedule({
   const filteredSchedule = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return schedule.filter((row) =>
-      (classFilter === "all" || row.classSection === classFilter) &&
-      [row.absentTeacherName, row.substituteName, row.classSection, `p${row.period}`]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery),
+    return schedule.filter(
+      (row) =>
+        (classFilter === "all" || row.classSection === classFilter) &&
+        [row.absentTeacherName, row.substituteName, row.classSection, `p${row.period}`]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery),
     );
   }, [classFilter, query, schedule]);
   const classes = useMemo(
@@ -184,18 +204,18 @@ function StudentSchedule({
   );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100 px-4 py-6 text-slate-900 sm:px-6 sm:py-10">
+    <main className="student-portal min-h-screen px-4 py-6 text-foreground sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <header className={`app-page-header ${headerCompact ? "app-page-header-compact" : ""} mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between`}>
           <div className="flex items-start gap-3">
-            <Logo size="md" />
+            <Logo size="md" className="student-brand-logo" />
             <div>
               <p className="text-lg font-semibold tracking-tight">Timely — Student Noticeboard</p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full border border-white/50 bg-white/70 px-2.5 py-1 font-medium text-blue-900 backdrop-blur-md">
+                <span className="rounded-full border border-primary/15 bg-white/30 px-2.5 py-1 font-medium text-foreground backdrop-blur-md">
                   Read-Only View
                 </span>
-                <span className="text-slate-600">School ID: {schoolId}</span>
+                <span className="text-foreground/70">School ID: {schoolId}</span>
               </div>
             </div>
           </div>
@@ -203,36 +223,36 @@ function StudentSchedule({
             <button
               type="button"
               onClick={onChangeSchool}
-              className="text-blue-800 underline-offset-4 hover:underline"
+              className="text-accent-sky underline-offset-4 hover:underline"
             >
               Change school
             </button>
-            <Link to="/" className="text-blue-800 underline-offset-4 hover:underline">
-              Back to Timely
+            <Link to="/" className="student-home-button">
+              Back to homepage
             </Link>
           </div>
         </header>
 
-        <section className="glass-regular mb-6 rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
+        <section className="glass-regular mb-6 rounded-2xl border border-primary/15 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-foreground/80">
               Date
               <span className="relative">
-                <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-700" />
+                <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary" />
                 <input
                   type="date"
                   value={date}
                   onChange={(event) => setDate(event.target.value)}
-                  className="h-10 w-full rounded-xl border border-white/50 bg-white/70 pl-10 pr-3 text-sm text-slate-900 outline-none ring-blue-300 transition focus:ring-2"
+                  className="h-10 w-full rounded-xl border border-primary/15 bg-white/60 pl-10 pr-3 text-sm text-primary outline-none ring-primary/30 transition focus:ring-2"
                 />
               </span>
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-foreground/80">
               Class / Section
               <select
                 value={classFilter}
                 onChange={(event) => setClassFilter(event.target.value)}
-                className="h-10 w-full rounded-xl border border-white/50 bg-white/70 px-3 text-sm text-slate-900 outline-none ring-blue-300 transition focus:ring-2"
+                className="h-10 w-full rounded-xl border border-primary/15 bg-white/60 px-3 text-sm text-primary outline-none ring-primary/30 transition focus:ring-2"
               >
                 <option value="all">All Classes (Whole School)</option>
                 {classes.map((classSection) => (
@@ -242,16 +262,16 @@ function StudentSchedule({
                 ))}
               </select>
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-foreground/80">
               Search schedule
               <span className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-700" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary" />
                 <input
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search class, subject, or teacher"
-                  className="h-10 w-full rounded-xl border border-white/50 bg-white/70 pl-10 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 ring-blue-300 transition focus:ring-2"
+                  className="h-10 w-full rounded-xl border border-primary/15 bg-white/60 pl-10 pr-3 text-sm text-primary outline-none placeholder:text-foreground/50 ring-primary/30 transition focus:ring-2"
                 />
               </span>
             </label>
@@ -260,18 +280,22 @@ function StudentSchedule({
 
         <section aria-live="polite" className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900">Today&apos;s substitutions</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              Today&apos;s substitutions
+            </h1>
+            <p className="text-sm text-foreground/70">
               {filteredSchedule.length} of {schedule.length} periods
             </p>
           </div>
 
           {isLoading || schedule.length === 0 ? (
-            <div className="glass-regular rounded-2xl border border-white/50 bg-white/5 px-5 py-10 text-center text-sm text-slate-600 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
+            <div className="glass-regular rounded-2xl border border-primary/15 px-5 py-10 text-center text-sm text-foreground/70 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%]">
               No substitution
             </div>
           ) : (
-            filteredSchedule.map((row) => <ScheduleCard key={`${row.period}-${row.classSection}`} row={row} />)
+            filteredSchedule.map((row) => (
+              <ScheduleCard key={`${row.period}-${row.classSection}`} row={row} />
+            ))
           )}
         </section>
       </div>
@@ -283,31 +307,35 @@ function ScheduleCard({ row }: { row: StudentScheduleRow }) {
   const hasSubstitute = Boolean(row.substituteId);
 
   return (
-    <article className="glass-regular rounded-2xl border border-white/50 bg-white/5 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
+    <article className="glass-regular rounded-2xl border border-primary/15 p-4 shadow-sm backdrop-blur-[10px] backdrop-saturate-[180%] sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="shrink-0 rounded-xl bg-blue-100 px-3 py-2 text-sm font-bold text-blue-900">
+          <span className="shrink-0 rounded-xl bg-accent px-3 py-2 text-sm font-bold text-primary">
             P{row.period}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-slate-900">
+            <p className="truncate text-base font-semibold text-foreground">
               P{row.period} · {row.classSection}
             </p>
-            <p className="mt-1 text-sm text-slate-600">Regular teacher: {row.absentTeacherName}</p>
+            <p className="mt-1 text-sm text-foreground/70">
+              Regular teacher: {row.absentTeacherName}
+            </p>
           </div>
         </div>
         <div className="min-w-0 sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground/60">
             {hasSubstitute ? `Substituted: ${row.substituteName}` : "Substitute teacher"}
           </p>
           <span
             className={`mt-1 inline-flex max-w-full rounded-full px-3 py-1.5 text-sm font-semibold ${
               hasSubstitute
                 ? "border border-emerald-200 bg-emerald-100/80 text-emerald-900"
-                : "border border-slate-200 bg-slate-100/80 text-slate-600"
+                : "border border-primary/15 bg-white/60 text-foreground/70"
             }`}
           >
-            <span className="truncate">{hasSubstitute ? row.substituteName : "No substitute assigned"}</span>
+            <span className="truncate">
+              {hasSubstitute ? row.substituteName : "No substitute assigned"}
+            </span>
           </span>
         </div>
       </div>

@@ -17,6 +17,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Timely Substitution App" },
+      { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
         content: "Create a Timely account or log in to save your school timetable and daily substitution plans.",
@@ -203,7 +204,7 @@ function AuthPage() {
               <div className="my-2 flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
               </div>
-              <Button variant="outline" className="w-full" onClick={() => void google()} disabled={busy}>
+              <Button variant="outline" className="auth-secondary-button w-full" onClick={() => void google()} disabled={busy}>
                 Continue with Google
               </Button>
               <button type="button" onClick={() => void forgot()} className="w-full text-xs text-muted-foreground underline-offset-4 hover:underline">
@@ -246,7 +247,7 @@ function AuthPage() {
               <div className="my-2 flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
               </div>
-              <Button variant="outline" className="w-full" onClick={() => void google()} disabled={busy}>
+              <Button variant="outline" className="auth-secondary-button w-full" onClick={() => void google()} disabled={busy}>
                 Continue with Google
               </Button>
             </TabsContent>

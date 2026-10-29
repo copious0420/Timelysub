@@ -15,7 +15,7 @@ function emptyDays(): ParsedTimetableDay[] {
 }
 
 function normalizeClassSection(value: string) {
-  return value.trim().replace(/\s+/g, " ");
+  return value.trim().replace(/\s+/g, " ").replace(/\s*\+\s*/g, "+").toUpperCase();
 }
 
 /**
@@ -28,7 +28,10 @@ export function parseTimetableCell(cellText: string): ParsedTimetableDay[] {
   if (lines.length === 0) return result;
 
   for (const line of lines) {
-    const match = line.match(/^(.*?)\s+([1-6](?:\s*-\s*[1-6])?(?:\s*,\s*[1-6])*)$/);
+    // Class like "XII B", "XI A", "X D", "XII B+G" followed by a day range; annotations (NEEEV, R.N., SOL...) never match.
+    const match = line.match(
+      /^((?:XII|XI|IX|X|VIII|VII|VI)\s*[A-Z](?:\s*\+\s*[A-Z])*)\s+([1-6](?:\s*-\s*[1-6])?(?:\s*,\s*[1-6](?:\s*-\s*[1-6])?)*)$/i,
+    );
     if (!match) continue;
 
     const classSection = normalizeClassSection(match[1] ?? "");
@@ -66,7 +69,12 @@ export function getTeacherScheduleForDay(
   return Object.fromEntries(
     PERIODS.map((period) => {
       const legacy = teacher.timetable?.[period];
-      const weekly = day ? teacher.weeklyTimetable?.[period]?.[day] : undefined;
+      const weeklyPeriod = teacher.weeklyTimetable?.[period];
+      const weekly = day ? weeklyPeriod?.[day] : undefined;
+      // Once a period has weekly data, a missing day means Free (never fall back to the legacy single-day slot).
+      if (weeklyPeriod && Object.keys(weeklyPeriod).length > 0) {
+        return [period, weekly ?? { subject: teacher.subject, classSection: "", isFree: true }];
+      }
       return [
         period,
         weekly ??

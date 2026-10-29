@@ -13,6 +13,7 @@ export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Timely Substitution App" },
+      { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
         content: "Manage your Timely account settings and profile information.",

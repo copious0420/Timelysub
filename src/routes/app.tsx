@@ -52,6 +52,7 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
       { title: "Dashboard — Timely Substitution App" },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       {
@@ -80,7 +81,21 @@ const NAV: { id: Tab; label: string; icon: typeof Users }[] = [
 ];
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(date: string, weekday: "long" | "short" = "long") {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00Z`));
 }
 
 function Index() {
@@ -89,6 +104,7 @@ function Index() {
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("generator");
   const [navOpen, setNavOpen] = useState(false);
+  const [headerCompact, setHeaderCompact] = useState(false);
   const [overrideIndex, setOverrideIndex] = useState<number | null>(null);
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -99,6 +115,13 @@ function Index() {
   const [teachersLoaded, setTeachersLoaded] = useState(false);
   const [schoolId, setSchoolId] = useState("");
   const [syncError, setSyncError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const updateHeader = () => setHeaderCompact(window.scrollY > 36);
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    return () => window.removeEventListener("scroll", updateHeader);
+  }, []);
 
   const activeAbsences = useMemo(() => {
     return absences.filter((absence) => absence.periods.length > 0);
@@ -139,22 +162,21 @@ function Index() {
 
           const cloudSaved = await fetchSavedDays();
           setSaved(cloudSaved);
-          const savedForDate = cloudSaved.find((entry) => entry.date === date);
-          if (savedForDate) setSchedule(savedForDate.rows);
         } else {
           // Load from localStorage for unauthenticated users
           setTeachers([]);
-          const localSaved = loadSaved();
-          setSaved(localSaved);
-          const savedForDate = localSaved.find((entry) => entry.date === date);
-          if (savedForDate) setSchedule(savedForDate.rows);
+          setSaved(loadSaved());
           setTeachersLoaded(true);
         }
         setDataLoaded(true);
       } catch (error) {
         console.error("Failed to load data:", error);
-        // Keep the dashboard empty if loading saved data fails.
-        setSaved(loadSaved());
+        if (user) {
+          // Never show another session's local history as this account's data.
+          setSyncError("Could not load your saved data. Please refresh the page.");
+        } else {
+          setSaved(loadSaved());
+        }
         setDataLoaded(true);
       }
     };
@@ -175,7 +197,7 @@ function Index() {
     };
 
     sync();
-  }, [teachers, user, dataLoaded]);
+  }, [teachers, user, dataLoaded, teachersLoaded]);
 
   const CurrentActiveAbsences = useMemo(
     () => absences.filter((a) => a.periods.length > 0),
@@ -291,8 +313,12 @@ function Index() {
       }
     } catch (error) {
       console.error("Failed to delete schedule:", error);
-      // Fallback to localStorage
-      setSaved(deleteSaved(date));
+      // Keep the list as it is; falling back to localStorage would show the wrong data.
+      setSyncError(
+        error instanceof Error
+          ? `Could not delete the saved day: ${error.message}`
+          : "Could not delete the saved day. Please try again.",
+      );
     }
   };
 
@@ -312,7 +338,7 @@ function Index() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="dashboard-shell flex min-h-screen flex-col md:flex-row">
       <motion.aside
         initial={{ opacity: 0, x: -18 }}
         animate={{ opacity: 1, x: 0 }}
@@ -320,7 +346,7 @@ function Index() {
         className="app-sidebar no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col px-4 py-6 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%] md:flex"
       >
         <Link to="/" className="flex items-center gap-2 px-2">
-          <Logo size="md" className="shrink-0" />
+          <Logo size="md" className="dashboard-brand-logo shrink-0" />
           <div>
             <p className="text-lg font-semibold tracking-tight text-sidebar-accent-foreground">
               Timely
@@ -336,7 +362,9 @@ function Index() {
               whileTap={{ scale: 0.98 }}
               className={cn(
                 "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm",
-                tab === item.id ? "text-foreground" : "hover:bg-secondary/60",
+                tab === item.id
+                  ? "text-foreground font-semibold"
+                  : "hover:bg-secondary/60",
               )}
             >
               {tab === item.id && (
@@ -393,11 +421,11 @@ function Index() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="glass-regular glass-highlight w-64 border-sidebar-border bg-white/5 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%]"
+            className="dashboard-mobile-sheet glass-regular glass-highlight w-64 border-sidebar-border bg-white/5 text-foreground backdrop-blur-[12px] backdrop-saturate-[180%]"
           >
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-sidebar-accent-foreground">
-                <Logo size="sm" /> Timely
+                <Logo size="sm" className="dashboard-brand-logo" /> Timely
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
@@ -411,7 +439,9 @@ function Index() {
                   whileTap={{ scale: 0.98 }}
                   className={cn(
                     "relative flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm",
-                    tab === item.id ? "text-foreground" : "hover:bg-secondary/60",
+                    tab === item.id
+                      ? "text-foreground font-semibold"
+                      : "hover:bg-secondary/60",
                   )}
                 >
                   {tab === item.id && (
@@ -436,7 +466,7 @@ function Index() {
           </SheetContent>
         </Sheet>
         <Link to="/" className="flex min-w-0 items-center gap-2">
-          <Logo size="sm" />
+          <Logo size="sm" className="dashboard-brand-logo" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
               {NAV.find((n) => n.id === tab)?.label}
@@ -447,7 +477,7 @@ function Index() {
       </div>
 
       <main className="min-w-0 flex-1 px-4 py-6 sm:px-5 md:px-8">
-        <header className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+        <header className={`app-page-header ${headerCompact ? "app-page-header-compact" : ""} mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4`}>
           <div className="min-w-0">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {tab === "roster"
@@ -462,12 +492,7 @@ function Index() {
             </h1>
 
             <p className="text-sm text-muted-foreground">
-              {new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {formatDateLabel(date)}
             </p>
           </div>
         </header>
@@ -720,12 +745,7 @@ function Index() {
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium">
-                        {new Date(`${s.date}T00:00:00`).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {formatDateLabel(s.date, "short")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {s.rows.length} assignments · saved {new Date(s.savedAt).toLocaleString()}
@@ -794,7 +814,7 @@ function Stat({
     <div
       className={cn(
         "panel data-panel px-5 py-4",
-        tone === "warn" && "border-l-4 border-l-destructive bg-destructive/5",
+        tone === "warn" && "dashboard-unassigned-stat border-l-4 border-l-destructive",
       )}
     >
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
@@ -802,14 +822,13 @@ function Stat({
         <p
           className={cn(
             "text-2xl font-semibold",
-            tone === "warn" && "text-destructive",
             tone === "ok" && "text-success",
           )}
         >
           {value}
         </p>
         {tone === "warn" && (
-          <AlertTriangle className="size-5 text-destructive" aria-label="Needs attention" />
+          <AlertTriangle className="size-5 text-foreground" aria-label="Needs attention" />
         )}
       </div>
     </div>

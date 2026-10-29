@@ -11,4 +11,7 @@ export default defineConfig({
       "/api": { target: "http://localhost:4000", changeOrigin: true },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+  },
 });

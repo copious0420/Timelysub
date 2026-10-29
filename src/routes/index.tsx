@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown, Clock3, Coffee, Scale, Sparkles, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ChevronDown, Clock3, Coffee, Copy, Scale, Sparkles, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 
@@ -127,9 +127,101 @@ function TypewriterText() {
   return <span className="typewriter-text">{text}</span>;
 }
 
+function SupportOptions() {
+  const [open, setOpen] = useState<"feature" | "support" | null>(null);
+  const [copyMessage, setCopyMessage] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) setOpen(null);
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("developerstimely@gmail.com");
+      setCopyMessage("Copied!");
+    } catch {
+      setCopyMessage("Copy failed. Email developerstimely@gmail.com");
+    }
+  };
+
+  return (
+    <div ref={containerRef} className="support-options">
+      {(["feature", "support"] as const).map((type) => {
+        const isOpen = open === type;
+        const label = type === "feature" ? "Suggest a feature" : "Get support";
+        return (
+          <motion.div
+            key={type}
+            layout
+            className={isOpen ? "glass support-option support-option-open" : "support-option"}
+          >
+            <button
+              type="button"
+              className="support-pill"
+              onClick={() => setOpen(isOpen ? null : type)}
+              aria-expanded={isOpen}
+            >
+              {label}
+            </button>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="support-card-content"
+                >
+                  <span>Email us at developerstimely@gmail.com</span>
+                  <button
+                    type="button"
+                    onClick={() => void copyEmail()}
+                    className="support-copy"
+                    aria-label="Copy support email"
+                  >
+                    <Copy className="size-4" />
+                  </button>
+                  <span className="copied-note" aria-live="polite">{copyMessage}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Landing() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   return (
     <main className="timely-landing">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "TimelySub",
+            alternateName: "Timely",
+            url: "https://timelysub.vercel.app/",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            description:
+              "Fair, conflict-free teacher substitution planning for schools.",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+            },
+          }),
+        }}
+      />
       <header className="landing-navbar sticky top-0 z-40">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-foreground" aria-label="Timely home">
@@ -334,6 +426,7 @@ function Landing() {
             <div className="quote-mark" aria-hidden="true">“</div>
             <blockquote>Everything is easier when the school knows who is free, who is qualified, and what the plan should be.</blockquote>
           </figure>
+          <SupportOptions />
         </div>
       </motion.section>
 
@@ -344,20 +437,23 @@ function Landing() {
             <h2>Questions school admins ask</h2>
           </motion.div>
           <div className="mt-10 space-y-3">
-            {faqs.map((faq, index) => (
-              <motion.details
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index;
+              return (
+              <motion.article
                 key={faq.question}
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewport}
                 variants={index % 2 === 0 ? revealFromLeft : revealFromRight}
                 transition={{ delay: index * 0.06 }}
-                className="faq-item"
+                className="glass faq-item"
               >
-                <summary><span>{faq.question}</span><ChevronDown className="size-5" /></summary>
-                <p>{faq.answer}</p>
-              </motion.details>
-            ))}
+                <button type="button" className="faq-question" onClick={() => setOpenFaq(isOpen ? null : index)} aria-expanded={isOpen}><span>{faq.question}</span><ChevronDown className="size-5" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }} /></button>
+                <AnimatePresence initial={false}>{isOpen && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="faq-answer"><p>{faq.answer}</p></motion.div>}</AnimatePresence>
+              </motion.article>
+              );
+            })}
           </div>
         </div>
       </section>
