@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import CursorRingField from "@/components/originkit/ui/cursor-ring-field";
+import VectorWordmark from "@/components/originkit/ui/vector-wordmark";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ------------------------------------------------------------------ */
 /*  Tokens & shared styles                                             */
@@ -953,6 +955,7 @@ function Faq({ reduced }: { reduced: boolean }) {
 function Footer({ reduced }: { reduced: boolean }) {
   const reveal = makeReveal(reduced);
   const link = "transition-colors";
+  const isMobile = useIsMobile();
   return (
     <motion.footer
       variants={reveal}
@@ -992,6 +995,25 @@ function Footer({ reduced }: { reduced: boolean }) {
             Sign up
           </Link>
         </nav>
+      </div>
+      <div aria-hidden="true">
+        <VectorWordmark
+          text="TIMELY"
+          font={{
+            fontFamily: "Nunito, ui-sans-serif, system-ui, sans-serif",
+            fontWeight: 800,
+            fontSize: "300px",
+            letterSpacing: "-0.02em",
+          }}
+          background="transparent"
+          textColor={COLORS.primary}
+          shade="#3074F9"
+          accent={COLORS.primary}
+          reach={isMobile ? 80 : 240}
+          speed={reduced ? 0 : 50}
+          handles={{ size: isMobile ? 24 : 64, spread: 27, labels: !isMobile }}
+          style={{ minWidth: 0, minHeight: 0, height: "auto", aspectRatio: "1200 / 340" }}
+        />
       </div>
     </motion.footer>
   );
