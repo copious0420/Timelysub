@@ -6,7 +6,7 @@ export function renderErrorPage(): string {
     <title>This page didn't load</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      body { font: 15px/1.5 'JetBrains Mono', ui-monospace, monospace; background: #BDEDFD; color: #1E3A8A; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
+      body { font: 15px/1.5 'Nunito', ui-sans-serif, system-ui, sans-serif; background: #BDEDFD; color: #1E3A8A; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
       .card { max-width: 28rem; width: 100%; text-align: center; padding: 2rem; background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(2px); border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
       h1 { font-size: 1.25rem; font-weight: 500; margin: 0 0 0.5rem; color: #1E3A8A; }
       p { color: rgba(30, 58, 138, 0.7); margin: 0 0 1.5rem; }
@@ -16,7 +16,7 @@ export function renderErrorPage(): string {
       .secondary { background: rgba(255, 255, 255, 0.6); color: #1E3A8A; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" />
   </head>
   <body>
     <div class="card">

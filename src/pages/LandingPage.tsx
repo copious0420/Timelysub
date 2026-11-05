@@ -25,6 +25,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import CursorRingField from "@/components/originkit/ui/cursor-ring-field";
 
 /* ------------------------------------------------------------------ */
 /*  Tokens & shared styles                                             */
@@ -56,10 +57,10 @@ const EDITORIAL_EASE = [0.25, 0.1, 0.25, 1] as const;
 const NO_SCALE: CSSProperties = { transform: "none" };
 
 const PAGE_CSS = `
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap");
 .landing-page {
   color: #1A1A1A;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 }
 .landing-page h1,
 .landing-page h2,
@@ -68,7 +69,7 @@ const PAGE_CSS = `
 .landing-page h5,
 .landing-page h6 {
   color: #1A1A1A;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
 }
 .landing-page h1 {
@@ -115,9 +116,6 @@ const PAGE_CSS = `
 /* ------------------------------------------------------------------ */
 /*  Content                                                            */
 /* ------------------------------------------------------------------ */
-
-const TICKER_FEATURES =
-  "Substitution plans in 90 seconds • Fair 4-level assignment • Same-subject matching first • Excel timetable import • One-click override • Print-ready cover schedules • Student portal • No teacher accounts • Free for government schools •";
 
 const PROBLEMS = [
   {
@@ -347,9 +345,24 @@ function Navbar() {
 /*  Hero                                                               */
 /* ------------------------------------------------------------------ */
 
+// Softens the ring field behind the centred hero copy; it stays at full strength elsewhere.
+const HERO_FIELD_MASK_IMAGE =
+  "radial-gradient(ellipse 42% 40% at 50% 46%, transparent 45%, black 100%)";
+const HERO_FIELD_MASK: CSSProperties = {
+  maskImage: HERO_FIELD_MASK_IMAGE,
+  WebkitMaskImage: HERO_FIELD_MASK_IMAGE,
+};
+
 function Hero({ reduced }: { reduced: boolean }) {
   return (
     <section className="relative flex min-h-[100svh] flex-col">
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={HERO_FIELD_MASK}
+        aria-hidden="true"
+      >
+        <CursorRingField background="transparent" />
+      </div>
       <div className="relative z-10 flex flex-1 items-center justify-center px-5 pb-20 pt-20 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: reduced ? 0 : 20 }}
@@ -406,25 +419,7 @@ function Hero({ reduced }: { reduced: boolean }) {
           </div>
         </motion.div>
       </div>
-      <LogoTicker />
     </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Logo ticker                                                        */
-/* ------------------------------------------------------------------ */
-
-function LogoTicker() {
-  return (
-    <div
-      aria-label="Key features"
-      role="region"
-      className="relative overflow-hidden py-8 text-center text-sm font-normal tracking-wide sm:py-10 sm:text-base"
-      style={{ color: COLORS.body }}
-    >
-      {TICKER_FEATURES}
-    </div>
   );
 }
 
@@ -810,7 +805,7 @@ function Pricing() {
               Basic
             </p>
             <p className="mt-4 text-5xl font-bold leading-none" style={{ color: COLORS.text }}>
-              ₹409
+              ₹59
             </p>
             <p className="mt-2 text-xs" style={mutedStyle}>
               per school / month
@@ -853,7 +848,7 @@ function Pricing() {
               Pro
             </p>
             <p className="mt-4 text-5xl font-bold leading-none" style={{ color: COLORS.text }}>
-              ₹499
+              ₹99
             </p>
             <p className="mt-2 text-xs" style={mutedStyle}>
               per school / month
