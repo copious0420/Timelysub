@@ -361,7 +361,11 @@ function Hero({ reduced }: { reduced: boolean }) {
         style={HERO_FIELD_MASK}
         aria-hidden="true"
       >
-        <CursorRingField background="transparent" />
+        <CursorRingField
+          background="transparent"
+          speed={9}
+          ring={{ push: 50, width: 7, radius: 9, turbulence: 100 }}
+        />
       </div>
       <div className="relative z-10 flex flex-1 items-center justify-center px-5 pb-20 pt-20 sm:px-8">
         <motion.div
