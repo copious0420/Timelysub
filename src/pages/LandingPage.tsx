@@ -415,8 +415,8 @@ function Hero({ reduced }: { reduced: boolean }) {
                   letterSpacing: "-0.02em",
                 }}
                 background="transparent"
-                textColor={COLORS.primary}
-                shade="#3074F9"
+                textColor={COLORS.text}
+                shade={COLORS.text}
                 accent={COLORS.primary}
                 reach={isMobile ? 70 : 130}
                 speed={reduced ? 0 : 50}
