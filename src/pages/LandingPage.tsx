@@ -355,7 +355,18 @@ const HERO_FIELD_MASK: CSSProperties = {
   WebkitMaskImage: HERO_FIELD_MASK_IMAGE,
 };
 
+const HERO_HEADLINE = "FAIR SUBSTITUTION PLANS. GENERATED IN MINUTES.";
+
 function Hero({ reduced }: { reduced: boolean }) {
+  const isMobile = useIsMobile();
+  // The headline is drawn on a canvas, so the real <h1> only hides once WebGL is
+  // confirmed. Without WebGL it stays as the visible headline.
+  const [hasWebGL, setHasWebGL] = useState(false);
+  useEffect(() => {
+    const probe = document.createElement("canvas");
+    setHasWebGL(!!(probe.getContext("webgl2") || probe.getContext("webgl")));
+  }, []);
+
   return (
     <section className="relative flex min-h-[100svh] flex-col">
       <div
@@ -388,8 +399,40 @@ function Hero({ reduced }: { reduced: boolean }) {
             </span>
           </div>
 
+          {hasWebGL ? (
+            <div className="mt-8" aria-hidden="true">
+              <VectorWordmark
+                text={
+                  isMobile
+                    ? "FAIR SUBSTITUTION\nPLANS. GENERATED\nIN MINUTES."
+                    : "FAIR SUBSTITUTION PLANS.\nGENERATED IN MINUTES."
+                }
+                font={{
+                  fontFamily: "Nunito, ui-sans-serif, system-ui, sans-serif",
+                  fontWeight: 600,
+                  fontSize: isMobile ? "116px" : "84px",
+                  lineHeight: 1.08,
+                  letterSpacing: "-0.02em",
+                }}
+                background="transparent"
+                textColor={COLORS.primary}
+                shade="#3074F9"
+                accent={COLORS.primary}
+                reach={isMobile ? 70 : 130}
+                speed={reduced ? 0 : 50}
+                footFade={false}
+                handles={{ size: isMobile ? 24 : 40, spread: 60, labels: !isMobile }}
+                style={{
+                  minWidth: 0,
+                  minHeight: 0,
+                  height: "auto",
+                  aspectRatio: isMobile ? "1200 / 390" : "1200 / 195",
+                }}
+              />
+            </div>
+          ) : null}
           <h1
-            className="mx-auto mt-8 max-w-5xl uppercase"
+            className={hasWebGL ? "sr-only" : "mx-auto mt-8 max-w-5xl uppercase"}
             style={{
               fontSize: "clamp(2.5rem, 6vw, 5rem)",
               fontWeight: 300,
@@ -398,7 +441,7 @@ function Hero({ reduced }: { reduced: boolean }) {
               color: COLORS.text,
             }}
           >
-            FAIR SUBSTITUTION PLANS. GENERATED IN MINUTES.
+            {HERO_HEADLINE}
           </h1>
 
           <p
@@ -955,7 +998,6 @@ function Faq({ reduced }: { reduced: boolean }) {
 function Footer({ reduced }: { reduced: boolean }) {
   const reveal = makeReveal(reduced);
   const link = "transition-colors";
-  const isMobile = useIsMobile();
   return (
     <motion.footer
       variants={reveal}
@@ -995,25 +1037,6 @@ function Footer({ reduced }: { reduced: boolean }) {
             Sign up
           </Link>
         </nav>
-      </div>
-      <div aria-hidden="true">
-        <VectorWordmark
-          text="TIMELY"
-          font={{
-            fontFamily: "Nunito, ui-sans-serif, system-ui, sans-serif",
-            fontWeight: 800,
-            fontSize: "300px",
-            letterSpacing: "-0.02em",
-          }}
-          background="transparent"
-          textColor={COLORS.primary}
-          shade="#3074F9"
-          accent={COLORS.primary}
-          reach={isMobile ? 80 : 240}
-          speed={reduced ? 0 : 50}
-          handles={{ size: isMobile ? 24 : 64, spread: 27, labels: !isMobile }}
-          style={{ minWidth: 0, minHeight: 0, height: "auto", aspectRatio: "1200 / 340" }}
-        />
       </div>
     </motion.footer>
   );

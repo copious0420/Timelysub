@@ -121,6 +121,7 @@ uniform vec2 uV0;
 uniform vec2 uV1;
 uniform vec2 uV2;
 uniform float uHalf;    // handle half-side, in y-normalised units
+uniform float uFade;    // 1 = melt the wordmark's foot into the page, 0 = keep it crisp
 
 varying vec2 vUv;
 
@@ -178,7 +179,7 @@ void main() {
     float inside = step(0.0, E.x) * step(E.x, 1.0) * step(0.0, E.y) * step(E.y, 1.0);
     vec2 safeUv = clamp(E, 0.0, 1.0);
 
-    float b = clamp(1.0 - E.y * 3.5, 0.0, 1.0) * 0.008;
+    float b = clamp(1.0 - E.y * 3.5, 0.0, 1.0) * 0.008 * uFade;
     vec2 soft = blurRG(safeUv, b);
     vec2 sharp = blurRG(safeUv, b * 0.1);
 
@@ -214,7 +215,7 @@ void main() {
     // algebraically the same result over a background-coloured root — check
     // it at any weight — and needs no plate, so the background colour is now
     // only ever the root's CSS background.
-    gl_FragColor = comp * pow(clamp(E.y, 0.0, 1.0), 0.7);
+    gl_FragColor = comp * mix(1.0, pow(clamp(E.y, 0.0, 1.0), 0.7), uFade);
 }`
 
 function compile(gl: WebGLRenderingContext, vs: string, fs: string) {
@@ -241,6 +242,7 @@ type FontSpec = {
     style: string
     size: number
     letterSpacing: string
+    lineHeight: number // multiple of the font size, between \n-separated lines
 }
 
 function fontString(f: FontSpec, px: number) {
@@ -275,20 +277,28 @@ function buildAtlas(
         }
     }
 
+    const lines = text.split("\n").map((l) => l || " ")
+    const extraLines = lines.length - 1
+
     const measure = (px: number) => {
         setFont(probe, px)
-        const m = probe.measureText(text)
-        const asc = m.actualBoundingBoxAscent || px * 0.8
-        const desc = m.actualBoundingBoxDescent || px * 0.22
-        return { w: Math.max(1, m.width), asc, desc }
+        const ms = lines.map((l) => probe.measureText(l))
+        const first = ms[0]!
+        const lastLine = ms[extraLines]!
+        const asc = first.actualBoundingBoxAscent || px * 0.8
+        const desc = lastLine.actualBoundingBoxDescent || px * 0.22
+        const w = ms.reduce((max, l) => Math.max(max, l.width), 1)
+        return { w, asc, desc }
     }
+    const stackHeight = (px: number, a: number, d: number) =>
+        a + d + px * f.lineHeight * extraLines
 
     let fpx = Math.max(8, drawFontPx * dpr)
     let m = measure(fpx)
     let pad = fpx * 0.12
     const over = Math.max(
         (m.w + pad * 2) / MAX_TEX,
-        (m.asc + m.desc + pad * 2) / MAX_TEX
+        (stackHeight(fpx, m.asc, m.desc) + pad * 2) / MAX_TEX
     )
     if (over > 1) {
         fpx = Math.max(8, fpx / over)
@@ -297,7 +307,7 @@ function buildAtlas(
     }
 
     const w = Math.max(1, Math.ceil(m.w + pad * 2))
-    const h = Math.max(1, Math.ceil(m.asc + m.desc + pad * 2))
+    const h = Math.max(1, Math.ceil(stackHeight(fpx, m.asc, m.desc) + pad * 2))
     const canvas = document.createElement("canvas")
     canvas.width = w
     canvas.height = h
@@ -311,8 +321,13 @@ function buildAtlas(
     ctx.textAlign = "left"
     ctx.globalCompositeOperation = "lighter"
 
+    // Each line is centred in the widest line's measure.
+    const pitch = fpx * f.lineHeight
+    const lineX = (line: string) => pad + (m.w - ctx.measureText(line).width) / 2
+    const lineY = (i: number) => pad + m.asc + pitch * i
+
     ctx.fillStyle = "#ff0000"
-    ctx.fillText(text, pad, pad + m.asc)
+    lines.forEach((line, i) => ctx.fillText(line, lineX(line), lineY(i)))
 
     // Zero-length dashes with a round cap ARE the dots. A solid stroke here
     // would read as an outline, not as a vector path with points on it.
@@ -325,7 +340,7 @@ function buildAtlas(
     ctx.lineJoin = "round"
     ctx.lineWidth = Math.max(1, block * DOT_DIAMETER)
     ctx.setLineDash([0, Math.max(2, block * DOT_PITCH)])
-    ctx.strokeText(text, pad, pad + m.asc)
+    lines.forEach((line, i) => ctx.strokeText(line, lineX(line), lineY(i)))
 
     const cssPerPx = drawFontPx / fpx
     return { canvas, cssW: w * cssPerPx, cssH: h * cssPerPx }
@@ -347,6 +362,8 @@ export interface VectorWordmarkProps {
     speed?: number
     damping?: number
     handles?: Partial<HandleGroup>
+    /** Melt the foot of the text into the page. Turn off for text that must stay legible. */
+    footFade?: boolean
     style?: React.CSSProperties
 }
 
@@ -369,6 +386,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
         speed = 50,
         damping = 60,
         handles,
+        footFade = true,
         style,
     } = props
 
@@ -388,6 +406,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
         style: font?.fontStyle === "italic" ? "italic" : "normal",
         size: Math.max(8, parseFloat(String(rawSize ?? 240)) || 240),
         letterSpacing: String(font?.letterSpacing ?? "0px"),
+        lineHeight: parseFloat(String(font?.lineHeight ?? 1)) || 1,
     }
 
     const accentRGBA = parseColor(accent, [1, 1, 1, 0.4])
@@ -408,6 +427,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
         speed,
         damping,
         hg,
+        footFade,
     })
     live.current.text = text
     live.current.fontSpec = fontSpec
@@ -419,6 +439,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
     live.current.speed = speed
     live.current.damping = damping
     live.current.hg = hg
+    live.current.footFade = footFade
 
     useEffect(() => {
         const host = hostRef.current
@@ -454,6 +475,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             v1: gl.getUniformLocation(prog, "uV1"),
             v2: gl.getUniformLocation(prog, "uV2"),
             half: gl.getUniformLocation(prog, "uHalf"),
+            fade: gl.getUniformLocation(prog, "uFade"),
         }
 
         const quad = gl.createBuffer()
@@ -624,7 +646,14 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             target.x = (e.clientX - r.left) / r.width
             target.y = 1 - (e.clientY - r.top) / r.height
         }
+        // Without this the reveal stays parked where the cursor left, leaving
+        // those letters hollow until it comes back.
+        const onLeave = () => {
+            hasPointer = false
+            target.x = -0.5
+        }
         host.addEventListener("pointermove", onMove)
+        host.addEventListener("pointerleave", onLeave)
 
         // --- loop ---------------------------------------------------------
         let raf = 0
@@ -644,6 +673,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
                 f.weight,
                 f.style,
                 f.letterSpacing,
+                f.lineHeight,
                 dpr,
                 Math.ceil(Math.max(8, drawFontPx()) / 64), // resolution tier
             ].join("|")
@@ -743,6 +773,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             gl!.uniform2f(U.v1, verts[1].x, verts[1].y)
             gl!.uniform2f(U.v2, verts[2].x, verts[2].y)
             gl!.uniform1f(U.half, L.hg.size / 2 / boxH)
+            gl!.uniform1f(U.fade, L.footFade ? 1 : 0)
             gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4)
         }
 
@@ -791,6 +822,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             if (raf) cancelAnimationFrame(raf)
             ro.disconnect()
             host.removeEventListener("pointermove", onMove)
+            host.removeEventListener("pointerleave", onLeave)
             document.removeEventListener("visibilitychange", gate)
             // Never loseContext(): getContext returns the same context per
             // canvas, so StrictMode's mount -> cleanup -> mount would reuse a
