@@ -117,7 +117,7 @@ const faqs = [
   },
   {
     question: "Can students see their substitution plan?",
-    answer: "Yes. There's a public student portal protected by a school password set by the admin. Students can check their plan without creating any account.",
+    answer: "Yes. There's a public schedule protected by a school password set by the admin. Students can check their plan without creating any account.",
   },
 ];
 
@@ -199,7 +199,7 @@ function Landing() {
           </Link>
           <nav className="flex items-center gap-2" aria-label="Main navigation">
             <Button asChild variant="ghost" size="sm" className="px-2 text-xs sm:px-3 sm:text-sm">
-              <Link to="/student">Student portal</Link>
+              <Link to="/student">Public schedule</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/auth" search={{ tab: "login" }}>Log in</Link>
@@ -374,7 +374,7 @@ function Landing() {
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-9 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-foreground"><Logo size="sm" /><span className="font-bold">Timely</span></Link>
           <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:gap-6">
-            <Link to="/student">Student portal</Link>
+            <Link to="/student">Public schedule</Link>
             <Link to="/auth" search={{ tab: "login" }}>Log in</Link>
             <Link to="/auth" search={{ tab: "signup" }}>Sign up</Link>
             <a href="mailto:developerstimely@gmail.com">developerstimely@gmail.com</a>

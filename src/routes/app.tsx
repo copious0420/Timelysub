@@ -384,7 +384,7 @@ function Index() {
             to="/student"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent/50"
           >
-            <Users className="size-4" /> Student Portal
+            <Users className="size-4" /> Public Schedule
           </Link>
           <div className="rounded-lg border border-sidebar-border px-3 py-3 text-xs text-sidebar-foreground/70">
             Cover matched by department first, then by lightest substitution load.
@@ -460,7 +460,7 @@ function Index() {
                 onClick={() => setNavOpen(false)}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-secondary/60"
               >
-                <Users className="size-4" /> Student Portal
+                <Users className="size-4" /> Public Schedule
               </Link>
             </nav>
           </SheetContent>

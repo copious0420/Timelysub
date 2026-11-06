@@ -205,7 +205,7 @@ const FAQS = [
   {
     question: "Can students see their substitution plan?",
     answer:
-      "Yes. There's a public student portal protected by a school password set by the admin. Students can check their plan without creating any account.",
+      "Yes. There's a public schedule protected by a school password set by the admin. Students can check their plan without creating any account.",
   },
 ];
 
@@ -315,13 +315,18 @@ function Navbar() {
         </Link>
         <nav className="flex items-center gap-0.5 sm:gap-1" aria-label="Main navigation">
           <Link to="/student" className={navLinkClass} style={{ color: COLORS.text, ...NO_SCALE }}>
-            Student portal
+            Public schedule
           </Link>
           <Link
             to="/auth"
             search={{ tab: "login" }}
-            className={navLinkClass}
-            style={{ color: COLORS.text, ...NO_SCALE }}
+            className="mr-1 whitespace-nowrap rounded-lg border px-2 py-1 text-[11px] font-normal min-[400px]:px-2.5 min-[400px]:text-xs sm:mr-1.5 sm:px-3.5 sm:py-1.5 sm:text-sm"
+            style={{
+              background: COLORS.text,
+              borderColor: COLORS.text,
+              color: COLORS.bg,
+              ...NO_SCALE,
+            }}
           >
             Log in
           </Link>
@@ -457,7 +462,7 @@ function Hero({ reduced }: { reduced: boolean }) {
               to="/app"
               className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold text-white"
               style={{
-                background: COLORS.primary,
+                background: COLORS.text,
                 color: "#FFFFFF",
                 borderRadius: 8,
                 ...NO_SCALE,
@@ -786,6 +791,12 @@ function Testimonial({ reduced }: { reduced: boolean }) {
 /*  Pricing                                                            */
 /* ------------------------------------------------------------------ */
 
+/** Monthly price per school, in INR. Single source of truth for the pricing cards. */
+const PRICING = {
+  basic: 149,
+  pro: 199,
+} as const;
+
 const BASIC_FEATURES = [
   "Absence logging by period",
   "Automated substitution generator",
@@ -854,7 +865,7 @@ function Pricing() {
               Basic
             </p>
             <p className="mt-4 text-5xl font-bold leading-none" style={{ color: COLORS.text }}>
-              ₹59
+              ₹{PRICING.basic}
             </p>
             <p className="mt-2 text-xs" style={mutedStyle}>
               per school / month
@@ -897,7 +908,7 @@ function Pricing() {
               Pro
             </p>
             <p className="mt-4 text-5xl font-bold leading-none" style={{ color: COLORS.text }}>
-              ₹99
+              ₹{PRICING.pro}
             </p>
             <p className="mt-2 text-xs" style={mutedStyle}>
               per school / month
@@ -1028,7 +1039,7 @@ function Footer({ reduced }: { reduced: boolean }) {
           style={{ color: COLORS.body }}
         >
           <Link to="/student" className={link} style={NO_SCALE}>
-            Student portal
+            Public schedule
           </Link>
           <Link to="/auth" search={{ tab: "login" }} className={link} style={NO_SCALE}>
             Log in

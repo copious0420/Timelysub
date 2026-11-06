@@ -24,7 +24,7 @@ No teacher gets overloaded. No favoritism. Every decision is transparent.
 - **Manual Override** — Reassign any substitute with one click
 - **Public Schedule Board** — Shareable link for students and staff (Pro)
 - **Schedule History** — View and download past substitution logs (Pro)
-- **Student Portal** — Students check their day's schedule without needing accounts
+- **Public Schedule** — Students check their day's schedule without needing accounts
 
 ## Tech Stack
 
