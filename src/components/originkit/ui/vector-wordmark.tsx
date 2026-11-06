@@ -652,13 +652,20 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             hasPointer = false
             target.x = -0.5
         }
-        host.addEventListener("pointermove", onMove)
-        host.addEventListener("pointerleave", onLeave)
+        host.addEventListener("pointermove", onMove, { passive: true })
+        host.addEventListener("pointerleave", onLeave, { passive: true })
 
         // --- loop ---------------------------------------------------------
         let raf = 0
         let last = 0
         let running = true
+        // Perf: false while the wordmark is scrolled off screen (see gate()).
+        let onScreen = true
+        // Perf: last values written to each label, so unchanged frames skip
+        // the DOM write (a textContent write forces style + layout).
+        const labelText: string[] = []
+        const labelTransform: string[] = []
+        const labelEl: (HTMLDivElement | null)[] = []
 
         function sync() {
             const L = live.current
@@ -742,11 +749,25 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
                 const by = verts[i].y
                 const gx = Math.round(clamp(bx * 100, 0, 100))
                 const gy = Math.round(clamp(by * 100, 0, 100))
-                el.style.transform = `translate(${bx * boxW - half}px, ${
+                const tf = `translate(${bx * boxW - half}px, ${
                     (1 - by) * boxH - half
                 }px)`
-                el.style.opacity = String(LABEL_MAX)
-                el.textContent = `${gx}, ${gy}`
+                // A remounted label is a new element: drop its cache so it gets
+                // every value written once.
+                const fresh = labelEl[i] !== el
+                if (fresh) {
+                    labelEl[i] = el
+                    el.style.opacity = String(LABEL_MAX)
+                }
+                if (fresh || labelTransform[i] !== tf) {
+                    labelTransform[i] = tf
+                    el.style.transform = tf
+                }
+                const txt = `${gx}, ${gy}`
+                if (fresh || labelText[i] !== txt) {
+                    labelText[i] = txt
+                    el.textContent = txt
+                }
             }
         }
 
@@ -788,7 +809,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
         }
 
         const gate = () => {
-            if (running && !document.hidden) {
+            if (running && onScreen && !document.hidden) {
                 if (!raf) {
                     last = 0
                     raf = requestAnimationFrame(frame)
@@ -805,6 +826,23 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
         ro.observe(host)
         document.addEventListener("visibilitychange", gate)
 
+        // Perf: pause the loop while the wordmark is off screen. Nothing is
+        // visible then, so this changes no pixels; gate() resets `last` so the
+        // first frame back takes a zero-length step instead of a jump.
+        let io: IntersectionObserver | null = null
+        if (typeof IntersectionObserver !== "undefined") {
+            io = new IntersectionObserver(
+                (entries) => {
+                    const entry = entries[entries.length - 1]
+                    if (!entry) return
+                    onScreen = entry.isIntersecting
+                    gate()
+                },
+                { rootMargin: "100px" }
+            )
+            io.observe(host)
+        }
+
         // Safety net for a family that finishes after the first bake but
         // that document.fonts.check() reported as present.
         if (typeof document !== "undefined" && document.fonts) {
@@ -820,6 +858,7 @@ function __OriginkitBase_VectorWordmark(props: VectorWordmarkProps) {
             alive = false
             running = false
             if (raf) cancelAnimationFrame(raf)
+            io?.disconnect()
             ro.disconnect()
             host.removeEventListener("pointermove", onMove)
             host.removeEventListener("pointerleave", onLeave)

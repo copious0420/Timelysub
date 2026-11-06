@@ -108,10 +108,6 @@ const faqs = [
       "Every assignment can be manually overridden with one click using the Override drawer in the dashboard. You're always in control.",
   },
   {
-    question: "Is Timely free for government schools?",
-    answer: "Yes. Timely is free for government schools. No per-teacher fees, no seat charges, no hidden costs.",
-  },
-  {
     question: "How does the fairness algorithm work?",
     answer: "Timely assigns substitutes using a 4-level priority: same subject first, then eligible category (PGT covers TGT/PRT), then the teacher with the lowest substitution load today, then alphabetical as a tiebreaker. No manual guesswork.",
   },

@@ -1002,21 +1002,36 @@ export default function CursorRingField(props: CursorRingFieldProps) {
         // the target and the follow rate both cross over instead of stepping.
         let follow = 0
 
+        // Perf: the handler only records the raw client position. The layout
+        // read (getBoundingClientRect) happens at most once per frame, inside
+        // the rAF loop, instead of on every pointer event.
+        let pendingX = 0
+        let pendingY = 0
+        let pointerDirty = false
         const onMove = (e: PointerEvent) => {
+            pendingX = e.clientX
+            pendingY = e.clientY
+            pointerDirty = true
+        }
+        const applyPointer = () => {
+            if (!pointerDirty) return
+            pointerDirty = false
             const r = canvas.getBoundingClientRect()
-            pointer.x = ((e.clientX - r.left) / Math.max(r.width, 1)) * 2 - 1
-            pointer.y = -(((e.clientY - r.top) / Math.max(r.height, 1)) * 2 - 1)
+            pointer.x = ((pendingX - r.left) / Math.max(r.width, 1)) * 2 - 1
+            pointer.y = -(((pendingY - r.top) / Math.max(r.height, 1)) * 2 - 1)
             pointer.over =
                 pointer.x >= -1 && pointer.x <= 1 && pointer.y >= -1 && pointer.y <= 1
         }
         const onLeave = () => {
+            // A move queued before the leave must not re-mark the pointer as over.
+            pointerDirty = false
             pointer.over = false
         }
         // Bound on WINDOW, not the host: the source tracked a global cursor and
         // tested the canvas bounds itself, so the ring keeps easing back to its
         // wander the moment the pointer leaves instead of freezing at the edge.
-        window.addEventListener("pointermove", onMove)
-        canvas.addEventListener("pointerleave", onLeave)
+        window.addEventListener("pointermove", onMove, { passive: true })
+        canvas.addEventListener("pointerleave", onLeave, { passive: true })
 
         /* ---- loop ---- */
         let raf = 0
@@ -1045,6 +1060,7 @@ export default function CursorRingField(props: CursorRingFieldProps) {
 
         const frame = (now: number) => {
             raf = requestAnimationFrame(frame)
+            applyPointer()
             const L = live.current
 
             if (densityDirty.current) {
@@ -1178,10 +1194,38 @@ export default function CursorRingField(props: CursorRingFieldProps) {
 
             gl.drawArrays(gl.POINTS, 0, count)
         }
-        raf = requestAnimationFrame(frame)
+
+        // Perf: only run the loop while the field is on screen. Off screen
+        // nothing is visible, so pausing is invisible; `last = 0` on resume
+        // makes the first frame back use the same 1/60 step as a fresh start.
+        const start = () => {
+            if (raf) return
+            last = 0
+            raf = requestAnimationFrame(frame)
+        }
+        const stop = () => {
+            if (!raf) return
+            cancelAnimationFrame(raf)
+            raf = 0
+        }
+        let io: IntersectionObserver | null = null
+        if (typeof IntersectionObserver !== "undefined") {
+            io = new IntersectionObserver(
+                (entries) => {
+                    const entry = entries[entries.length - 1]
+                    if (!entry) return
+                    if (entry.isIntersecting) start()
+                    else stop()
+                },
+                { rootMargin: "100px" }
+            )
+            io.observe(host)
+        }
+        start()
 
         return () => {
-            cancelAnimationFrame(raf)
+            stop()
+            io?.disconnect()
             ro.disconnect()
             window.removeEventListener("pointermove", onMove)
             canvas.removeEventListener("pointerleave", onLeave)

@@ -193,11 +193,6 @@ const FAQS = [
       "Every assignment can be manually overridden with one click using the Override drawer in the dashboard. You're always in control.",
   },
   {
-    question: "Is Timely free for government schools?",
-    answer:
-      "Yes. Timely is free for government schools. No per-teacher fees, no seat charges, no hidden costs.",
-  },
-  {
     question: "How does the fairness algorithm work?",
     answer:
       "Timely assigns substitutes using a 4-level priority: same subject first, then eligible category (PGT covers TGT/PRT), then the teacher with the lowest substitution load today, then alphabetical as a tiebreaker. No manual guesswork.",
@@ -243,14 +238,36 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [vw, setVw] = useState(1280);
 
-  useMotionValueEvent(scrollY, "change", (latest) => setScrolled(latest >= 50));
+  // Perf: only touch React state when the 50px threshold is actually crossed,
+  // not on every scroll tick.
+  const scrolledRef = useRef(false);
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const next = latest >= 50;
+    if (next !== scrolledRef.current) {
+      scrolledRef.current = next;
+      setScrolled(next);
+    }
+  });
 
   useEffect(() => {
+    // Perf: coalesce resize bursts into at most one state update per frame.
+    let frame = 0;
     const update = () => setVw(window.innerWidth);
-    setScrolled(scrollY.get() >= 50);
+    const onResize = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+    scrolledRef.current = scrollY.get() >= 50;
+    setScrolled(scrolledRef.current);
     update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("resize", onResize);
+    };
   }, [scrollY]);
 
   const mobile = vw < 640;
